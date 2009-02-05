@@ -23,4 +23,5 @@
 
 - (BOOL) addItemWithDisplayName:(NSString*)name url:(NSURL*)url hidden:(BOOL)hidden;
 - (BOOL) removeItemWithDisplayName:(NSString*)name;
+- (BOOL) hasItemWithDisplayName:(NSString*)name;
 @end

@@ -92,4 +92,38 @@
 	return success;
 }
 
+- (BOOL) hasItemWithDisplayName:(NSString*)name
+{
+	BOOL					found = NO;
+	LSSharedFileListRef		list;
+	UInt32					seed;
+	CFArrayRef				items;
+	CFIndex					i;
+	LSSharedFileListItemRef	item;
+	
+	list = LSSharedFileListCreate(kCFAllocatorDefault, kLSSharedFileListSessionLoginItems, NULL);
+	if(list == NULL) {
+		NSLog(@"%s: Failed retrieving shared file list for session login items", __FUNCTION__);
+		return NO;
+	}
+	
+	items = LSSharedFileListCopySnapshot(list, &seed);
+	if(items) {
+		for(i = 0; i < CFArrayGetCount(items); ++i) {
+			item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
+			if([[(NSString*)LSSharedFileListItemCopyDisplayName(item) autorelease] isEqualToString:name]) {
+				found = YES;
+				break;
+			}
+		}
+		CFRelease(items);
+	}
+	else
+	NSLog(@"%s: Failed retrieving entries from shared file list for session login items", __FUNCTION__);
+	
+	CFRelease(list);
+	
+	return found;
+}
+
 @end
