@@ -1,0 +1,640 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 44;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2394F5830F2FF2C10046622E /* LoginItems.m in Sources */ = {isa = PBXBuildFile; fileRef = 2394F5820F2FF2C10046622E /* LoginItems.m */; };
+		E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C2FF0F37E99D00421E40 /* NetworkReachability.m */; };
+		E230C31A0F38318100421E40 /* TestNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C3190F38318100421E40 /* TestNetworking.m */; };
+		E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C37D0F3837BD00421E40 /* DiskWatcher.m */; };
+		E230C3C50F3841F800421E40 /* DiskArbitration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230C3C40F3841F800421E40 /* DiskArbitration.framework */; };
+		E24D28960E9298BA00E298A9 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28950E9298BA00E298A9 /* SenTestingKit.framework */; };
+		E24D28BF0E9298FF00E298A9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28BE0E9298FF00E298A9 /* Foundation.framework */; };
+		E24D29980E92C97B00E298A9 /* Image.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D29940E92C96B00E298A9 /* Image.jpg */; };
+		E24D2A400E92F29200E298A9 /* MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A340E92F29200E298A9 /* MD5.m */; };
+		E24D2A410E92F29200E298A9 /* Keychain.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A360E92F29200E298A9 /* Keychain.m */; };
+		E24D2A440E92F29200E298A9 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3C0E92F29200E298A9 /* Task.m */; };
+		E24D2A450E92F29200E298A9 /* DiskImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3E0E92F29200E298A9 /* DiskImageController.m */; };
+		E24D2A590E92F2CE00E298A9 /* NSData+Encryption.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A540E92F2CE00E298A9 /* NSData+Encryption.m */; };
+		E24D2A5A0E92F2CE00E298A9 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A560E92F2CE00E298A9 /* NSData+GZip.m */; };
+		E24D2A5B0E92F2CE00E298A9 /* NSURL+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A580E92F2CE00E298A9 /* NSURL+Parameters.m */; };
+		E24D2A5F0E92F2E800E298A9 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2A5E0E92F2E800E298A9 /* Security.framework */; };
+		E24D2ABC0E92F35B00E298A9 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ABB0E92F35B00E298A9 /* libcrypto.dylib */; };
+		E24D2ACD0E92F38000E298A9 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ACC0E92F38000E298A9 /* libz.dylib */; };
+		E24D2AD10E92F3A800E298A9 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
+		E24D2B950E92F3BD00E298A9 /* SVNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A380E92F29200E298A9 /* SVNClient.m */; };
+		E24D2B970E92F40600E298A9 /* libsvn_client-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B960E92F40600E298A9 /* libsvn_client-1.dylib */; };
+		E24D2B990E92F40600E298A9 /* libsvn_subr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */; };
+		E24D2B9B0E92F41300E298A9 /* libapr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */; };
+		E24D2BE80E948BAC00E298A9 /* TestUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE70E948BAC00E298A9 /* TestUtilities.m */; };
+		E24D2BEA0E948BE100E298A9 /* TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE90E948BE100E298A9 /* TestExtensions.m */; };
+		E24D2C100E94965200E298A9 /* Image.b64 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D2BED0E94924600E298A9 /* Image.b64 */; };
+		E24D2E440E95E6F600E298A9 /* TestDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E430E95E6F600E298A9 /* TestDevices.m */; };
+		E24D2E450E95E74300E298A9 /* HIDController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E290E95C81100E298A9 /* HIDController.m */; };
+		E24D2E460E95E76B00E298A9 /* MidiController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2B0E95C81100E298A9 /* MidiController.m */; };
+		E24D2E480E95E7F800E298A9 /* MiniUDPSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */; };
+		E24D2E4C0E95E95700E298A9 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2E4B0E95E95700E298A9 /* IOKit.framework */; };
+		E24D2EFD0E95E97C00E298A9 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2EFC0E95E97C00E298A9 /* CoreMIDI.framework */; };
+		E24D2F3B0E95EE9E00E298A9 /* DirectoryScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E240E95C81100E298A9 /* DirectoryScanner.m */; };
+		E24D2F3C0E95EE9F00E298A9 /* DirectoryWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */; };
+		E24D2F490E95EEB100E298A9 /* TestFileSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2F480E95EEB100E298A9 /* TestFileSystem.m */; };
+		E24D2F980E95F75E00E298A9 /* FileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E380E95C81100E298A9 /* FileTransferController.m */; };
+		E24D2F990E95F75E00E298A9 /* FileTransferController_Local.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3C0E95C81100E298A9 /* FileTransferController_Local.m */; };
+		E24D2F9A0E95F75F00E298A9 /* FileTransferController_FTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */; };
+		E24D2F9B0E95F75F00E298A9 /* FileTransferController_SFTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */; };
+		E24D2F9C0E95F76000E298A9 /* FileTransferController_HTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */; };
+		E24D2FCF0E95FABF00E298A9 /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
+		E24D2FD00E95FABF00E298A9 /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
+		E24D2FD10E95FABF00E298A9 /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB60E95FABF00E298A9 /* crypt.c */; };
+		E24D2FD20E95FABF00E298A9 /* hostkey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB70E95FABF00E298A9 /* hostkey.c */; };
+		E24D2FD30E95FABF00E298A9 /* kex.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB80E95FABF00E298A9 /* kex.c */; };
+		E24D2FD50E95FABF00E298A9 /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FBE0E95FABF00E298A9 /* mac.c */; };
+		E24D2FD70E95FABF00E298A9 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC20E95FABF00E298A9 /* misc.c */; };
+		E24D2FD80E95FABF00E298A9 /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC40E95FABF00E298A9 /* openssl.c */; };
+		E24D2FD90E95FABF00E298A9 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC60E95FABF00E298A9 /* packet.c */; };
+		E24D2FDA0E95FABF00E298A9 /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC70E95FABF00E298A9 /* pem.c */; };
+		E24D2FDB0E95FABF00E298A9 /* publickey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC80E95FABF00E298A9 /* publickey.c */; };
+		E24D2FDC0E95FABF00E298A9 /* scp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC90E95FABF00E298A9 /* scp.c */; };
+		E24D2FDD0E95FABF00E298A9 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCA0E95FABF00E298A9 /* session.c */; };
+		E24D2FDE0E95FABF00E298A9 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCB0E95FABF00E298A9 /* sftp.c */; };
+		E24D2FDF0E95FABF00E298A9 /* transport.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCD0E95FABF00E298A9 /* transport.c */; };
+		E24D2FE00E95FABF00E298A9 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCE0E95FABF00E298A9 /* userauth.c */; };
+		E24D2FED0E95FB4D00E298A9 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */; };
+		E24D30140E95FBA800E298A9 /* TestFileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D30130E95FBA800E298A9 /* TestFileTransferController.m */; };
+		E284E7F00F0FAE9C0054C122 /* Image.md5 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E7EF0F0FAE8C0054C122 /* Image.md5 */; };
+		E284E81D0F0FB3930054C122 /* Image.hmac-sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */; };
+		E284E9280F0FCA5A0054C122 /* Image.bf in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E9270F0FCA580054C122 /* Image.bf */; };
+		E284EA330F0FE6DC0054C122 /* NSFileManager+LockedItems.m in Sources */ = {isa = PBXBuildFile; fileRef = E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */; };
+		E286099C0F28F47D0032DF7D /* DataStream.m in Sources */ = {isa = PBXBuildFile; fileRef = E286099A0F28F47D0032DF7D /* DataStream.m */; };
+		E2C085580F3848E30058019D /* Volume.dmg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2C085410F3847C80058019D /* Volume.dmg */; };
+		E2E7AF140F1032360057A9A5 /* Image.sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF130F1032280057A9A5 /* Image.sha1 */; };
+		E2E7AFA90F103D0F0057A9A5 /* Image.aes128 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */; };
+		E2E7AFAA0F103D0F0057A9A5 /* Image.aes256 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E24D299A0E92C98A00E298A9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				E24D29980E92C97B00E298A9 /* Image.jpg in CopyFiles */,
+				E24D2C100E94965200E298A9 /* Image.b64 in CopyFiles */,
+				E284E7F00F0FAE9C0054C122 /* Image.md5 in CopyFiles */,
+				E2E7AF140F1032360057A9A5 /* Image.sha1 in CopyFiles */,
+				E284E9280F0FCA5A0054C122 /* Image.bf in CopyFiles */,
+				E2E7AFA90F103D0F0057A9A5 /* Image.aes128 in CopyFiles */,
+				E2E7AFAA0F103D0F0057A9A5 /* Image.aes256 in CopyFiles */,
+				E284E81D0F0FB3930054C122 /* Image.hmac-sha1 in CopyFiles */,
+				E2C085580F3848E30058019D /* Volume.dmg in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2394F5810F2FF2C10046622E /* LoginItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginItems.h; sourceTree = "<group>"; };
+		2394F5820F2FF2C10046622E /* LoginItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginItems.m; sourceTree = "<group>"; };
+		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
+		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
+		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
+		E230C37D0F3837BD00421E40 /* DiskWatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiskWatcher.m; sourceTree = "<group>"; };
+		E230C37E0F3837BD00421E40 /* DiskWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskWatcher.h; sourceTree = "<group>"; };
+		E230C3C40F3841F800421E40 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = System/Library/Frameworks/DiskArbitration.framework; sourceTree = SDKROOT; };
+		E24D285C0E9295D300E298A9 /* Unit-Testing.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit-Testing.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E24D285E0E9295D300E298A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E24D287B0E92977600E298A9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = "../Xcode-Configurations/Release.xcconfig"; sourceTree = SOURCE_ROOT; };
+		E24D287C0E92977600E298A9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = "../Xcode-Configurations/Debug.xcconfig"; sourceTree = SOURCE_ROOT; };
+		E24D28950E9298BA00E298A9 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		E24D28BE0E9298FF00E298A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		E24D294A0E92996000E298A9 /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
+		E24D29940E92C96B00E298A9 /* Image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Image.jpg; sourceTree = "<group>"; };
+		E24D2A340E92F29200E298A9 /* MD5.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MD5.m; sourceTree = "<group>"; };
+		E24D2A350E92F29200E298A9 /* MD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MD5.h; sourceTree = "<group>"; };
+		E24D2A360E92F29200E298A9 /* Keychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Keychain.m; sourceTree = "<group>"; };
+		E24D2A370E92F29200E298A9 /* Keychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Keychain.h; sourceTree = "<group>"; };
+		E24D2A380E92F29200E298A9 /* SVNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVNClient.m; sourceTree = "<group>"; };
+		E24D2A390E92F29200E298A9 /* SVNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVNClient.h; sourceTree = "<group>"; };
+		E24D2A3C0E92F29200E298A9 /* Task.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Task.m; sourceTree = "<group>"; };
+		E24D2A3D0E92F29200E298A9 /* Task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Task.h; sourceTree = "<group>"; };
+		E24D2A3E0E92F29200E298A9 /* DiskImageController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiskImageController.m; sourceTree = "<group>"; };
+		E24D2A3F0E92F29200E298A9 /* DiskImageController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskImageController.h; sourceTree = "<group>"; };
+		E24D2A530E92F2CE00E298A9 /* NSData+Encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Encryption.h"; sourceTree = "<group>"; };
+		E24D2A540E92F2CE00E298A9 /* NSData+Encryption.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Encryption.m"; sourceTree = "<group>"; };
+		E24D2A550E92F2CE00E298A9 /* NSData+GZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
+		E24D2A560E92F2CE00E298A9 /* NSData+GZip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
+		E24D2A570E92F2CE00E298A9 /* NSURL+Parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Parameters.h"; sourceTree = "<group>"; };
+		E24D2A580E92F2CE00E298A9 /* NSURL+Parameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Parameters.m"; sourceTree = "<group>"; };
+		E24D2A5E0E92F2E800E298A9 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		E24D2ABB0E92F35B00E298A9 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
+		E24D2ACC0E92F38000E298A9 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		E24D2AD00E92F3A800E298A9 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		E24D2B960E92F40600E298A9 /* libsvn_client-1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsvn_client-1.dylib"; path = "usr/lib/libsvn_client-1.dylib"; sourceTree = SDKROOT; };
+		E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsvn_subr-1.dylib"; path = "usr/lib/libsvn_subr-1.dylib"; sourceTree = SDKROOT; };
+		E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libapr-1.dylib"; path = "usr/lib/libapr-1.dylib"; sourceTree = SDKROOT; };
+		E24D2BE70E948BAC00E298A9 /* TestUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestUtilities.m; sourceTree = "<group>"; };
+		E24D2BE90E948BE100E298A9 /* TestExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestExtensions.m; sourceTree = "<group>"; };
+		E24D2BED0E94924600E298A9 /* Image.b64 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Image.b64; sourceTree = "<group>"; };
+		E24D2E230E95C81100E298A9 /* DirectoryScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryScanner.h; sourceTree = "<group>"; };
+		E24D2E240E95C81100E298A9 /* DirectoryScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DirectoryScanner.m; sourceTree = "<group>"; };
+		E24D2E250E95C81100E298A9 /* DirectoryWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryWatcher.h; sourceTree = "<group>"; };
+		E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DirectoryWatcher.m; sourceTree = "<group>"; };
+		E24D2E280E95C81100E298A9 /* HIDController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDController.h; sourceTree = "<group>"; };
+		E24D2E290E95C81100E298A9 /* HIDController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDController.m; sourceTree = "<group>"; };
+		E24D2E2A0E95C81100E298A9 /* MidiController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MidiController.h; sourceTree = "<group>"; };
+		E24D2E2B0E95C81100E298A9 /* MidiController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MidiController.m; sourceTree = "<group>"; };
+		E24D2E2C0E95C81100E298A9 /* MiniUDPSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MiniUDPSocket.h; sourceTree = "<group>"; };
+		E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MiniUDPSocket.m; sourceTree = "<group>"; };
+		E24D2E2E0E95C81100E298A9 /* OSCController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSCController.h; sourceTree = "<group>"; };
+		E24D2E2F0E95C81100E298A9 /* OSCController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSCController.m; sourceTree = "<group>"; };
+		E24D2E300E95C81100E298A9 /* SC2004LCDModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SC2004LCDModule.h; sourceTree = "<group>"; };
+		E24D2E310E95C81100E298A9 /* SC2004LCDModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SC2004LCDModule.m; sourceTree = "<group>"; };
+		E24D2E320E95C81100E298A9 /* SerialPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialPort.h; sourceTree = "<group>"; };
+		E24D2E330E95C81100E298A9 /* SerialPort.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SerialPort.m; sourceTree = "<group>"; };
+		E24D2E340E95C81100E298A9 /* UsageTables.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = UsageTables.plist; sourceTree = "<group>"; };
+		E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransferController_SFTP.m; sourceTree = "<group>"; };
+		E24D2E370E95C81100E298A9 /* FileTransferController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileTransferController.h; sourceTree = "<group>"; };
+		E24D2E380E95C81100E298A9 /* FileTransferController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransferController.m; sourceTree = "<group>"; };
+		E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransferController_FTP.m; sourceTree = "<group>"; };
+		E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransferController_HTTP.m; sourceTree = "<group>"; };
+		E24D2E3B0E95C81100E298A9 /* FileTransferController_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileTransferController_Internal.h; sourceTree = "<group>"; };
+		E24D2E3C0E95C81100E298A9 /* FileTransferController_Local.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransferController_Local.m; sourceTree = "<group>"; };
+		E24D2E430E95E6F600E298A9 /* TestDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestDevices.m; sourceTree = "<group>"; };
+		E24D2E4B0E95E95700E298A9 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		E24D2EFC0E95E97C00E298A9 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
+		E24D2F480E95EEB100E298A9 /* TestFileSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileSystem.m; sourceTree = "<group>"; };
+		E24D2FB00E95FABF00E298A9 /* libssh2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libssh2.h; sourceTree = "<group>"; };
+		E24D2FB10E95FABF00E298A9 /* libssh2_publickey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libssh2_publickey.h; sourceTree = "<group>"; };
+		E24D2FB20E95FABF00E298A9 /* libssh2_sftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libssh2_sftp.h; sourceTree = "<group>"; };
+		E24D2FB40E95FABF00E298A9 /* channel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = channel.c; sourceTree = "<group>"; };
+		E24D2FB50E95FABF00E298A9 /* comp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = comp.c; sourceTree = "<group>"; };
+		E24D2FB60E95FABF00E298A9 /* crypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crypt.c; sourceTree = "<group>"; };
+		E24D2FB70E95FABF00E298A9 /* hostkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hostkey.c; sourceTree = "<group>"; };
+		E24D2FB80E95FABF00E298A9 /* kex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kex.c; sourceTree = "<group>"; };
+		E24D2FBB0E95FABF00E298A9 /* libssh2_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libssh2_config.h; sourceTree = "<group>"; };
+		E24D2FBD0E95FABF00E298A9 /* libssh2_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libssh2_priv.h; sourceTree = "<group>"; };
+		E24D2FBE0E95FABF00E298A9 /* mac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mac.c; sourceTree = "<group>"; };
+		E24D2FC20E95FABF00E298A9 /* misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = misc.c; sourceTree = "<group>"; };
+		E24D2FC40E95FABF00E298A9 /* openssl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = openssl.c; sourceTree = "<group>"; };
+		E24D2FC50E95FABF00E298A9 /* openssl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openssl.h; sourceTree = "<group>"; };
+		E24D2FC60E95FABF00E298A9 /* packet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = packet.c; sourceTree = "<group>"; };
+		E24D2FC70E95FABF00E298A9 /* pem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pem.c; sourceTree = "<group>"; };
+		E24D2FC80E95FABF00E298A9 /* publickey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = publickey.c; sourceTree = "<group>"; };
+		E24D2FC90E95FABF00E298A9 /* scp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = scp.c; sourceTree = "<group>"; };
+		E24D2FCA0E95FABF00E298A9 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
+		E24D2FCB0E95FABF00E298A9 /* sftp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sftp.c; sourceTree = "<group>"; };
+		E24D2FCD0E95FABF00E298A9 /* transport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = transport.c; sourceTree = "<group>"; };
+		E24D2FCE0E95FABF00E298A9 /* userauth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = userauth.c; sourceTree = "<group>"; };
+		E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		E24D30130E95FBA800E298A9 /* TestFileTransferController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileTransferController.m; sourceTree = "<group>"; };
+		E284E7EF0F0FAE8C0054C122 /* Image.md5 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Image.md5; sourceTree = "<group>"; };
+		E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Image.hmac-sha1"; sourceTree = "<group>"; };
+		E284E9270F0FCA580054C122 /* Image.bf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.bf; sourceTree = "<group>"; };
+		E284EA310F0FE6DC0054C122 /* NSFileManager+LockedItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+LockedItems.h"; sourceTree = "<group>"; };
+		E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+LockedItems.m"; sourceTree = "<group>"; };
+		E286099A0F28F47D0032DF7D /* DataStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataStream.m; sourceTree = "<group>"; };
+		E286099B0F28F47D0032DF7D /* DataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataStream.h; sourceTree = "<group>"; };
+		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
+		E2E7AF130F1032280057A9A5 /* Image.sha1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Image.sha1; sourceTree = "<group>"; };
+		E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes256; sourceTree = "<group>"; };
+		E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes128; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E24D28590E9295D300E298A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E24D28960E9298BA00E298A9 /* SenTestingKit.framework in Frameworks */,
+				E24D28BF0E9298FF00E298A9 /* Foundation.framework in Frameworks */,
+				E24D2A5F0E92F2E800E298A9 /* Security.framework in Frameworks */,
+				E24D2ABC0E92F35B00E298A9 /* libcrypto.dylib in Frameworks */,
+				E24D2ACD0E92F38000E298A9 /* libz.dylib in Frameworks */,
+				E24D2AD10E92F3A800E298A9 /* Carbon.framework in Frameworks */,
+				E24D2B970E92F40600E298A9 /* libsvn_client-1.dylib in Frameworks */,
+				E24D2B990E92F40600E298A9 /* libsvn_subr-1.dylib in Frameworks */,
+				E24D2B9B0E92F41300E298A9 /* libapr-1.dylib in Frameworks */,
+				E24D2E4C0E95E95700E298A9 /* IOKit.framework in Frameworks */,
+				E24D2EFD0E95E97C00E298A9 /* CoreMIDI.framework in Frameworks */,
+				E24D2FED0E95FB4D00E298A9 /* SystemConfiguration.framework in Frameworks */,
+				E230C3C50F3841F800421E40 /* DiskArbitration.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E230C2FB0F37E99D00421E40 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2E2C0E95C81100E298A9 /* MiniUDPSocket.h */,
+				E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */,
+				E230C2FE0F37E99D00421E40 /* NetworkReachability.h */,
+				E230C2FF0F37E99D00421E40 /* NetworkReachability.m */,
+			);
+			name = Networking;
+			path = ../Networking;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D28440E9295B000E298A9 = {
+			isa = PBXGroup;
+			children = (
+				E24D287C0E92977600E298A9 /* Debug.xcconfig */,
+				E24D287B0E92977600E298A9 /* Release.xcconfig */,
+				E24D294A0E92996000E298A9 /* Prefix.pch */,
+				E24D2BF90E94957800E298A9 /* Unit Tests */,
+				E24D29990E92C98900E298A9 /* Resources */,
+				E24D2E270E95C81100E298A9 /* Devices */,
+				E24D2A520E92F2CE00E298A9 /* Extensions */,
+				E24D2E220E95C81100E298A9 /* FileSystem */,
+				E24D2E350E95C81100E298A9 /* FileTransferController */,
+				E230C2FB0F37E99D00421E40 /* Networking */,
+				E24D28690E92972C00E298A9 /* Utilities */,
+				E24D28AD0E9298C800E298A9 /* External Frameworks and Libraries */,
+				E24D285D0E9295D300E298A9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E24D285D0E9295D300E298A9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E24D285C0E9295D300E298A9 /* Unit-Testing.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E24D28690E92972C00E298A9 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E286099B0F28F47D0032DF7D /* DataStream.h */,
+				E286099A0F28F47D0032DF7D /* DataStream.m */,
+				E24D2A3F0E92F29200E298A9 /* DiskImageController.h */,
+				E24D2A3E0E92F29200E298A9 /* DiskImageController.m */,
+				E24D2A370E92F29200E298A9 /* Keychain.h */,
+				E24D2A360E92F29200E298A9 /* Keychain.m */,
+				2394F5810F2FF2C10046622E /* LoginItems.h */,
+				2394F5820F2FF2C10046622E /* LoginItems.m */,
+				E24D2A350E92F29200E298A9 /* MD5.h */,
+				E24D2A340E92F29200E298A9 /* MD5.m */,
+				E24D2A390E92F29200E298A9 /* SVNClient.h */,
+				E24D2A380E92F29200E298A9 /* SVNClient.m */,
+				E24D2A3D0E92F29200E298A9 /* Task.h */,
+				E24D2A3C0E92F29200E298A9 /* Task.m */,
+			);
+			name = Utilities;
+			path = ../Utilities;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D28AD0E9298C800E298A9 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				E24D28950E9298BA00E298A9 /* SenTestingKit.framework */,
+				E24D28BE0E9298FF00E298A9 /* Foundation.framework */,
+				E24D2AD00E92F3A800E298A9 /* Carbon.framework */,
+				E24D2A5E0E92F2E800E298A9 /* Security.framework */,
+				E24D2EFC0E95E97C00E298A9 /* CoreMIDI.framework */,
+				E230C3C40F3841F800421E40 /* DiskArbitration.framework */,
+				E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */,
+				E24D2E4B0E95E95700E298A9 /* IOKit.framework */,
+				E24D2ABB0E92F35B00E298A9 /* libcrypto.dylib */,
+				E24D2ACC0E92F38000E298A9 /* libz.dylib */,
+				E24D2B960E92F40600E298A9 /* libsvn_client-1.dylib */,
+				E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */,
+				E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		E24D29990E92C98900E298A9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E24D285E0E9295D300E298A9 /* Info.plist */,
+				E24D29940E92C96B00E298A9 /* Image.jpg */,
+				E24D2BED0E94924600E298A9 /* Image.b64 */,
+				E284E7EF0F0FAE8C0054C122 /* Image.md5 */,
+				E2E7AF130F1032280057A9A5 /* Image.sha1 */,
+				E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */,
+				E284E9270F0FCA580054C122 /* Image.bf */,
+				E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */,
+				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
+				E2C085410F3847C80058019D /* Volume.dmg */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		E24D2A520E92F2CE00E298A9 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2A530E92F2CE00E298A9 /* NSData+Encryption.h */,
+				E24D2A540E92F2CE00E298A9 /* NSData+Encryption.m */,
+				E24D2A550E92F2CE00E298A9 /* NSData+GZip.h */,
+				E24D2A560E92F2CE00E298A9 /* NSData+GZip.m */,
+				E284EA310F0FE6DC0054C122 /* NSFileManager+LockedItems.h */,
+				E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */,
+				E24D2A570E92F2CE00E298A9 /* NSURL+Parameters.h */,
+				E24D2A580E92F2CE00E298A9 /* NSURL+Parameters.m */,
+			);
+			name = Extensions;
+			path = ../Extensions;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D2BF90E94957800E298A9 /* Unit Tests */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2E430E95E6F600E298A9 /* TestDevices.m */,
+				E24D2BE90E948BE100E298A9 /* TestExtensions.m */,
+				E24D2F480E95EEB100E298A9 /* TestFileSystem.m */,
+				E24D30130E95FBA800E298A9 /* TestFileTransferController.m */,
+				E230C3190F38318100421E40 /* TestNetworking.m */,
+				E24D2BE70E948BAC00E298A9 /* TestUtilities.m */,
+			);
+			name = "Unit Tests";
+			sourceTree = "<group>";
+		};
+		E24D2E220E95C81100E298A9 /* FileSystem */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2E230E95C81100E298A9 /* DirectoryScanner.h */,
+				E24D2E240E95C81100E298A9 /* DirectoryScanner.m */,
+				E24D2E250E95C81100E298A9 /* DirectoryWatcher.h */,
+				E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */,
+				E230C37E0F3837BD00421E40 /* DiskWatcher.h */,
+				E230C37D0F3837BD00421E40 /* DiskWatcher.m */,
+			);
+			name = FileSystem;
+			path = ../FileSystem;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D2E270E95C81100E298A9 /* Devices */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2E280E95C81100E298A9 /* HIDController.h */,
+				E24D2E290E95C81100E298A9 /* HIDController.m */,
+				E24D2E2A0E95C81100E298A9 /* MidiController.h */,
+				E24D2E2B0E95C81100E298A9 /* MidiController.m */,
+				E24D2E2E0E95C81100E298A9 /* OSCController.h */,
+				E24D2E2F0E95C81100E298A9 /* OSCController.m */,
+				E24D2E300E95C81100E298A9 /* SC2004LCDModule.h */,
+				E24D2E310E95C81100E298A9 /* SC2004LCDModule.m */,
+				E24D2E320E95C81100E298A9 /* SerialPort.h */,
+				E24D2E330E95C81100E298A9 /* SerialPort.m */,
+				E24D2E340E95C81100E298A9 /* UsageTables.plist */,
+			);
+			name = Devices;
+			path = ../Devices;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D2E350E95C81100E298A9 /* FileTransferController */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2E370E95C81100E298A9 /* FileTransferController.h */,
+				E24D2E3B0E95C81100E298A9 /* FileTransferController_Internal.h */,
+				E24D2E380E95C81100E298A9 /* FileTransferController.m */,
+				E24D2E3C0E95C81100E298A9 /* FileTransferController_Local.m */,
+				E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */,
+				E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */,
+				E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */,
+				E24D2FAC0E95FABF00E298A9 /* libssh2-0.18 */,
+			);
+			name = FileTransferController;
+			path = ../FileTransferController;
+			sourceTree = SOURCE_ROOT;
+		};
+		E24D2FAC0E95FABF00E298A9 /* libssh2-0.18 */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2FAF0E95FABF00E298A9 /* include */,
+				E24D2FB30E95FABF00E298A9 /* src */,
+			);
+			path = "libssh2-0.18";
+			sourceTree = "<group>";
+		};
+		E24D2FAF0E95FABF00E298A9 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2FB00E95FABF00E298A9 /* libssh2.h */,
+				E24D2FB10E95FABF00E298A9 /* libssh2_publickey.h */,
+				E24D2FB20E95FABF00E298A9 /* libssh2_sftp.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		E24D2FB30E95FABF00E298A9 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				E24D2FB40E95FABF00E298A9 /* channel.c */,
+				E24D2FB50E95FABF00E298A9 /* comp.c */,
+				E24D2FB60E95FABF00E298A9 /* crypt.c */,
+				E24D2FB70E95FABF00E298A9 /* hostkey.c */,
+				E24D2FB80E95FABF00E298A9 /* kex.c */,
+				E24D2FBB0E95FABF00E298A9 /* libssh2_config.h */,
+				E24D2FBD0E95FABF00E298A9 /* libssh2_priv.h */,
+				E24D2FBE0E95FABF00E298A9 /* mac.c */,
+				E24D2FC20E95FABF00E298A9 /* misc.c */,
+				E24D2FC40E95FABF00E298A9 /* openssl.c */,
+				E24D2FC50E95FABF00E298A9 /* openssl.h */,
+				E24D2FC60E95FABF00E298A9 /* packet.c */,
+				E24D2FC70E95FABF00E298A9 /* pem.c */,
+				E24D2FC80E95FABF00E298A9 /* publickey.c */,
+				E24D2FC90E95FABF00E298A9 /* scp.c */,
+				E24D2FCA0E95FABF00E298A9 /* session.c */,
+				E24D2FCB0E95FABF00E298A9 /* sftp.c */,
+				E24D2FCD0E95FABF00E298A9 /* transport.c */,
+				E24D2FCE0E95FABF00E298A9 /* userauth.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E24D285B0E9295D300E298A9 /* Unit-Testing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E24D28610E9295D400E298A9 /* Build configuration list for PBXNativeTarget "Unit-Testing" */;
+			buildPhases = (
+				E24D299A0E92C98A00E298A9 /* CopyFiles */,
+				E24D28580E9295D300E298A9 /* Sources */,
+				E24D28590E9295D300E298A9 /* Frameworks */,
+				E24D2D350E9535C000E298A9 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Unit-Testing";
+			productName = "Unit-Testing";
+			productReference = E24D285C0E9295D300E298A9 /* Unit-Testing.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E24D28460E9295B000E298A9 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "Unit-Testing" */;
+			compatibilityVersion = "Xcode 3.0";
+			hasScannedForEncodings = 0;
+			mainGroup = E24D28440E9295B000E298A9;
+			productRefGroup = E24D285D0E9295D300E298A9 /* Products */;
+			projectDirPath = "";
+			projectRoot = ..;
+			targets = (
+				E24D285B0E9295D300E298A9 /* Unit-Testing */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E24D2D350E9535C000E298A9 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E24D28580E9295D300E298A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E24D2A400E92F29200E298A9 /* MD5.m in Sources */,
+				E24D2A410E92F29200E298A9 /* Keychain.m in Sources */,
+				E24D2A440E92F29200E298A9 /* Task.m in Sources */,
+				E24D2A450E92F29200E298A9 /* DiskImageController.m in Sources */,
+				E24D2A590E92F2CE00E298A9 /* NSData+Encryption.m in Sources */,
+				E24D2A5A0E92F2CE00E298A9 /* NSData+GZip.m in Sources */,
+				E24D2A5B0E92F2CE00E298A9 /* NSURL+Parameters.m in Sources */,
+				E24D2B950E92F3BD00E298A9 /* SVNClient.m in Sources */,
+				E24D2BE80E948BAC00E298A9 /* TestUtilities.m in Sources */,
+				E24D2BEA0E948BE100E298A9 /* TestExtensions.m in Sources */,
+				E24D2E440E95E6F600E298A9 /* TestDevices.m in Sources */,
+				E24D2E450E95E74300E298A9 /* HIDController.m in Sources */,
+				E24D2E460E95E76B00E298A9 /* MidiController.m in Sources */,
+				E24D2E480E95E7F800E298A9 /* MiniUDPSocket.m in Sources */,
+				E24D2F3B0E95EE9E00E298A9 /* DirectoryScanner.m in Sources */,
+				E24D2F3C0E95EE9F00E298A9 /* DirectoryWatcher.m in Sources */,
+				E24D2F490E95EEB100E298A9 /* TestFileSystem.m in Sources */,
+				E24D2F980E95F75E00E298A9 /* FileTransferController.m in Sources */,
+				E24D2F990E95F75E00E298A9 /* FileTransferController_Local.m in Sources */,
+				E24D2F9A0E95F75F00E298A9 /* FileTransferController_FTP.m in Sources */,
+				E24D2F9B0E95F75F00E298A9 /* FileTransferController_SFTP.m in Sources */,
+				E24D2F9C0E95F76000E298A9 /* FileTransferController_HTTP.m in Sources */,
+				E24D2FCF0E95FABF00E298A9 /* channel.c in Sources */,
+				E24D2FD00E95FABF00E298A9 /* comp.c in Sources */,
+				E24D2FD10E95FABF00E298A9 /* crypt.c in Sources */,
+				E24D2FD20E95FABF00E298A9 /* hostkey.c in Sources */,
+				E24D2FD30E95FABF00E298A9 /* kex.c in Sources */,
+				E24D2FD50E95FABF00E298A9 /* mac.c in Sources */,
+				E24D2FD70E95FABF00E298A9 /* misc.c in Sources */,
+				E24D2FD80E95FABF00E298A9 /* openssl.c in Sources */,
+				E24D2FD90E95FABF00E298A9 /* packet.c in Sources */,
+				E24D2FDA0E95FABF00E298A9 /* pem.c in Sources */,
+				E24D2FDB0E95FABF00E298A9 /* publickey.c in Sources */,
+				E24D2FDC0E95FABF00E298A9 /* scp.c in Sources */,
+				E24D2FDD0E95FABF00E298A9 /* session.c in Sources */,
+				E24D2FDE0E95FABF00E298A9 /* sftp.c in Sources */,
+				E24D2FDF0E95FABF00E298A9 /* transport.c in Sources */,
+				E24D2FE00E95FABF00E298A9 /* userauth.c in Sources */,
+				E24D30140E95FBA800E298A9 /* TestFileTransferController.m in Sources */,
+				E284EA330F0FE6DC0054C122 /* NSFileManager+LockedItems.m in Sources */,
+				E286099C0F28F47D0032DF7D /* DataStream.m in Sources */,
+				2394F5830F2FF2C10046622E /* LoginItems.m in Sources */,
+				E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */,
+				E230C31A0F38318100421E40 /* TestNetworking.m in Sources */,
+				E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E24D28470E9295B000E298A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E24D287C0E92977600E298A9 /* Debug.xcconfig */;
+			buildSettings = {
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+			};
+			name = Debug;
+		};
+		E24D28480E9295B000E298A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E24D287B0E92977600E298A9 /* Release.xcconfig */;
+			buildSettings = {
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+			};
+			name = Release;
+		};
+		E24D285F0E9295D400E298A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(DEVELOPER_FRAMEWORKS_DIR)\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = "Unit-Testing";
+				TEST_AFTER_BUILD = NO;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		E24D28600E9295D400E298A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(DEVELOPER_FRAMEWORKS_DIR)\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = "Unit-Testing";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "Unit-Testing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E24D28470E9295B000E298A9 /* Debug */,
+				E24D28480E9295B000E298A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E24D28610E9295D400E298A9 /* Build configuration list for PBXNativeTarget "Unit-Testing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E24D285F0E9295D400E298A9 /* Debug */,
+				E24D28600E9295D400E298A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E24D28460E9295B000E298A9 /* Project object */;
+}
