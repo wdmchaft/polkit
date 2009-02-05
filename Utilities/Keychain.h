@@ -26,6 +26,7 @@
 - (BOOL) removeGenericPasswordForService:(NSString*)service account:(NSString*)account;
 
 - (NSURL*) URLWithPasswordForURL:(NSURL*)url;
+- (BOOL) setPasswordForURL:(NSURL*)url; //Remove if password is nil or add if not nil
 - (BOOL) addPasswordForURL:(NSURL*)url;
 - (BOOL) removePasswordForURL:(NSURL*)url;
 @end

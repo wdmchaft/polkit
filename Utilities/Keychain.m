@@ -110,6 +110,14 @@ static SecProtocolType _ProtocolFromURLScheme(NSString* scheme)
 	return kSecProtocolTypeAny;
 }
 
+- (BOOL) setPasswordForURL:(NSURL*)url
+{
+	if([[url password] length])
+	return [self addPasswordForURL:url];
+	else
+	return [self removePasswordForURL:url];
+}
+
 - (BOOL) addPasswordForURL:(NSURL*)url
 {
 	const char*			utf8Host = [[url host] UTF8String];
