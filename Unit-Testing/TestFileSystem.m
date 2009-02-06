@@ -52,7 +52,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	_didUpdate = YES;
 }
 
-/*- (void) _update:(NSTimer*)timer
+- (void) _update:(NSTimer*)timer
 {
 	NSString*				path = (NSString*)[timer userInfo];
 	NSError*				error;
@@ -314,7 +314,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	acl_free(aclText);
 	STAssertEquals(chflags([file UTF8String], 0), (int)0, nil);
 	STAssertTrue([manager removeItemAtPath:scratchPath error:&error], [error localizedDescription]);
-}*/
+}
 
 - (void) diskWatcherDidUpdateAvailability:(DiskWatcher*)watcher
 {

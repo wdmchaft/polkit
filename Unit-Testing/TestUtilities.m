@@ -24,6 +24,7 @@
 #import "DiskImageController.h"
 #import "SVNClient.h"
 #import "LoginItems.h"
+#import "SystemInfo.h"
 
 #define kIdentifier @"unit-testing"
 #define kAccount @"polkit"
@@ -37,7 +38,7 @@
 
 @implementation UtilitiesTestCase
 
-- (void) testDataStream
+/*- (void) testDataStream
 {
 	NSLog(@"DataStream class is tested through FileTransferController class");
 }
@@ -186,6 +187,11 @@
 	[client release];
 	
 	STAssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
+}*/
+
+- (void) testSystemInfo
+{
+	STAssertNotNil([SystemInfo sharedSystemInfo], nil);
 }
 
 @end

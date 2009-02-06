@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2394F5830F2FF2C10046622E /* LoginItems.m in Sources */ = {isa = PBXBuildFile; fileRef = 2394F5820F2FF2C10046622E /* LoginItems.m */; };
+		23CB96950F3CD5020072DD9D /* SystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CB96940F3CD5020072DD9D /* SystemInfo.m */; };
 		E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C2FF0F37E99D00421E40 /* NetworkReachability.m */; };
 		E230C31A0F38318100421E40 /* TestNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C3190F38318100421E40 /* TestNetworking.m */; };
 		E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C37D0F3837BD00421E40 /* DiskWatcher.m */; };
@@ -100,6 +101,8 @@
 /* Begin PBXFileReference section */
 		2394F5810F2FF2C10046622E /* LoginItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginItems.h; sourceTree = "<group>"; };
 		2394F5820F2FF2C10046622E /* LoginItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginItems.m; sourceTree = "<group>"; };
+		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
+		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
 		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
 		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
 		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
@@ -283,6 +286,8 @@
 				E24D2A340E92F29200E298A9 /* MD5.m */,
 				E24D2A390E92F29200E298A9 /* SVNClient.h */,
 				E24D2A380E92F29200E298A9 /* SVNClient.m */,
+				23CB96930F3CD5020072DD9D /* SystemInfo.h */,
+				23CB96940F3CD5020072DD9D /* SystemInfo.m */,
 				E24D2A3D0E92F29200E298A9 /* Task.h */,
 				E24D2A3C0E92F29200E298A9 /* Task.m */,
 			);
@@ -556,6 +561,7 @@
 				E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */,
 				E230C31A0F38318100421E40 /* TestNetworking.m in Sources */,
 				E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */,
+				23CB96950F3CD5020072DD9D /* SystemInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
