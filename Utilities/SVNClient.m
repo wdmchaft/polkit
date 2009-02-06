@@ -24,6 +24,9 @@
 
 #define REPORT_SVN_ERROR(e) if((e) && _errorReporting) _ReportError(__FUNCTION__, e)
 
+/* Defined in svn_auth.h */
+extern void svn_auth_get_keychain_simple_provider(svn_auth_provider_object_t **provider, apr_pool_t *pool);
+
 static const char _svnStatus[] = {'_', ' ', '?', ' ', 'A', '!', 'D', 'R', 'M', 'U', 'C', 'I', '~', 'X', '!'};
 static BOOL _errorReporting = YES;
 
@@ -47,6 +50,10 @@ static svn_client_ctx_t* _CreateSVNClientContext(apr_pool_t* pool)
 	svn_config_get_config(&context->config, NULL, pool);
 	
 	providers = apr_array_make(pool, 10, sizeof(svn_auth_provider_object_t*));
+	svn_auth_get_username_provider(&provider, pool);
+	*(svn_auth_provider_object_t**)apr_array_push (providers) = provider;
+	svn_auth_get_keychain_simple_provider(&provider, pool);
+	*(svn_auth_provider_object_t**)apr_array_push (providers) = provider;
 	svn_auth_get_ssl_server_trust_file_provider(&provider, pool);
 	*(svn_auth_provider_object_t**)apr_array_push (providers) = provider;
 	svn_auth_get_ssl_client_cert_file_provider(&provider, pool);
@@ -55,7 +62,7 @@ static svn_client_ctx_t* _CreateSVNClientContext(apr_pool_t* pool)
 	*(svn_auth_provider_object_t**)apr_array_push (providers) = provider;
 	svn_auth_open(&auth_baton, providers, pool);
 	//svn_auth_set_parameter(auth_baton, SVN_AUTH_PARAM_DEFAULT_USERNAME, ?);
-	//svn_auth_set_parameter(auth_baton, SVN_AUTH_PARAM_DEFAULT_PASSWORD,  ?);
+	//svn_auth_set_parameter(auth_baton, SVN_AUTH_PARAM_DEFAULT_PASSWORD, ?);
 	context->auth_baton = auth_baton;
 	
 	return context;
