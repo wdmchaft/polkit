@@ -38,7 +38,7 @@
 
 @implementation UtilitiesTestCase
 
-/*- (void) testDataStream
+- (void) testDataStream
 {
 	NSLog(@"DataStream class is tested through FileTransferController class");
 }
@@ -187,7 +187,7 @@
 	[client release];
 	
 	STAssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
-}*/
+}
 
 - (void) testSystemInfo
 {
