@@ -18,6 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
+#define kFileTransferHost_Local					@"localhost"
 #define kFileTransferHost_iDisk					@"idisk.mac.com"
 #define kFileTransferHost_AmazonS3				@"s3.amazonaws.com"
 
