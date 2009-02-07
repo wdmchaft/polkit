@@ -28,6 +28,7 @@
 {
 @private
 	NSString*				_taskPath;
+	NSDictionary*			_environment;
 	NSString*				_directoryPath;
 	id<TaskDelegate>		_delegate;
 	NSTimeInterval			_timeOut;
@@ -45,6 +46,7 @@
 + (NSString*) runWithToolPath:(NSString*)toolPath arguments:(NSArray*)arguments inputString:(NSString*)string timeOut:(NSTimeInterval)timeOut;
 
 - (id) initWithToolPath:(NSString*)toolPath currentDirectoryPath:(NSString*)directoryPath;
+- (id) initWithToolPath:(NSString*)toolPath environment:(NSDictionary*)environment currentDirectoryPath:(NSString*)directoryPath;
 - (NSString*) runWithArguments:(NSArray*)arguments inputString:(NSString*)string;
 - (NSError*) runWithInputData:(NSData*)inputData arguments:(NSArray*)arguments outputData:(NSData**)outputData;
 - (int) runWithInputData:(NSData*)inputData arguments:(NSArray*)arguments outputData:(NSData**)outputData errorData:(NSData**)errorData;

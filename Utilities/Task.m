@@ -85,6 +85,8 @@
 	
 	task = [NSTask new];
 	[task setLaunchPath:_taskPath];
+	if(_environment)
+	[task setEnvironment:_environment];
 	if(_directoryPath)
 	[task setCurrentDirectoryPath:_directoryPath];
 	if(arguments)
@@ -231,8 +233,14 @@ Exit:
 
 - (id) initWithToolPath:(NSString*)toolPath currentDirectoryPath:(NSString*)directoryPath
 {
+	return [self initWithToolPath:toolPath environment:nil currentDirectoryPath:directoryPath];
+}
+
+- (id) initWithToolPath:(NSString*)toolPath environment:(NSDictionary*)environment currentDirectoryPath:(NSString*)directoryPath
+{
 	if((self = [super init])) {
 		_taskPath = [toolPath copy];
+		_environment = [environment copy];
 		_directoryPath = [directoryPath copy];
 	}
 	
@@ -286,6 +294,7 @@ Exit:
 - (void) dealloc
 {
 	[_directoryPath release];
+	[_environment release];
 	[_taskPath release];
 	
 	[super dealloc];

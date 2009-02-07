@@ -26,10 +26,10 @@
 #import "LoginItems.h"
 #import "SystemInfo.h"
 
-#define kIdentifier @"unit-testing"
-#define kAccount @"polkit"
-#define kPassword @"info@pol-online.net"
-#define kSVNURL @"http://pol-online.svn.beanstalkapp.com/svn/PolKit/trunk/Unit-Testing"
+#define kKeychainService @"unit-testing"
+#define kKeychainAccount @"polkit"
+#define kKeychainPassword @"info@pol-online.net"
+#define kSVNURL @"http://polkit.googlecode.com/svn/trunk/Unit-Testing"
 #define kURLWithoutPassword @"ftp://foo@example.com/path"
 #define kURLWithPassword @"ftp://foo:bar@example.com/path"
 
@@ -45,10 +45,10 @@
 
 - (void) testKeychain
 {
-	STAssertTrue([[Keychain sharedKeychain] addGenericPassword:kPassword forService:kIdentifier account:kAccount], nil);
-	STAssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kIdentifier account:kAccount], kPassword, nil);
-	STAssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kIdentifier account:kAccount], nil);
-	STAssertNil([[Keychain sharedKeychain] genericPasswordForService:kIdentifier account:kAccount], nil);
+	STAssertTrue([[Keychain sharedKeychain] addGenericPassword:kKeychainPassword forService:kKeychainService account:kKeychainAccount], nil);
+	STAssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], kKeychainPassword, nil);
+	STAssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kKeychainService account:kKeychainAccount], nil);
+	STAssertNil([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], nil);
 	
 	STAssertTrue([[Keychain sharedKeychain] addPasswordForURL:[NSURL URLWithString:kURLWithPassword]], nil);
 	STAssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithPassword], nil);
@@ -115,15 +115,15 @@
 	
 	sourcePath = [[NSBundle bundleForClass:[self class]] resourcePath];
 	imagePath = [imagePath stringByAppendingPathExtension:@"dmg"];
-	STAssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kPassword], nil);
+	STAssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kKeychainPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
 	STAssertNil(mountPoint, nil);
-	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:YES];
+	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:YES];
 	STAssertNotNil(mountPoint, nil);
 	STAssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
 	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
 	STAssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
+	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
 	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
 	sourcePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"];
@@ -150,13 +150,13 @@
 	
 	sourcePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"];
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparsebundle"];
-	STAssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kPassword], nil);
-	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:NO];
+	STAssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kKeychainPassword], nil);
+	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:NO];
 	STAssertNotNil(mountPoint, nil);
 	STAssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
 	STAssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
+	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
 	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 }
 
@@ -178,10 +178,10 @@
 	STAssertNotNil(client, nil);
 	STAssertNotNil([client infoForPath:@"Image.jpg"], nil);
 	STAssertNotNil([client statusForPath:@"."], nil);
-	STAssertTrue([client setProperty:kPassword forPath:@"." key:kAccount], nil);
-	STAssertEqualObjects([client propertyForPath:@"." key:kAccount], kPassword, nil);
+	STAssertTrue([client setProperty:kKeychainPassword forPath:@"." key:kKeychainAccount], nil);
+	STAssertEqualObjects([client propertyForPath:@"." key:kKeychainAccount], kKeychainPassword, nil);
 	STAssertTrue([[client statusForPath:@"."] count], nil);
-	STAssertTrue([client removePropertyForPath:@"." key:kAccount], nil);
+	STAssertTrue([client removePropertyForPath:@"." key:kKeychainAccount], nil);
 	STAssertFalse([[client statusForPath:@"."] count], nil);
 	STAssertTrue([client updatePath:@"Unit-Testing.xcodeproj" revision:([client updatePath:@"Unit-Testing.xcodeproj"] - 1)], nil);
 	[client release];
