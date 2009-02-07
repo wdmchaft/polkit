@@ -257,8 +257,7 @@
 
 - (void) testSMB
 {
-#warning We don't test SMB
-	[self _testURL:[[self class] testURLForProtocol:@"SMB"]];
+	//FIXME: [self _testURL:[[self class] testURLForProtocol:@"SMB"]];
 }
 
 - (void) testSFTP
@@ -268,8 +267,7 @@
 
 - (void) testFTP
 {
-#warning FTP fails deleting non-existent files or directories
-	[self _testURL:[[self class] testURLForProtocol:@"FTP"]];
+	[self _testURL:[[self class] testURLForProtocol:@"FTP"]]; //FIXME: FTP fails deleting non-existent files or directories (issue #4)
 }
 
 - (void) testIDisk

@@ -254,11 +254,13 @@ Exit:
 	
 	error = [self runWithInputData:[string dataUsingEncoding:NSUTF8StringEncoding] arguments:arguments outputData:&data];
 	if(error) {
+#if __DEBUG__
 		NSLog(@"%s: %@ when executing \"%@\" with arguments:\n%@\n", __FUNCTION__, [error localizedDescription], _taskPath, [arguments description]);
 		if([error localizedFailureReason])
 		NSLog(@"%s: %@\n", __FUNCTION__, [error localizedFailureReason]);
 		if([data length])
 		NSLog(@"%s: %@\n", __FUNCTION__, [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+#endif
 		return nil;
 	}
 	

@@ -26,9 +26,9 @@
 #import "SystemInfo.h"
 
 #define kKeychainService @"unit-testing"
-#define kKeychainAccount @"polkit"
-#define kKeychainPassword @"info@pol-online.net"
-#define kSVNURL @"http://polkit.googlecode.com/svn/trunk/Unit-Testing"
+#define kLogin @"polkit"
+#define kPassword @"info@pol-online.net"
+#define kSVNURL @"http://polkit.googlecode.com/svn/trunk/_UnitTests"
 #define kURLWithoutPassword @"ftp://foo@example.com/path"
 #define kURLWithPassword @"ftp://foo:bar@example.com/path"
 
@@ -39,15 +39,15 @@
 
 - (void) testDataStream
 {
-	NSLog(@"DataStream class is tested through FileTransferController class");
+	; //DataStream class is tested through FileTransferController class
 }
 
 - (void) testKeychain
 {
-	AssertTrue([[Keychain sharedKeychain] addGenericPassword:kKeychainPassword forService:kKeychainService account:kKeychainAccount], nil);
-	AssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], kKeychainPassword, nil);
-	AssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kKeychainService account:kKeychainAccount], nil);
-	AssertNil([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], nil);
+	AssertTrue([[Keychain sharedKeychain] addGenericPassword:kPassword forService:kKeychainService account:kLogin], nil);
+	AssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kLogin], kPassword, nil);
+	AssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kKeychainService account:kLogin], nil);
+	AssertNil([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kLogin], nil);
 	
 	AssertTrue([[Keychain sharedKeychain] addPasswordForURL:[NSURL URLWithString:kURLWithPassword]], nil);
 	AssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithPassword], nil);
@@ -58,8 +58,11 @@
 - (void) testLoginItems
 {
 	AssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
+	AssertFalse([[LoginItems sharedLoginItems] hasItemWithDisplayName:@"Pol-Online"], nil);
 	AssertTrue([[LoginItems sharedLoginItems] addItemWithDisplayName:@"Pol-Online" url:[NSURL fileURLWithPath:@"/Applications/Safari.app"] hidden:NO], nil);
+	AssertTrue([[LoginItems sharedLoginItems] hasItemWithDisplayName:@"Pol-Online"], nil);
 	AssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
+	AssertFalse([[LoginItems sharedLoginItems] hasItemWithDisplayName:@"Pol-Online"], nil);
 }
 
 - (void) testMD5Computation
@@ -114,15 +117,16 @@
 	
 	sourcePath = @".";
 	imagePath = [imagePath stringByAppendingPathExtension:@"dmg"];
-	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kKeychainPassword], nil);
+	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
 	AssertNil(mountPoint, nil);
-	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:YES];
+	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:YES];
 	AssertNotNil(mountPoint, nil);
 	AssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
 	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	sleep(1);
 	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
 	sourcePath = @"Image.jpg";
@@ -132,6 +136,7 @@
 	AssertNotNil(mountPoint, nil);
 	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	sleep(1);
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath2 withDiskImage:imagePath password:nil], nil);
 	AssertTrue([manager removeItemAtPath:imagePath2 error:&error], [error localizedDescription]);
@@ -144,18 +149,20 @@
 	AssertNotNil(mountPoint, nil);
 	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	sleep(1);
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
 	sourcePath = @"Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparsebundle"];
-	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kKeychainPassword], nil);
-	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:NO];
+	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kPassword], nil);
+	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:NO];
 	AssertNotNil(mountPoint, nil);
 	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	sleep(1);
 	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 }
 
@@ -177,12 +184,12 @@
 	AssertNotNil(client, nil);
 	AssertNotNil([client infoForPath:@"Image.jpg"], nil);
 	AssertNotNil([client statusForPath:@"."], nil);
-	AssertTrue([client setProperty:kKeychainPassword forPath:@"." key:kKeychainAccount], nil);
-	AssertEqualObjects([client propertyForPath:@"." key:kKeychainAccount], kKeychainPassword, nil);
+	AssertTrue([client setProperty:kPassword forPath:@"." key:kLogin], nil);
+	AssertEqualObjects([client propertyForPath:@"." key:kLogin], kPassword, nil);
 	AssertTrue([[client statusForPath:@"."] count], nil);
-	AssertTrue([client removePropertyForPath:@"." key:kKeychainAccount], nil);
+	AssertTrue([client removePropertyForPath:@"." key:kLogin], nil);
 	AssertFalse([[client statusForPath:@"."] count], nil);
-	AssertTrue([client updatePath:@"Unit-Testing.xcodeproj" revision:([client updatePath:@"Unit-Testing.xcodeproj"] - 1)], nil);
+	AssertTrue([client updatePath:@"UnitTests.xcodeproj" revision:([client updatePath:@"UnitTests.xcodeproj"] - 1)], nil);
 	[client release];
 	
 	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);

@@ -452,10 +452,8 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 											
 												(*(IOHIDQueueInterface**)_queueInterface)->addElement((IOHIDQueueInterface**)_queueInterface, cookie, 0);
 											}
-#if __DEBUG__
-											else
+											else if([[NSUserDefaults standardUserDefaults] boolForKey:@"debug"])
 											NSLog(@"Found duplicate cookie '%@\' for device \"%@\"", [(NSDictionary*)element objectForKey:@kIOHIDElementCookieKey], [(NSDictionary*)dictionary objectForKey:@kIOHIDProductKey]);
-#endif
 										}
 										
 										if((*(IOHIDQueueInterface**)_queueInterface)->createAsyncEventSource((IOHIDQueueInterface**)_queueInterface, &_hidEventSource) == kIOReturnSuccess) {
