@@ -33,21 +33,12 @@ MD5 MD5WithBytes(const void* bytes, NSUInteger length)
 	unsigned char*			src;
 	unsigned char*			dst;
 	NSUInteger				i;
-#if !(defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5))
-	CC_MD5_CTX				context;
-#endif
 	
 	if(bytes == NULL)
 	return kNullMD5;
 	
 	if(length > 16) {
-#if defined(MAC_OS_X_VERSION_10_5) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
 		CC_MD5(bytes, length, md5.bytes);
-#else
-		CC_MD5_Init(&context);
-		CC_MD5_Update(&context, bytes, length);
-		CC_MD5_Final(md5.bytes, &context);
-#endif
 		return md5;
 	}
 	
