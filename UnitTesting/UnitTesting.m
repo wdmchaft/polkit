@@ -19,7 +19,7 @@
 #import <objc/runtime.h>
 #import <libgen.h>
 
-#import "UnitTests.h"
+#import "UnitTesting.h"
 
 #define kSystemPrefix		"/System/"
 #define kLibraryPrefix		"/Library/"

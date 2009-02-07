@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#import "UnitTests.h"
+#import "UnitTesting.h"
 #import "FileTransferController.h"
 #import "Keychain.h"
 #import "NSURL+Parameters.h"

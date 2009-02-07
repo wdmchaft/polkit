@@ -426,9 +426,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 											element = CFArrayGetValueAtIndex(elements, i);
 											cookie = (IOHIDElementCookie)[[(NSDictionary*)element objectForKey:@kIOHIDElementCookieKey] unsignedLongValue];
 											
-											if(CFDictionaryContainsKey(_cookies, (const void*)cookie))
-											NSLog(@"Found duplicate cookie '%@\' for device \"%@\"", [(NSDictionary*)element objectForKey:@kIOHIDElementCookieKey], [(NSDictionary*)dictionary objectForKey:@kIOHIDProductKey]);
-											else {
+											if(!CFDictionaryContainsKey(_cookies, (const void*)cookie)) {
 												data = CFDataCreateMutable(kCFAllocatorDefault, sizeof(ElementInfo));
 												CFDataSetLength(data, sizeof(ElementInfo));
 												info = (ElementInfo*)CFDataGetMutableBytePtr(data);
@@ -454,6 +452,10 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 											
 												(*(IOHIDQueueInterface**)_queueInterface)->addElement((IOHIDQueueInterface**)_queueInterface, cookie, 0);
 											}
+#if __DEBUG__
+											else
+											NSLog(@"Found duplicate cookie '%@\' for device \"%@\"", [(NSDictionary*)element objectForKey:@kIOHIDElementCookieKey], [(NSDictionary*)dictionary objectForKey:@kIOHIDProductKey]);
+#endif
 										}
 										
 										if((*(IOHIDQueueInterface**)_queueInterface)->createAsyncEventSource((IOHIDQueueInterface**)_queueInterface, &_hidEventSource) == kIOReturnSuccess) {

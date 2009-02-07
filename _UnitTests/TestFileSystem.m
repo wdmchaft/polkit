@@ -20,7 +20,7 @@
 #import <sys/xattr.h>
 #import <membership.h>
 
-#import "UnitTests.h"
+#import "UnitTesting.h"
 #import "DiskImageController.h"
 #import "DirectoryScanner.h"
 #import "DirectoryWatcher.h"

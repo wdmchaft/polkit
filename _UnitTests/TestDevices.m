@@ -19,7 +19,7 @@
 #import <IOKit/hid/IOHIDUsageTables.h>
 #import <IOKit/hid/IOHIDKeys.h>
 
-#import "UnitTests.h"
+#import "UnitTesting.h"
 #import "HIDController.h"
 #import "MidiController.h"
 

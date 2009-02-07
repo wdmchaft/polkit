@@ -77,7 +77,7 @@
 		E2004A7F0F3D64D80025B23C /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB60E95FABF00E298A9 /* crypt.c */; };
 		E2004A800F3D64D90025B23C /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
 		E2004A810F3D64D90025B23C /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
-		E2004A9D0F3D65340025B23C /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E2004A9C0F3D65340025B23C /* UnitTests.m */; };
+		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -106,9 +106,7 @@
 		2394F5820F2FF2C10046622E /* LoginItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginItems.m; sourceTree = "<group>"; };
 		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
-		E20048B30F3D61950025B23C /* UnitTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests.h; sourceTree = "<group>"; };
 		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
-		E2004A9C0F3D65340025B23C /* UnitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTests.m; sourceTree = "<group>"; };
 		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
 		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
 		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
@@ -206,6 +204,8 @@
 		E286099A0F28F47D0032DF7D /* DataStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataStream.m; sourceTree = "<group>"; };
 		E286099B0F28F47D0032DF7D /* DataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataStream.h; sourceTree = "<group>"; };
 		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
+		E2D5896B0F3D82C4005575BD /* UnitTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTesting.h; sourceTree = "<group>"; };
+		E2D5896C0F3D82C4005575BD /* UnitTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTesting.m; sourceTree = "<group>"; };
 		E2E7AF130F1032280057A9A5 /* Image.sha1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Image.sha1; sourceTree = "<group>"; };
 		E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes256; sourceTree = "<group>"; };
 		E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes128; sourceTree = "<group>"; };
@@ -252,8 +252,9 @@
 				E24D287C0E92977600E298A9 /* Debug.xcconfig */,
 				E24D287B0E92977600E298A9 /* Release.xcconfig */,
 				E24D294A0E92996000E298A9 /* Prefix.pch */,
-				E24D2BF90E94957800E298A9 /* Unit Tests */,
+				E24D2BF90E94957800E298A9 /* UnitTests */,
 				E24D29990E92C98900E298A9 /* Resources */,
+				E2D5896A0F3D82C4005575BD /* UnitTesting */,
 				E24D2E270E95C81100E298A9 /* Devices */,
 				E24D2A520E92F2CE00E298A9 /* Extensions */,
 				E24D2E220E95C81100E298A9 /* FileSystem */,
@@ -348,11 +349,9 @@
 			path = ../Extensions;
 			sourceTree = SOURCE_ROOT;
 		};
-		E24D2BF90E94957800E298A9 /* Unit Tests */ = {
+		E24D2BF90E94957800E298A9 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				E20048B30F3D61950025B23C /* UnitTests.h */,
-				E2004A9C0F3D65340025B23C /* UnitTests.m */,
 				E24D2E430E95E6F600E298A9 /* TestDevices.m */,
 				E24D2BE90E948BE100E298A9 /* TestExtensions.m */,
 				E24D2F480E95EEB100E298A9 /* TestFileSystem.m */,
@@ -360,7 +359,7 @@
 				E230C3190F38318100421E40 /* TestNetworking.m */,
 				E24D2BE70E948BAC00E298A9 /* TestUtilities.m */,
 			);
-			name = "Unit Tests";
+			name = UnitTests;
 			sourceTree = "<group>";
 		};
 		E24D2E220E95C81100E298A9 /* FileSystem */ = {
@@ -457,6 +456,16 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		E2D5896A0F3D82C4005575BD /* UnitTesting */ = {
+			isa = PBXGroup;
+			children = (
+				E2D5896B0F3D82C4005575BD /* UnitTesting.h */,
+				E2D5896C0F3D82C4005575BD /* UnitTesting.m */,
+			);
+			name = UnitTesting;
+			path = ../UnitTesting;
+			sourceTree = SOURCE_ROOT;
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -482,7 +491,7 @@
 /* Begin PBXProject section */
 		E24D28460E9295B000E298A9 /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "Unit-Testing" */;
+			buildConfigurationList = E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "UnitTests" */;
 			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 0;
 			mainGroup = E24D28440E9295B000E298A9;
@@ -549,7 +558,7 @@
 				E2004A7F0F3D64D80025B23C /* crypt.c in Sources */,
 				E2004A800F3D64D90025B23C /* comp.c in Sources */,
 				E2004A810F3D64D90025B23C /* channel.c in Sources */,
-				E2004A9D0F3D65340025B23C /* UnitTests.m in Sources */,
+				E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,7 +615,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "Unit-Testing" */ = {
+		E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "UnitTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E24D28470E9295B000E298A9 /* Debug */,
