@@ -16,24 +16,23 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#import <SenTestingKit/SenTestingKit.h>
-
+#import "UnitTests.h"
 #import	"MiniUDPSocket.h"
 #import "NetworkReachability.h"
 
-@interface NetworkingTestCase : SenTestCase
+@interface UnitTests_Networking : UnitTest
 @end
 
-@implementation NetworkingTestCase
+@implementation UnitTests_Networking
 
 - (void) testUDP
 {
 	MiniUDPSocket*			socket;
 	
 	socket = [MiniUDPSocket new];
-	STAssertNotNil(socket, nil);
+	AssertNotNil(socket, nil);
 	
-	STAssertTrue([socket sendData:[@"PolKit" dataUsingEncoding:NSUTF8StringEncoding] toRemoteIPv4Address:(127 << 24 | 0 << 16 | 0 << 8 | 1) port:10000], nil);
+	AssertTrue([socket sendData:[@"PolKit" dataUsingEncoding:NSUTF8StringEncoding] toRemoteIPv4Address:(127 << 24 | 0 << 16 | 0 << 8 | 1) port:10000], nil);
 	
 	[socket release];
 }
@@ -43,11 +42,11 @@
 	NetworkReachability*	reachability;
 	
 	reachability = [[NetworkReachability alloc] init];
-	STAssertTrue([reachability isReachable], nil);
+	AssertTrue([reachability isReachable], nil);
 	[reachability release];
 	
 	reachability = [[NetworkReachability alloc] initWithHostName:@"apple.com"];
-	STAssertTrue([reachability isReachable], nil);
+	AssertTrue([reachability isReachable], nil);
 	[reachability release];
 }
 

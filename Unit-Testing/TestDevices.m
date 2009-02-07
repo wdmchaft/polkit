@@ -16,17 +16,17 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#import <SenTestingKit/SenTestingKit.h>
 #import <IOKit/hid/IOHIDUsageTables.h>
 #import <IOKit/hid/IOHIDKeys.h>
 
+#import "UnitTests.h"
 #import "HIDController.h"
 #import "MidiController.h"
 
-@interface DevicesTestCase : SenTestCase
+@interface UnitTests_Devices : UnitTest
 @end
 
-@implementation DevicesTestCase
+@implementation UnitTests_Devices
 
 - (void) testHID
 {
@@ -35,26 +35,26 @@
 	NSString*				key;
 	
 	dictionary = [HIDController allDevices];
-	STAssertNotNil(dictionary, nil);
+	AssertNotNil(dictionary, nil);
 	
 	for(key in dictionary) {
 		if(([[[dictionary objectForKey:key] objectForKey:@"Product"] rangeOfString:@"Keyboard"].location != NSNotFound) && ([[[dictionary objectForKey:key] objectForKey:@kIOHIDPrimaryUsageKey] unsignedShortValue] == kHIDUsage_GD_Keyboard)) {
 			controller = [[HIDController alloc] initWithDevicePath:key exclusive:NO];
-			STAssertNotNil(controller, nil);
-			STAssertTrue([controller vendorID], nil);
-			STAssertTrue([controller productID], nil);
-			STAssertTrue([controller primaryUsagePage], nil);
-			STAssertTrue([controller primaryUsage], nil);
-			STAssertNotNil([controller devicePath], nil);
-			STAssertTrue([controller isConnected], nil);
-			STAssertNotNil([controller info], nil);
-			STAssertNotNil([controller allElements], nil);
+			AssertNotNil(controller, nil);
+			AssertTrue([controller vendorID], nil);
+			AssertTrue([controller productID], nil);
+			AssertTrue([controller primaryUsagePage], nil);
+			AssertTrue([controller primaryUsage], nil);
+			AssertNotNil([controller devicePath], nil);
+			AssertTrue([controller isConnected], nil);
+			AssertNotNil([controller info], nil);
+			AssertNotNil([controller allElements], nil);
 			[controller release];
 			return;
 		}
 	}
 	
-	STAssertNotNil(controller, nil);
+	AssertNotNil(controller, nil);
 }
 
 - (void) testMidi
@@ -62,7 +62,7 @@
 	MidiController*			controller;
 	
 	controller = [[MidiController alloc] initWithName:@"PolKit" uniqueID:0];
-	STAssertNotNil(controller, nil);
+	AssertNotNil(controller, nil);
 	[controller release];
 }
 

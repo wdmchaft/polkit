@@ -7,92 +7,95 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2394F5830F2FF2C10046622E /* LoginItems.m in Sources */ = {isa = PBXBuildFile; fileRef = 2394F5820F2FF2C10046622E /* LoginItems.m */; };
-		23CB96950F3CD5020072DD9D /* SystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CB96940F3CD5020072DD9D /* SystemInfo.m */; };
-		E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C2FF0F37E99D00421E40 /* NetworkReachability.m */; };
-		E230C31A0F38318100421E40 /* TestNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C3190F38318100421E40 /* TestNetworking.m */; };
-		E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C37D0F3837BD00421E40 /* DiskWatcher.m */; };
-		E230C3C50F3841F800421E40 /* DiskArbitration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230C3C40F3841F800421E40 /* DiskArbitration.framework */; };
-		E24D28960E9298BA00E298A9 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28950E9298BA00E298A9 /* SenTestingKit.framework */; };
-		E24D28BF0E9298FF00E298A9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28BE0E9298FF00E298A9 /* Foundation.framework */; };
-		E24D29980E92C97B00E298A9 /* Image.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D29940E92C96B00E298A9 /* Image.jpg */; };
-		E24D2A400E92F29200E298A9 /* MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A340E92F29200E298A9 /* MD5.m */; };
-		E24D2A410E92F29200E298A9 /* Keychain.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A360E92F29200E298A9 /* Keychain.m */; };
-		E24D2A440E92F29200E298A9 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3C0E92F29200E298A9 /* Task.m */; };
-		E24D2A450E92F29200E298A9 /* DiskImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3E0E92F29200E298A9 /* DiskImageController.m */; };
-		E24D2A590E92F2CE00E298A9 /* NSData+Encryption.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A540E92F2CE00E298A9 /* NSData+Encryption.m */; };
-		E24D2A5A0E92F2CE00E298A9 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A560E92F2CE00E298A9 /* NSData+GZip.m */; };
-		E24D2A5B0E92F2CE00E298A9 /* NSURL+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A580E92F2CE00E298A9 /* NSURL+Parameters.m */; };
-		E24D2A5F0E92F2E800E298A9 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2A5E0E92F2E800E298A9 /* Security.framework */; };
-		E24D2ABC0E92F35B00E298A9 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ABB0E92F35B00E298A9 /* libcrypto.dylib */; };
-		E24D2ACD0E92F38000E298A9 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ACC0E92F38000E298A9 /* libz.dylib */; };
-		E24D2AD10E92F3A800E298A9 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
-		E24D2B950E92F3BD00E298A9 /* SVNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A380E92F29200E298A9 /* SVNClient.m */; };
-		E24D2B970E92F40600E298A9 /* libsvn_client-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B960E92F40600E298A9 /* libsvn_client-1.dylib */; };
-		E24D2B990E92F40600E298A9 /* libsvn_subr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */; };
-		E24D2B9B0E92F41300E298A9 /* libapr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */; };
-		E24D2BE80E948BAC00E298A9 /* TestUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE70E948BAC00E298A9 /* TestUtilities.m */; };
-		E24D2BEA0E948BE100E298A9 /* TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE90E948BE100E298A9 /* TestExtensions.m */; };
-		E24D2C100E94965200E298A9 /* Image.b64 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D2BED0E94924600E298A9 /* Image.b64 */; };
-		E24D2E440E95E6F600E298A9 /* TestDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E430E95E6F600E298A9 /* TestDevices.m */; };
-		E24D2E450E95E74300E298A9 /* HIDController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E290E95C81100E298A9 /* HIDController.m */; };
-		E24D2E460E95E76B00E298A9 /* MidiController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2B0E95C81100E298A9 /* MidiController.m */; };
-		E24D2E480E95E7F800E298A9 /* MiniUDPSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */; };
-		E24D2E4C0E95E95700E298A9 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2E4B0E95E95700E298A9 /* IOKit.framework */; };
-		E24D2EFD0E95E97C00E298A9 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2EFC0E95E97C00E298A9 /* CoreMIDI.framework */; };
-		E24D2F3B0E95EE9E00E298A9 /* DirectoryScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E240E95C81100E298A9 /* DirectoryScanner.m */; };
-		E24D2F3C0E95EE9F00E298A9 /* DirectoryWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */; };
-		E24D2F490E95EEB100E298A9 /* TestFileSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2F480E95EEB100E298A9 /* TestFileSystem.m */; };
-		E24D2F980E95F75E00E298A9 /* FileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E380E95C81100E298A9 /* FileTransferController.m */; };
-		E24D2F990E95F75E00E298A9 /* FileTransferController_Local.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3C0E95C81100E298A9 /* FileTransferController_Local.m */; };
-		E24D2F9A0E95F75F00E298A9 /* FileTransferController_FTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */; };
-		E24D2F9B0E95F75F00E298A9 /* FileTransferController_SFTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */; };
-		E24D2F9C0E95F76000E298A9 /* FileTransferController_HTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */; };
-		E24D2FCF0E95FABF00E298A9 /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
-		E24D2FD00E95FABF00E298A9 /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
-		E24D2FD10E95FABF00E298A9 /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB60E95FABF00E298A9 /* crypt.c */; };
-		E24D2FD20E95FABF00E298A9 /* hostkey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB70E95FABF00E298A9 /* hostkey.c */; };
-		E24D2FD30E95FABF00E298A9 /* kex.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB80E95FABF00E298A9 /* kex.c */; };
-		E24D2FD50E95FABF00E298A9 /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FBE0E95FABF00E298A9 /* mac.c */; };
-		E24D2FD70E95FABF00E298A9 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC20E95FABF00E298A9 /* misc.c */; };
-		E24D2FD80E95FABF00E298A9 /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC40E95FABF00E298A9 /* openssl.c */; };
-		E24D2FD90E95FABF00E298A9 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC60E95FABF00E298A9 /* packet.c */; };
-		E24D2FDA0E95FABF00E298A9 /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC70E95FABF00E298A9 /* pem.c */; };
-		E24D2FDB0E95FABF00E298A9 /* publickey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC80E95FABF00E298A9 /* publickey.c */; };
-		E24D2FDC0E95FABF00E298A9 /* scp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC90E95FABF00E298A9 /* scp.c */; };
-		E24D2FDD0E95FABF00E298A9 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCA0E95FABF00E298A9 /* session.c */; };
-		E24D2FDE0E95FABF00E298A9 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCB0E95FABF00E298A9 /* sftp.c */; };
-		E24D2FDF0E95FABF00E298A9 /* transport.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCD0E95FABF00E298A9 /* transport.c */; };
-		E24D2FE00E95FABF00E298A9 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCE0E95FABF00E298A9 /* userauth.c */; };
-		E24D2FED0E95FB4D00E298A9 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */; };
-		E24D30140E95FBA800E298A9 /* TestFileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D30130E95FBA800E298A9 /* TestFileTransferController.m */; };
-		E284E7F00F0FAE9C0054C122 /* Image.md5 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E7EF0F0FAE8C0054C122 /* Image.md5 */; };
-		E284E81D0F0FB3930054C122 /* Image.hmac-sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */; };
-		E284E9280F0FCA5A0054C122 /* Image.bf in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E9270F0FCA580054C122 /* Image.bf */; };
-		E284EA330F0FE6DC0054C122 /* NSFileManager+LockedItems.m in Sources */ = {isa = PBXBuildFile; fileRef = E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */; };
-		E286099C0F28F47D0032DF7D /* DataStream.m in Sources */ = {isa = PBXBuildFile; fileRef = E286099A0F28F47D0032DF7D /* DataStream.m */; };
-		E2C085580F3848E30058019D /* Volume.dmg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2C085410F3847C80058019D /* Volume.dmg */; };
-		E2E7AF140F1032360057A9A5 /* Image.sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF130F1032280057A9A5 /* Image.sha1 */; };
-		E2E7AFA90F103D0F0057A9A5 /* Image.aes128 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */; };
-		E2E7AFAA0F103D0F0057A9A5 /* Image.aes256 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */; };
+		E20048ED0F3D64470025B23C /* TestDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E430E95E6F600E298A9 /* TestDevices.m */; };
+		E20048EE0F3D64470025B23C /* TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE90E948BE100E298A9 /* TestExtensions.m */; };
+		E20048EF0F3D64480025B23C /* TestFileSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2F480E95EEB100E298A9 /* TestFileSystem.m */; };
+		E20048F00F3D64480025B23C /* TestFileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D30130E95FBA800E298A9 /* TestFileTransferController.m */; };
+		E20048F10F3D64490025B23C /* TestNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C3190F38318100421E40 /* TestNetworking.m */; };
+		E20048F20F3D64490025B23C /* TestUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE70E948BAC00E298A9 /* TestUtilities.m */; };
+		E2004A400F3D645B0025B23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28BE0E9298FF00E298A9 /* Foundation.framework */; };
+		E2004A410F3D645B0025B23C /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
+		E2004A420F3D645C0025B23C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2A5E0E92F2E800E298A9 /* Security.framework */; };
+		E2004A430F3D645C0025B23C /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2EFC0E95E97C00E298A9 /* CoreMIDI.framework */; };
+		E2004A440F3D645D0025B23C /* DiskArbitration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230C3C40F3841F800421E40 /* DiskArbitration.framework */; };
+		E2004A450F3D645D0025B23C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */; };
+		E2004A460F3D645E0025B23C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2E4B0E95E95700E298A9 /* IOKit.framework */; };
+		E2004A470F3D645E0025B23C /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ABB0E92F35B00E298A9 /* libcrypto.dylib */; };
+		E2004A480F3D645F0025B23C /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2ACC0E92F38000E298A9 /* libz.dylib */; };
+		E2004A490F3D645F0025B23C /* libsvn_client-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B960E92F40600E298A9 /* libsvn_client-1.dylib */; };
+		E2004A4A0F3D64600025B23C /* libsvn_subr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */; };
+		E2004A4B0F3D64600025B23C /* libapr-1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */; };
+		E2004A4C0F3D64640025B23C /* DataStream.m in Sources */ = {isa = PBXBuildFile; fileRef = E286099A0F28F47D0032DF7D /* DataStream.m */; };
+		E2004A4D0F3D64650025B23C /* DiskImageController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3E0E92F29200E298A9 /* DiskImageController.m */; };
+		E2004A4E0F3D64650025B23C /* Keychain.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A360E92F29200E298A9 /* Keychain.m */; };
+		E2004A4F0F3D64660025B23C /* LoginItems.m in Sources */ = {isa = PBXBuildFile; fileRef = 2394F5820F2FF2C10046622E /* LoginItems.m */; };
+		E2004A500F3D64670025B23C /* MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A340E92F29200E298A9 /* MD5.m */; };
+		E2004A510F3D64670025B23C /* SVNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A380E92F29200E298A9 /* SVNClient.m */; };
+		E2004A520F3D64680025B23C /* SystemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CB96940F3CD5020072DD9D /* SystemInfo.m */; };
+		E2004A530F3D64690025B23C /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A3C0E92F29200E298A9 /* Task.m */; };
+		E2004A540F3D646A0025B23C /* NetworkReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C2FF0F37E99D00421E40 /* NetworkReachability.m */; };
+		E2004A550F3D646A0025B23C /* MiniUDPSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */; };
+		E2004A560F3D64700025B23C /* FileTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E380E95C81100E298A9 /* FileTransferController.m */; };
+		E2004A570F3D64710025B23C /* FileTransferController_Local.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3C0E95C81100E298A9 /* FileTransferController_Local.m */; };
+		E2004A580F3D64710025B23C /* FileTransferController_FTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */; };
+		E2004A590F3D64720025B23C /* FileTransferController_SFTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */; };
+		E2004A5A0F3D64720025B23C /* FileTransferController_HTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */; };
+		E2004A5B0F3D64730025B23C /* DiskWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C37D0F3837BD00421E40 /* DiskWatcher.m */; };
+		E2004A5C0F3D64740025B23C /* DirectoryWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */; };
+		E2004A5D0F3D64750025B23C /* DirectoryScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E240E95C81100E298A9 /* DirectoryScanner.m */; };
+		E2004A5E0F3D64750025B23C /* NSURL+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A580E92F2CE00E298A9 /* NSURL+Parameters.m */; };
+		E2004A5F0F3D64760025B23C /* NSFileManager+LockedItems.m in Sources */ = {isa = PBXBuildFile; fileRef = E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */; };
+		E2004A600F3D64770025B23C /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A560E92F2CE00E298A9 /* NSData+GZip.m */; };
+		E2004A610F3D64770025B23C /* NSData+Encryption.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2A540E92F2CE00E298A9 /* NSData+Encryption.m */; };
+		E2004A620F3D64790025B23C /* SerialPort.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E330E95C81100E298A9 /* SerialPort.m */; };
+		E2004A630F3D647A0025B23C /* SC2004LCDModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E310E95C81100E298A9 /* SC2004LCDModule.m */; };
+		E2004A640F3D647A0025B23C /* OSCController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2F0E95C81100E298A9 /* OSCController.m */; };
+		E2004A650F3D647B0025B23C /* MidiController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E2B0E95C81100E298A9 /* MidiController.m */; };
+		E2004A660F3D647C0025B23C /* HIDController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E290E95C81100E298A9 /* HIDController.m */; };
+		E2004A690F3D64C00025B23C /* Image.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D29940E92C96B00E298A9 /* Image.jpg */; };
+		E2004A6A0F3D64C00025B23C /* Image.b64 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E24D2BED0E94924600E298A9 /* Image.b64 */; };
+		E2004A6B0F3D64C00025B23C /* Image.md5 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E7EF0F0FAE8C0054C122 /* Image.md5 */; };
+		E2004A6C0F3D64C00025B23C /* Image.sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF130F1032280057A9A5 /* Image.sha1 */; };
+		E2004A6D0F3D64C00025B23C /* Image.hmac-sha1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */; };
+		E2004A6E0F3D64C00025B23C /* Image.bf in CopyFiles */ = {isa = PBXBuildFile; fileRef = E284E9270F0FCA580054C122 /* Image.bf */; };
+		E2004A6F0F3D64C00025B23C /* Image.aes128 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */; };
+		E2004A700F3D64C00025B23C /* Image.aes256 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */; };
+		E2004A710F3D64C00025B23C /* Volume.dmg in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2C085410F3847C80058019D /* Volume.dmg */; };
+		E2004A720F3D64D10025B23C /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCE0E95FABF00E298A9 /* userauth.c */; };
+		E2004A730F3D64D20025B23C /* transport.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCD0E95FABF00E298A9 /* transport.c */; };
+		E2004A740F3D64D20025B23C /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCB0E95FABF00E298A9 /* sftp.c */; };
+		E2004A750F3D64D30025B23C /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FCA0E95FABF00E298A9 /* session.c */; };
+		E2004A760F3D64D30025B23C /* scp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC90E95FABF00E298A9 /* scp.c */; };
+		E2004A770F3D64D40025B23C /* publickey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC80E95FABF00E298A9 /* publickey.c */; };
+		E2004A780F3D64D40025B23C /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC70E95FABF00E298A9 /* pem.c */; };
+		E2004A790F3D64D50025B23C /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC60E95FABF00E298A9 /* packet.c */; };
+		E2004A7A0F3D64D60025B23C /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC40E95FABF00E298A9 /* openssl.c */; };
+		E2004A7B0F3D64D60025B23C /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FC20E95FABF00E298A9 /* misc.c */; };
+		E2004A7C0F3D64D60025B23C /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FBE0E95FABF00E298A9 /* mac.c */; };
+		E2004A7D0F3D64D70025B23C /* kex.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB80E95FABF00E298A9 /* kex.c */; };
+		E2004A7E0F3D64D80025B23C /* hostkey.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB70E95FABF00E298A9 /* hostkey.c */; };
+		E2004A7F0F3D64D80025B23C /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB60E95FABF00E298A9 /* crypt.c */; };
+		E2004A800F3D64D90025B23C /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
+		E2004A810F3D64D90025B23C /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
+		E2004A9D0F3D65340025B23C /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E2004A9C0F3D65340025B23C /* UnitTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E24D299A0E92C98A00E298A9 /* CopyFiles */ = {
+		E2004A680F3D64990025B23C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
+			dstPath = Resources;
+			dstSubfolderSpec = 16;
 			files = (
-				E24D29980E92C97B00E298A9 /* Image.jpg in CopyFiles */,
-				E24D2C100E94965200E298A9 /* Image.b64 in CopyFiles */,
-				E284E7F00F0FAE9C0054C122 /* Image.md5 in CopyFiles */,
-				E2E7AF140F1032360057A9A5 /* Image.sha1 in CopyFiles */,
-				E284E9280F0FCA5A0054C122 /* Image.bf in CopyFiles */,
-				E2E7AFA90F103D0F0057A9A5 /* Image.aes128 in CopyFiles */,
-				E2E7AFAA0F103D0F0057A9A5 /* Image.aes256 in CopyFiles */,
-				E284E81D0F0FB3930054C122 /* Image.hmac-sha1 in CopyFiles */,
-				E2C085580F3848E30058019D /* Volume.dmg in CopyFiles */,
+				E2004A690F3D64C00025B23C /* Image.jpg in CopyFiles */,
+				E2004A6A0F3D64C00025B23C /* Image.b64 in CopyFiles */,
+				E2004A6B0F3D64C00025B23C /* Image.md5 in CopyFiles */,
+				E2004A6C0F3D64C00025B23C /* Image.sha1 in CopyFiles */,
+				E2004A6D0F3D64C00025B23C /* Image.hmac-sha1 in CopyFiles */,
+				E2004A6E0F3D64C00025B23C /* Image.bf in CopyFiles */,
+				E2004A6F0F3D64C00025B23C /* Image.aes128 in CopyFiles */,
+				E2004A700F3D64C00025B23C /* Image.aes256 in CopyFiles */,
+				E2004A710F3D64C00025B23C /* Volume.dmg in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,17 +106,17 @@
 		2394F5820F2FF2C10046622E /* LoginItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginItems.m; sourceTree = "<group>"; };
 		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
+		E20048B30F3D61950025B23C /* UnitTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests.h; sourceTree = "<group>"; };
+		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2004A9C0F3D65340025B23C /* UnitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTests.m; sourceTree = "<group>"; };
 		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
 		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
 		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
 		E230C37D0F3837BD00421E40 /* DiskWatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiskWatcher.m; sourceTree = "<group>"; };
 		E230C37E0F3837BD00421E40 /* DiskWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskWatcher.h; sourceTree = "<group>"; };
 		E230C3C40F3841F800421E40 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = System/Library/Frameworks/DiskArbitration.framework; sourceTree = SDKROOT; };
-		E24D285C0E9295D300E298A9 /* Unit-Testing.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit-Testing.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E24D285E0E9295D300E298A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E24D287B0E92977600E298A9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = "../Xcode-Configurations/Release.xcconfig"; sourceTree = SOURCE_ROOT; };
 		E24D287C0E92977600E298A9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = "../Xcode-Configurations/Debug.xcconfig"; sourceTree = SOURCE_ROOT; };
-		E24D28950E9298BA00E298A9 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		E24D28BE0E9298FF00E298A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E24D294A0E92996000E298A9 /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
 		E24D29940E92C96B00E298A9 /* Image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Image.jpg; sourceTree = "<group>"; };
@@ -209,23 +212,22 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		E24D28590E9295D300E298A9 /* Frameworks */ = {
+		E20048E60F3D641A0025B23C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E24D28960E9298BA00E298A9 /* SenTestingKit.framework in Frameworks */,
-				E24D28BF0E9298FF00E298A9 /* Foundation.framework in Frameworks */,
-				E24D2A5F0E92F2E800E298A9 /* Security.framework in Frameworks */,
-				E24D2ABC0E92F35B00E298A9 /* libcrypto.dylib in Frameworks */,
-				E24D2ACD0E92F38000E298A9 /* libz.dylib in Frameworks */,
-				E24D2AD10E92F3A800E298A9 /* Carbon.framework in Frameworks */,
-				E24D2B970E92F40600E298A9 /* libsvn_client-1.dylib in Frameworks */,
-				E24D2B990E92F40600E298A9 /* libsvn_subr-1.dylib in Frameworks */,
-				E24D2B9B0E92F41300E298A9 /* libapr-1.dylib in Frameworks */,
-				E24D2E4C0E95E95700E298A9 /* IOKit.framework in Frameworks */,
-				E24D2EFD0E95E97C00E298A9 /* CoreMIDI.framework in Frameworks */,
-				E24D2FED0E95FB4D00E298A9 /* SystemConfiguration.framework in Frameworks */,
-				E230C3C50F3841F800421E40 /* DiskArbitration.framework in Frameworks */,
+				E2004A400F3D645B0025B23C /* Foundation.framework in Frameworks */,
+				E2004A410F3D645B0025B23C /* Carbon.framework in Frameworks */,
+				E2004A420F3D645C0025B23C /* Security.framework in Frameworks */,
+				E2004A430F3D645C0025B23C /* CoreMIDI.framework in Frameworks */,
+				E2004A440F3D645D0025B23C /* DiskArbitration.framework in Frameworks */,
+				E2004A450F3D645D0025B23C /* SystemConfiguration.framework in Frameworks */,
+				E2004A460F3D645E0025B23C /* IOKit.framework in Frameworks */,
+				E2004A470F3D645E0025B23C /* libcrypto.dylib in Frameworks */,
+				E2004A480F3D645F0025B23C /* libz.dylib in Frameworks */,
+				E2004A490F3D645F0025B23C /* libsvn_client-1.dylib in Frameworks */,
+				E2004A4A0F3D64600025B23C /* libsvn_subr-1.dylib in Frameworks */,
+				E2004A4B0F3D64600025B23C /* libapr-1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,7 +268,7 @@
 		E24D285D0E9295D300E298A9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E24D285C0E9295D300E298A9 /* Unit-Testing.octest */,
+				E20048E80F3D641A0025B23C /* UnitTests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -298,7 +300,6 @@
 		E24D28AD0E9298C800E298A9 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				E24D28950E9298BA00E298A9 /* SenTestingKit.framework */,
 				E24D28BE0E9298FF00E298A9 /* Foundation.framework */,
 				E24D2AD00E92F3A800E298A9 /* Carbon.framework */,
 				E24D2A5E0E92F2E800E298A9 /* Security.framework */,
@@ -318,7 +319,6 @@
 		E24D29990E92C98900E298A9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				E24D285E0E9295D300E298A9 /* Info.plist */,
 				E24D29940E92C96B00E298A9 /* Image.jpg */,
 				E24D2BED0E94924600E298A9 /* Image.b64 */,
 				E284E7EF0F0FAE8C0054C122 /* Image.md5 */,
@@ -351,6 +351,8 @@
 		E24D2BF90E94957800E298A9 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				E20048B30F3D61950025B23C /* UnitTests.h */,
+				E2004A9C0F3D65340025B23C /* UnitTests.m */,
 				E24D2E430E95E6F600E298A9 /* TestDevices.m */,
 				E24D2BE90E948BE100E298A9 /* TestExtensions.m */,
 				E24D2F480E95EEB100E298A9 /* TestFileSystem.m */,
@@ -458,23 +460,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E24D285B0E9295D300E298A9 /* Unit-Testing */ = {
+		E20048E70F3D641A0025B23C /* UnitTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E24D28610E9295D400E298A9 /* Build configuration list for PBXNativeTarget "Unit-Testing" */;
+			buildConfigurationList = E20048EC0F3D64320025B23C /* Build configuration list for PBXNativeTarget "UnitTests" */;
 			buildPhases = (
-				E24D299A0E92C98A00E298A9 /* CopyFiles */,
-				E24D28580E9295D300E298A9 /* Sources */,
-				E24D28590E9295D300E298A9 /* Frameworks */,
-				E24D2D350E9535C000E298A9 /* ShellScript */,
+				E20048E50F3D641A0025B23C /* Sources */,
+				E20048E60F3D641A0025B23C /* Frameworks */,
+				E2004A680F3D64990025B23C /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "Unit-Testing";
-			productName = "Unit-Testing";
-			productReference = E24D285C0E9295D300E298A9 /* Unit-Testing.octest */;
-			productType = "com.apple.product-type.bundle";
+			name = UnitTests;
+			productName = UnitTests;
+			productReference = E20048E80F3D641A0025B23C /* UnitTests */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -489,85 +490,94 @@
 			projectDirPath = "";
 			projectRoot = ..;
 			targets = (
-				E24D285B0E9295D300E298A9 /* Unit-Testing */,
+				E20048E70F3D641A0025B23C /* UnitTests */,
 			);
 		};
 /* End PBXProject section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		E24D2D350E9535C000E298A9 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		E24D28580E9295D300E298A9 /* Sources */ = {
+		E20048E50F3D641A0025B23C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E24D2A400E92F29200E298A9 /* MD5.m in Sources */,
-				E24D2A410E92F29200E298A9 /* Keychain.m in Sources */,
-				E24D2A440E92F29200E298A9 /* Task.m in Sources */,
-				E24D2A450E92F29200E298A9 /* DiskImageController.m in Sources */,
-				E24D2A590E92F2CE00E298A9 /* NSData+Encryption.m in Sources */,
-				E24D2A5A0E92F2CE00E298A9 /* NSData+GZip.m in Sources */,
-				E24D2A5B0E92F2CE00E298A9 /* NSURL+Parameters.m in Sources */,
-				E24D2B950E92F3BD00E298A9 /* SVNClient.m in Sources */,
-				E24D2BE80E948BAC00E298A9 /* TestUtilities.m in Sources */,
-				E24D2BEA0E948BE100E298A9 /* TestExtensions.m in Sources */,
-				E24D2E440E95E6F600E298A9 /* TestDevices.m in Sources */,
-				E24D2E450E95E74300E298A9 /* HIDController.m in Sources */,
-				E24D2E460E95E76B00E298A9 /* MidiController.m in Sources */,
-				E24D2E480E95E7F800E298A9 /* MiniUDPSocket.m in Sources */,
-				E24D2F3B0E95EE9E00E298A9 /* DirectoryScanner.m in Sources */,
-				E24D2F3C0E95EE9F00E298A9 /* DirectoryWatcher.m in Sources */,
-				E24D2F490E95EEB100E298A9 /* TestFileSystem.m in Sources */,
-				E24D2F980E95F75E00E298A9 /* FileTransferController.m in Sources */,
-				E24D2F990E95F75E00E298A9 /* FileTransferController_Local.m in Sources */,
-				E24D2F9A0E95F75F00E298A9 /* FileTransferController_FTP.m in Sources */,
-				E24D2F9B0E95F75F00E298A9 /* FileTransferController_SFTP.m in Sources */,
-				E24D2F9C0E95F76000E298A9 /* FileTransferController_HTTP.m in Sources */,
-				E24D2FCF0E95FABF00E298A9 /* channel.c in Sources */,
-				E24D2FD00E95FABF00E298A9 /* comp.c in Sources */,
-				E24D2FD10E95FABF00E298A9 /* crypt.c in Sources */,
-				E24D2FD20E95FABF00E298A9 /* hostkey.c in Sources */,
-				E24D2FD30E95FABF00E298A9 /* kex.c in Sources */,
-				E24D2FD50E95FABF00E298A9 /* mac.c in Sources */,
-				E24D2FD70E95FABF00E298A9 /* misc.c in Sources */,
-				E24D2FD80E95FABF00E298A9 /* openssl.c in Sources */,
-				E24D2FD90E95FABF00E298A9 /* packet.c in Sources */,
-				E24D2FDA0E95FABF00E298A9 /* pem.c in Sources */,
-				E24D2FDB0E95FABF00E298A9 /* publickey.c in Sources */,
-				E24D2FDC0E95FABF00E298A9 /* scp.c in Sources */,
-				E24D2FDD0E95FABF00E298A9 /* session.c in Sources */,
-				E24D2FDE0E95FABF00E298A9 /* sftp.c in Sources */,
-				E24D2FDF0E95FABF00E298A9 /* transport.c in Sources */,
-				E24D2FE00E95FABF00E298A9 /* userauth.c in Sources */,
-				E24D30140E95FBA800E298A9 /* TestFileTransferController.m in Sources */,
-				E284EA330F0FE6DC0054C122 /* NSFileManager+LockedItems.m in Sources */,
-				E286099C0F28F47D0032DF7D /* DataStream.m in Sources */,
-				2394F5830F2FF2C10046622E /* LoginItems.m in Sources */,
-				E230C3010F37E99D00421E40 /* NetworkReachability.m in Sources */,
-				E230C31A0F38318100421E40 /* TestNetworking.m in Sources */,
-				E230C37F0F3837BD00421E40 /* DiskWatcher.m in Sources */,
-				23CB96950F3CD5020072DD9D /* SystemInfo.m in Sources */,
+				E20048ED0F3D64470025B23C /* TestDevices.m in Sources */,
+				E20048EE0F3D64470025B23C /* TestExtensions.m in Sources */,
+				E20048EF0F3D64480025B23C /* TestFileSystem.m in Sources */,
+				E20048F00F3D64480025B23C /* TestFileTransferController.m in Sources */,
+				E20048F10F3D64490025B23C /* TestNetworking.m in Sources */,
+				E20048F20F3D64490025B23C /* TestUtilities.m in Sources */,
+				E2004A4C0F3D64640025B23C /* DataStream.m in Sources */,
+				E2004A4D0F3D64650025B23C /* DiskImageController.m in Sources */,
+				E2004A4E0F3D64650025B23C /* Keychain.m in Sources */,
+				E2004A4F0F3D64660025B23C /* LoginItems.m in Sources */,
+				E2004A500F3D64670025B23C /* MD5.m in Sources */,
+				E2004A510F3D64670025B23C /* SVNClient.m in Sources */,
+				E2004A520F3D64680025B23C /* SystemInfo.m in Sources */,
+				E2004A530F3D64690025B23C /* Task.m in Sources */,
+				E2004A540F3D646A0025B23C /* NetworkReachability.m in Sources */,
+				E2004A550F3D646A0025B23C /* MiniUDPSocket.m in Sources */,
+				E2004A560F3D64700025B23C /* FileTransferController.m in Sources */,
+				E2004A570F3D64710025B23C /* FileTransferController_Local.m in Sources */,
+				E2004A580F3D64710025B23C /* FileTransferController_FTP.m in Sources */,
+				E2004A590F3D64720025B23C /* FileTransferController_SFTP.m in Sources */,
+				E2004A5A0F3D64720025B23C /* FileTransferController_HTTP.m in Sources */,
+				E2004A5B0F3D64730025B23C /* DiskWatcher.m in Sources */,
+				E2004A5C0F3D64740025B23C /* DirectoryWatcher.m in Sources */,
+				E2004A5D0F3D64750025B23C /* DirectoryScanner.m in Sources */,
+				E2004A5E0F3D64750025B23C /* NSURL+Parameters.m in Sources */,
+				E2004A5F0F3D64760025B23C /* NSFileManager+LockedItems.m in Sources */,
+				E2004A600F3D64770025B23C /* NSData+GZip.m in Sources */,
+				E2004A610F3D64770025B23C /* NSData+Encryption.m in Sources */,
+				E2004A620F3D64790025B23C /* SerialPort.m in Sources */,
+				E2004A630F3D647A0025B23C /* SC2004LCDModule.m in Sources */,
+				E2004A640F3D647A0025B23C /* OSCController.m in Sources */,
+				E2004A650F3D647B0025B23C /* MidiController.m in Sources */,
+				E2004A660F3D647C0025B23C /* HIDController.m in Sources */,
+				E2004A720F3D64D10025B23C /* userauth.c in Sources */,
+				E2004A730F3D64D20025B23C /* transport.c in Sources */,
+				E2004A740F3D64D20025B23C /* sftp.c in Sources */,
+				E2004A750F3D64D30025B23C /* session.c in Sources */,
+				E2004A760F3D64D30025B23C /* scp.c in Sources */,
+				E2004A770F3D64D40025B23C /* publickey.c in Sources */,
+				E2004A780F3D64D40025B23C /* pem.c in Sources */,
+				E2004A790F3D64D50025B23C /* packet.c in Sources */,
+				E2004A7A0F3D64D60025B23C /* openssl.c in Sources */,
+				E2004A7B0F3D64D60025B23C /* misc.c in Sources */,
+				E2004A7C0F3D64D60025B23C /* mac.c in Sources */,
+				E2004A7D0F3D64D70025B23C /* kex.c in Sources */,
+				E2004A7E0F3D64D80025B23C /* hostkey.c in Sources */,
+				E2004A7F0F3D64D80025B23C /* crypt.c in Sources */,
+				E2004A800F3D64D90025B23C /* comp.c in Sources */,
+				E2004A810F3D64D90025B23C /* channel.c in Sources */,
+				E2004A9D0F3D65340025B23C /* UnitTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		E20048EA0F3D641B0025B23C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				PRODUCT_NAME = UnitTests;
+			};
+			name = Debug;
+		};
+		E20048EB0F3D641B0025B23C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				PRODUCT_NAME = UnitTests;
+			};
+			name = Release;
+		};
 		E24D28470E9295B000E298A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E24D287C0E92977600E298A9 /* Debug.xcconfig */;
@@ -584,58 +594,23 @@
 			};
 			name = Release;
 		};
-		E24D285F0E9295D400E298A9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(DEVELOPER_FRAMEWORKS_DIR)\"",
-				);
-				HEADER_SEARCH_PATHS = (
-					"/usr/include/subversion-1",
-					"/usr/include/apr-1",
-				);
-				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = "Unit-Testing";
-				TEST_AFTER_BUILD = NO;
-				WRAPPER_EXTENSION = octest;
-			};
-			name = Debug;
-		};
-		E24D28600E9295D400E298A9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(DEVELOPER_FRAMEWORKS_DIR)\"",
-				);
-				HEADER_SEARCH_PATHS = (
-					"/usr/include/subversion-1",
-					"/usr/include/apr-1",
-				);
-				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = "Unit-Testing";
-				WRAPPER_EXTENSION = octest;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E20048EC0F3D64320025B23C /* Build configuration list for PBXNativeTarget "UnitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E20048EA0F3D641B0025B23C /* Debug */,
+				E20048EB0F3D641B0025B23C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "Unit-Testing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E24D28470E9295B000E298A9 /* Debug */,
 				E24D28480E9295B000E298A9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E24D28610E9295D400E298A9 /* Build configuration list for PBXNativeTarget "Unit-Testing" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E24D285F0E9295D400E298A9 /* Debug */,
-				E24D28600E9295D400E298A9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

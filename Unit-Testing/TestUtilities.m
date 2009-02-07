@@ -16,8 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#import <SenTestingKit/SenTestingKit.h>
-
+#import "UnitTests.h"
 #import "Keychain.h"
 #import "MD5.h"
 #import "Task.h"
@@ -33,10 +32,10 @@
 #define kURLWithoutPassword @"ftp://foo@example.com/path"
 #define kURLWithPassword @"ftp://foo:bar@example.com/path"
 
-@interface UtilitiesTestCase : SenTestCase
+@interface UnitTests_Utilities : UnitTest
 @end
 
-@implementation UtilitiesTestCase
+@implementation UnitTests_Utilities
 
 - (void) testDataStream
 {
@@ -45,22 +44,22 @@
 
 - (void) testKeychain
 {
-	STAssertTrue([[Keychain sharedKeychain] addGenericPassword:kKeychainPassword forService:kKeychainService account:kKeychainAccount], nil);
-	STAssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], kKeychainPassword, nil);
-	STAssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kKeychainService account:kKeychainAccount], nil);
-	STAssertNil([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], nil);
+	AssertTrue([[Keychain sharedKeychain] addGenericPassword:kKeychainPassword forService:kKeychainService account:kKeychainAccount], nil);
+	AssertEqualObjects([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], kKeychainPassword, nil);
+	AssertTrue([[Keychain sharedKeychain] removeGenericPasswordForService:kKeychainService account:kKeychainAccount], nil);
+	AssertNil([[Keychain sharedKeychain] genericPasswordForService:kKeychainService account:kKeychainAccount], nil);
 	
-	STAssertTrue([[Keychain sharedKeychain] addPasswordForURL:[NSURL URLWithString:kURLWithPassword]], nil);
-	STAssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithPassword], nil);
-	STAssertTrue([[Keychain sharedKeychain] removePasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], nil);
-	STAssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithoutPassword], nil);
+	AssertTrue([[Keychain sharedKeychain] addPasswordForURL:[NSURL URLWithString:kURLWithPassword]], nil);
+	AssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithPassword], nil);
+	AssertTrue([[Keychain sharedKeychain] removePasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], nil);
+	AssertEqualObjects([[Keychain sharedKeychain] URLWithPasswordForURL:[NSURL URLWithString:kURLWithoutPassword]], [NSURL URLWithString:kURLWithoutPassword], nil);
 }
 
 - (void) testLoginItems
 {
-	STAssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
-	STAssertTrue([[LoginItems sharedLoginItems] addItemWithDisplayName:@"Pol-Online" url:[NSURL fileURLWithPath:@"/Applications/Safari.app"] hidden:NO], nil);
-	STAssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
+	AssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
+	AssertTrue([[LoginItems sharedLoginItems] addItemWithDisplayName:@"Pol-Online" url:[NSURL fileURLWithPath:@"/Applications/Safari.app"] hidden:NO], nil);
+	AssertTrue([[LoginItems sharedLoginItems] removeItemWithDisplayName:@"Pol-Online"], nil);
 }
 
 - (void) testMD5Computation
@@ -70,16 +69,16 @@
 							expectedMD5;
 	NSString*				string;
 	
-	data = [[NSData alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"]];
-	STAssertNotNil(data, nil);
+	data = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	AssertNotNil(data, nil);
 	dataMD5 = MD5WithData(data);
 	[data release];
 	
 	//Generated with 'openssl dgst -md5 Image.jpg'
-	string = [NSString stringWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"md5"] encoding:NSUTF8StringEncoding error:NULL];
-	STAssertTrue([string isEqualToString:[MD5ToString(&dataMD5) lowercaseString]], nil);
+	string = [NSString stringWithContentsOfFile:@"Image.md5" encoding:NSUTF8StringEncoding error:NULL];
+	AssertTrue([string isEqualToString:[MD5ToString(&dataMD5) lowercaseString]], nil);
 	expectedMD5 = MD5FromString(string);
-	STAssertTrue(MD5EqualToMD5(&dataMD5, &expectedMD5), nil);
+	AssertTrue(MD5EqualToMD5(&dataMD5, &expectedMD5), nil);
 }
 
 - (void) testMD5StringConversion
@@ -89,7 +88,7 @@
 	
 	md5 = MD5FromString(string);
 	
-	STAssertTrue([MD5ToString(&md5) isEqualToString:[string uppercaseString]], nil);
+	AssertTrue([MD5ToString(&md5) isEqualToString:[string uppercaseString]], nil);
 }
 
 - (void) testTask
@@ -97,10 +96,10 @@
 	NSString*	result;
 	
 	result = [Task runWithToolPath:@"/usr/bin/grep" arguments:[NSArray arrayWithObject:@"france"] inputString:@"bonjour!\nvive la france!\nau revoir!" timeOut:0.0];
-	STAssertEqualObjects(result, @"vive la france!\n", nil);
+	AssertEqualObjects(result, @"vive la france!\n", nil);
 	
 	result = [Task runWithToolPath:@"/bin/sleep" arguments:[NSArray arrayWithObject:@"2"] inputString:nil timeOut:1.0];
-	STAssertNil(result, nil);
+	AssertNil(result, nil);
 }
 
 - (void) testDiskImage
@@ -113,51 +112,51 @@
 	NSError*				error;
 	NSString*				mountPoint;
 	
-	sourcePath = [[NSBundle bundleForClass:[self class]] resourcePath];
+	sourcePath = @".";
 	imagePath = [imagePath stringByAppendingPathExtension:@"dmg"];
-	STAssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kKeychainPassword], nil);
+	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath withName:nil contentsOfDirectory:sourcePath password:kKeychainPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
-	STAssertNil(mountPoint, nil);
+	AssertNil(mountPoint, nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:YES];
-	STAssertNotNil(mountPoint, nil);
-	STAssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
-	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	STAssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
-	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
+	AssertNotNil(mountPoint, nil);
+	AssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
+	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
+	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"];
+	sourcePath = @"Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"dmg"];
-	STAssertTrue([controller makeDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
+	AssertTrue([controller makeDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
-	STAssertNotNil(mountPoint, nil);
-	STAssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertTrue([controller makeCompressedDiskImageAtPath:imagePath2 withDiskImage:imagePath password:nil], nil);
-	STAssertTrue([manager removeItemAtPath:imagePath2 error:&error], [error localizedDescription]);
-	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
+	AssertNotNil(mountPoint, nil);
+	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
+	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath2 withDiskImage:imagePath password:nil], nil);
+	AssertTrue([manager removeItemAtPath:imagePath2 error:&error], [error localizedDescription]);
+	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"];
+	sourcePath = @"Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparseimage"];
-	STAssertTrue([controller makeSparseDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
+	AssertTrue([controller makeSparseDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
-	STAssertNotNil(mountPoint, nil);
-	STAssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
+	AssertNotNil(mountPoint, nil);
+	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
+	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"Image" ofType:@"jpg"];
+	sourcePath = @"Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparsebundle"];
-	STAssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kKeychainPassword], nil);
+	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kKeychainPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kKeychainPassword private:NO verify:NO];
-	STAssertNotNil(mountPoint, nil);
-	STAssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	STAssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	STAssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
-	STAssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
-	STAssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
+	AssertNotNil(mountPoint, nil);
+	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
+	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kKeychainPassword], nil);
+	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 }
 
 - (void) testSVN
@@ -166,32 +165,32 @@
 	NSError*				error;
 	SVNClient*				client;
 	
-	STAssertNotNil([SVNClient infoForURL:kSVNURL], nil);
+	AssertNotNil([SVNClient infoForURL:kSVNURL], nil);
 	
-	STAssertTrue([SVNClient exportURL:kSVNURL toPath:path], nil);
-	STAssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
+	AssertTrue([SVNClient exportURL:kSVNURL toPath:path], nil);
+	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
 	
-	STAssertTrue([SVNClient checkOutURL:kSVNURL toPath:path], nil);
-	STAssertNotNil([SVNClient infoForPath:path], nil);
+	AssertTrue([SVNClient checkOutURL:kSVNURL toPath:path], nil);
+	AssertNotNil([SVNClient infoForPath:path], nil);
 	
 	client = [[SVNClient alloc] initWithRepositoryPath:path];
-	STAssertNotNil(client, nil);
-	STAssertNotNil([client infoForPath:@"Image.jpg"], nil);
-	STAssertNotNil([client statusForPath:@"."], nil);
-	STAssertTrue([client setProperty:kKeychainPassword forPath:@"." key:kKeychainAccount], nil);
-	STAssertEqualObjects([client propertyForPath:@"." key:kKeychainAccount], kKeychainPassword, nil);
-	STAssertTrue([[client statusForPath:@"."] count], nil);
-	STAssertTrue([client removePropertyForPath:@"." key:kKeychainAccount], nil);
-	STAssertFalse([[client statusForPath:@"."] count], nil);
-	STAssertTrue([client updatePath:@"Unit-Testing.xcodeproj" revision:([client updatePath:@"Unit-Testing.xcodeproj"] - 1)], nil);
+	AssertNotNil(client, nil);
+	AssertNotNil([client infoForPath:@"Image.jpg"], nil);
+	AssertNotNil([client statusForPath:@"."], nil);
+	AssertTrue([client setProperty:kKeychainPassword forPath:@"." key:kKeychainAccount], nil);
+	AssertEqualObjects([client propertyForPath:@"." key:kKeychainAccount], kKeychainPassword, nil);
+	AssertTrue([[client statusForPath:@"."] count], nil);
+	AssertTrue([client removePropertyForPath:@"." key:kKeychainAccount], nil);
+	AssertFalse([[client statusForPath:@"."] count], nil);
+	AssertTrue([client updatePath:@"Unit-Testing.xcodeproj" revision:([client updatePath:@"Unit-Testing.xcodeproj"] - 1)], nil);
 	[client release];
 	
-	STAssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
+	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
 }
 
 - (void) testSystemInfo
 {
-	STAssertNotNil([SystemInfo sharedSystemInfo], nil);
+	AssertNotNil([SystemInfo sharedSystemInfo], nil);
 }
 
 @end

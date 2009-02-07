@@ -18,5 +18,4 @@
 
 #ifdef __OBJC__
 	#import <Foundation/Foundation.h>
-	#import <SenTestingKit/SenTestingKit.h>
 #endif
