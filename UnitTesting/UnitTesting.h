@@ -23,7 +23,8 @@
 		NSString* _description = (__DESCRIPTION__); \
 		if(_description) \
 		_description = [NSString stringWithFormat:_description, ##__VA_ARGS__]; \
-		[self logFailure:@"%s @ line %i\n%@\n%@", __FILE__, __LINE__, __MESSAGE__, _description]; \
+		[self logMessage:@"%s @ line %i\n%@\n%@", __FILE__, __LINE__, __MESSAGE__, _description]; \
+		[self setDidFail:YES]; \
 	} while(0)
 	
 #define AssertTrue(__EXPRESSION__, __DESCRIPTION__, ...) \
@@ -89,6 +90,6 @@ do { \
 @private
 	BOOL				_didFail;
 }
-@property(readonly, nonatomic) BOOL didFail;
-- (void) logFailure:(NSString*)message, ...;
+@property(nonatomic) BOOL didFail;
+- (void) logMessage:(NSString*)message, ...;
 @end
