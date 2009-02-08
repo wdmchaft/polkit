@@ -567,6 +567,7 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 {
 	CFDictionaryValueCallBacks	itemValueCallbacks = {0, NULL, _DirectoryItemDataReleaseCallback, NULL, NULL};
 	CFMutableDictionaryRef		dictionary = NULL;
+	NSMutableDictionary*		variables = nil;
 	char						buffer[PATH_MAX];
 	char*						fullPath;
 	size_t						rootLength,
@@ -577,7 +578,6 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 	DirectoryItemData*			data;
 	size_t						nameLength;
 	DIR*						dir;
-	NSMutableDictionary*		variables;
 	CFTypeRef					value;
 	int							type;
 	
@@ -1297,11 +1297,11 @@ static void _DictionaryApplierFunction_Enumerator(const void* key, const void* v
 
 - (NSUInteger) countByEnumeratingWithState:(NSFastEnumerationState*)state objects:(id*)stackbuf count:(NSUInteger)len
 {
+	const char*				path = NULL;
+	CFDictionaryRef			contents = NULL;
 	NSUInteger				count = CFDictionaryGetCount(_directories),
 							max = 0,
 							i;
-	const char*				path;
-	CFDictionaryRef			contents;
 	void*					params[3];
 	size_t					length;
 	
