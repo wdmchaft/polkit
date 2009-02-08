@@ -30,7 +30,7 @@
 
 @synthesize didFail=_didFail;
 
-- (void) logFailure:(NSString*)message, ...
+- (void) logMessage:(NSString*)message, ...
 {
 	NSString*				string;
 	va_list					list;
@@ -42,8 +42,6 @@
 	fprintf(stderr, "\n");
 	[string release];
 	va_end(list);
-	
-	_didFail = YES;
 }
 
 @end
