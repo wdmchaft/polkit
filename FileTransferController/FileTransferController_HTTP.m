@@ -532,7 +532,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	if([username length] && (password == nil))
 	password = [[Keychain sharedKeychain] genericPasswordForService:@"iTools" account:username];
 	
-	if([username length] && ![basePath hasPrefix:[NSString stringWithFormat:@"/%@/", username]])
+	if([username length] && ![username isEqualToString:@"public"] && ![basePath hasSuffix:[NSString stringWithFormat:@"/%@", username]] && ![basePath hasPrefix:[NSString stringWithFormat:@"/%@/", username]])
 	basePath = [[NSString stringWithFormat:@"/%@", username] stringByAppendingPathComponent:basePath];
 	
 	return [self initWithHost:kFileTransferHost_iDisk port:0 username:username password:password basePath:basePath];
