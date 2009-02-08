@@ -72,13 +72,13 @@
 							expectedMD5;
 	NSString*				string;
 	
-	data = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data, nil);
 	dataMD5 = MD5WithData(data);
 	[data release];
 	
 	//Generated with 'openssl dgst -md5 Image.jpg'
-	string = [NSString stringWithContentsOfFile:@"Image.md5" encoding:NSUTF8StringEncoding error:NULL];
+	string = [NSString stringWithContentsOfFile:@"Resources/Image.md5" encoding:NSUTF8StringEncoding error:NULL];
 	AssertTrue([string isEqualToString:[MD5ToString(&dataMD5) lowercaseString]], nil);
 	expectedMD5 = MD5FromString(string);
 	AssertTrue(MD5EqualToMD5(&dataMD5, &expectedMD5), nil);
@@ -129,7 +129,7 @@
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = @"Image.jpg";
+	sourcePath = @"Resources/Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"dmg"];
 	AssertTrue([controller makeDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
@@ -142,7 +142,7 @@
 	AssertTrue([manager removeItemAtPath:imagePath2 error:&error], [error localizedDescription]);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = @"Image.jpg";
+	sourcePath = @"Resources/Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparseimage"];
 	AssertTrue([controller makeSparseDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
@@ -153,7 +153,7 @@
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
-	sourcePath = @"Image.jpg";
+	sourcePath = @"Resources/Image.jpg";
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparsebundle"];
 	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:NO];

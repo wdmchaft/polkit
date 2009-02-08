@@ -28,7 +28,7 @@
 
 @implementation UnitTest
 
-@synthesize didFail=_didFail;
+@synthesize numberOfSuccesses=_successes, numberOfFailures=_failures;
 
 - (void) logMessage:(NSString*)message, ...
 {
@@ -44,11 +44,19 @@
 	va_end(list);
 }
 
+- (void) reportResult:(BOOL)success
+{
+	if(success)
+	_successes += 1;
+	else
+	_failures += 1;
+}
+
 @end
 
 int main(int argc, const char* argv[])
 {
-	NSUInteger				total = 0,
+	NSUInteger				successes = 0,
 							failures = 0;
 	unsigned int			count1,
 							i1,
@@ -65,7 +73,6 @@ int main(int argc, const char* argv[])
 	int						i;
 	SEL						method;
 	int						match;
-	BOOL					didFail;
 	
 	if(argv[0][0] != '/')
 	return 1;
@@ -130,22 +137,19 @@ int main(int argc, const char* argv[])
 				@try {
 					test = [class new];
 					[test performSelector:method];
-					didFail = [test didFail];
+					successes += [test numberOfSuccesses];
+					failures += [test numberOfFailures];
 					[test release];
-					if(didFail)
-					++failures;
 				}
 				@catch(NSException* exception) {
 					printf("<IGNORED EXCEPTION> %s\n", [[exception description] UTF8String]);
-					++failures;
 				}
-				++total;
 				[localPool release];
 			}
 		}
 	}
 	
-	printf("===== %i UNIT TESTS COMPLETED WITH %i FAILURE(S) =====\n", total, failures);
+	printf("===== %i UNIT TESTS COMPLETED WITH %i FAILURE(S) =====\n", successes + failures, failures);
 	
 	return 0;
 }

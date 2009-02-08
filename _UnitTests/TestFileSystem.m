@@ -57,7 +57,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	NSString*				path = (NSString*)[timer userInfo];
 	NSError*				error;
 	
-	AssertTrue([[NSFileManager defaultManager] createSymbolicLinkAtPath:[path stringByAppendingPathComponent:@"Test.jpg"] withDestinationPath:@"Image.jpg" error:&error], [error localizedDescription]);
+	AssertTrue([[NSFileManager defaultManager] createSymbolicLinkAtPath:[path stringByAppendingPathComponent:@"Test.jpg"] withDestinationPath:@"Resources/Image.jpg" error:&error], [error localizedDescription]);
 }
 
 - (void) testWatcher
@@ -334,7 +334,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 - (void) testDiskWatcher
 {
 	DiskImageController*	controller = [DiskImageController sharedDiskImageController];
-	NSString*				imagePath = @"Volume.dmg";
+	NSString*				imagePath = @"Resources/Volume.dmg";
 	NSString*				mountPath;
 	NSString*				uuid;
 	DiskWatcher*			watcher;

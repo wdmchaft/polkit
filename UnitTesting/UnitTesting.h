@@ -24,7 +24,6 @@
 		if(_description) \
 		_description = [NSString stringWithFormat:_description, ##__VA_ARGS__]; \
 		[self logMessage:@"%s @ line %i\n%@\n%@", __FILE__, __LINE__, __MESSAGE__, _description]; \
-		[self setDidFail:YES]; \
 	} while(0)
 	
 #define AssertTrue(__EXPRESSION__, __DESCRIPTION__, ...) \
@@ -33,7 +32,10 @@ do { \
 	if(!_bool) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == TRUE)", [NSString stringWithUTF8String: #__EXPRESSION__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
 	} \
+	else \
+	[self reportResult:YES]; \
 } while(0)
 
 #define AssertFalse(__EXPRESSION__, __DESCRIPTION__, ...) \
@@ -42,7 +44,10 @@ do { \
 	if(_bool) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == FALSE)", [NSString stringWithUTF8String: #__EXPRESSION__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
 	} \
+	else \
+	[self reportResult:YES]; \
 } while(0)
 
 #define AssertEquals(__VALUE1__, __VALUE2__, __DESCRIPTION__, ...) \
@@ -52,7 +57,10 @@ do { \
 	if((@encode(__typeof__(__VALUE1__)) != @encode(__typeof__(__VALUE2__))) || (_value1 != _value2)) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
 	} \
+	else \
+	[self reportResult:YES]; \
 } while(0)
 
 #define AssertNotNil(__OBJECT__, __DESCRIPTION__, ...) \
@@ -61,7 +69,10 @@ do { \
 	if(_object == nil) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) != nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
 	} \
+	else \
+	[self reportResult:YES]; \
 } while(0)
 
 #define AssertNil(__OBJECT__, __DESCRIPTION__, ...) \
@@ -70,26 +81,33 @@ do { \
 	if(_object != nil) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
 	} \
+	else \
+	[self reportResult:YES]; \
 } while(0)
 
 #define AssertEqualObjects(__OBJECT1__, __OBJECT2__, __DESCRIPTION__, ...) \
 do { \
     id _object1 = (__OBJECT1__); \
 	id _object2 = (__OBJECT2__); \
-	if(_object1 == _object2) \
-	continue; \
-	if((@encode(__typeof__(_object1)) == @encode(id)) && (@encode(__typeof__(_object2)) == @encode(id)) && [(id)_object1 isEqual:(id)_object2] ) \
-	continue; \
-	NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__OBJECT1__], [NSString stringWithUTF8String: #__OBJECT2__]]; \
-	LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+	if((_object1 == _object2) || ((@encode(__typeof__(_object1)) == @encode(id)) && (@encode(__typeof__(_object2)) == @encode(id)) && [(id)_object1 isEqual:(id)_object2])) \
+	[self reportResult:YES]; \
+	else { \
+		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__OBJECT1__], [NSString stringWithUTF8String: #__OBJECT2__]]; \
+		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
+	} \
 } while(0)
 
 @interface UnitTest : NSObject
 {
 @private
-	BOOL				_didFail;
+	NSUInteger				_successes,
+							_failures;
 }
-@property(nonatomic) BOOL didFail;
+@property(nonatomic, readonly) NSUInteger numberOfSuccesses;
+@property(nonatomic, readonly) NSUInteger numberOfFailures;
 - (void) logMessage:(NSString*)message, ...;
+- (void) reportResult:(BOOL)success;
 @end

@@ -55,14 +55,14 @@
 
 - (void) fileTransferControllerDidFail:(FileTransferController*)controller error:(NSError*)error
 {
-	NSLog(@"%@\n%@", error, [error userInfo]);
+	[self logMessage:@"[%i] %@\n%@", [error code], [error localizedDescription], [error userInfo]];
 }
 
 - (void) _testURL:(NSURL*)url
 {
 	NSAutoreleasePool*			pool = [NSAutoreleasePool new];
 	NSString*					filePath = [[@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]] stringByAppendingPathExtension:@"jpg"];
-	NSString*					imagePath = @"Image.jpg";
+	NSString*					imagePath = @"Resources/Image.jpg";
 	FileTransferController*		controller;
 	NSError*					error;
 	NSData*						sourceData;
@@ -160,7 +160,7 @@
 
 - (void) _testDigest:(BOOL)encryption
 {
-	NSString*					imagePath = @"Image.jpg";
+	NSString*					imagePath = @"Resources/Image.jpg";
 	NSString*					fileName = [[NSProcessInfo processInfo] globallyUniqueString];
 	NSString*					tmpPath = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	FileTransferController*		controller;
@@ -209,7 +209,7 @@
 
 - (void) testEncryption
 {
-	NSString*					imagePath = @"Image.jpg";
+	NSString*					imagePath = @"Resources/Image.jpg";
 	NSString*					fileName = [[[NSProcessInfo processInfo] globallyUniqueString] stringByAppendingPathExtension:@"data"];
 	FileTransferController*		controller;
 	NSData*						data1;
@@ -226,7 +226,7 @@
 	AssertNotNil(data1, nil);
 	
 	//Generated with 'openssl aes-256-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes256'
-	data2 = [[NSData alloc] initWithContentsOfFile:@"Image.aes256"];
+	data2 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.aes256"];
 	AssertNotNil(data2, nil);
 	
 	AssertEqualObjects(data1, data2, nil);
@@ -288,7 +288,7 @@
 - (void) _testAmazonS3:(BOOL)secure
 {
 	NSURL*						url = [[self class] testURLForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")];
-	NSString*					imagePath = @"Image.jpg";
+	NSString*					imagePath = @"Resources/Image.jpg";
 	AmazonS3TransferController*	controller;
 	
 	[self _testURL:url];

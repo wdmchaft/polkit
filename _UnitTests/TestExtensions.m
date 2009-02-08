@@ -35,7 +35,7 @@
 	NSUInteger				i;
 	NSString*				string;
 	
-	data = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data, nil);
 	md5Data = [data md5Digest];
 	AssertEquals([md5Data length], (NSUInteger)16, nil);
@@ -47,7 +47,7 @@
 	AssertNotNil(md5String, nil);
 	
 	//Generated with 'openssl dgst -md5 Image.jpg'
-	string = [NSString stringWithContentsOfFile:@"Image.md5" encoding:NSUTF8StringEncoding error:NULL];
+	string = [NSString stringWithContentsOfFile:@"Resources/Image.md5" encoding:NSUTF8StringEncoding error:NULL];
 	AssertEqualObjects(md5String, string, nil);
 }
 
@@ -59,7 +59,7 @@
 	NSUInteger				i;
 	NSString*				string;
 	
-	data = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data, nil);
 	sha1Data = [data sha1Digest];
 	AssertEquals([sha1Data length], (NSUInteger)20, nil);
@@ -71,7 +71,7 @@
 	AssertNotNil(sha1String, nil);
 	
 	//Generated with 'openssl dgst -sha1 Image.jpg'
-	string = [NSString stringWithContentsOfFile:@"Image.sha1" encoding:NSUTF8StringEncoding error:NULL];
+	string = [NSString stringWithContentsOfFile:@"Resources/Image.sha1" encoding:NSUTF8StringEncoding error:NULL];
 	AssertEqualObjects(sha1String, string, nil);
 }
 
@@ -83,7 +83,7 @@
 	NSUInteger				i;
 	NSString*				string;
 	
-	data = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data, nil);
 	sha1Data = [data sha1HMacWithKey:@"info@pol-online.net"];
 	AssertEquals([sha1Data length], (NSUInteger)20, nil);
@@ -95,7 +95,7 @@
 	AssertNotNil(sha1String, nil);
 	
 	//Generated with 'openssl sha1 -hmac info@pol-online.net Image.jpg'
-	string = [NSString stringWithContentsOfFile:@"Image.hmac-sha1" encoding:NSUTF8StringEncoding error:NULL];
+	string = [NSString stringWithContentsOfFile:@"Resources/Image.hmac-sha1" encoding:NSUTF8StringEncoding error:NULL];
 	AssertEqualObjects(sha1String, string, nil);
 }
 
@@ -107,13 +107,13 @@
 	NSString*				string2;
 	NSError*				error;
 	
-	data1 = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	string1 = [data1 encodeBase64];
 	AssertNotNil(string1, nil);
 	
 	//Generated with 'openssl base64 -e -in Unit-Testing/Image.jpg -out Image.b64'
-	string2 = [NSString stringWithContentsOfFile:@"Image.b64" encoding:NSASCIIStringEncoding error:&error];
+	string2 = [NSString stringWithContentsOfFile:@"Resources/Image.b64" encoding:NSASCIIStringEncoding error:&error];
 	AssertNotNil(string2, [error localizedDescription]);
 	
 	AssertEqualObjects(string1, [string2 stringByReplacingOccurrencesOfString:@"\n" withString:@""], nil);
@@ -130,14 +130,14 @@
 	NSData*					data2;
 	NSData*					data3;
 	
-	data1 = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
 	data2 = [data1 encryptBlowfishWithPassword:@"info@pol-online.net"];
 	AssertNotNil(data2, nil);
 	
 	//Generated with 'openssl bf-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.bf'
-	data3 = [NSData dataWithContentsOfFile:@"Image.bf"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.bf"];
 	AssertNotNil(data3, nil);
 	
 	AssertEqualObjects(data2, data3, nil);
@@ -154,14 +154,14 @@
 	NSData*					data2;
 	NSData*					data3;
 	
-	data1 = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
 	data2 = [data1 encryptAES128WithPassword:@"info@pol-online.net"];
 	AssertNotNil(data2, nil);
 	
 	//Generated with 'openssl aes-128-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes128'
-	data3 = [NSData dataWithContentsOfFile:@"Image.aes128"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes128"];
 	AssertNotNil(data3, nil);
 	
 	AssertEqualObjects(data2, data3, nil);
@@ -178,14 +178,14 @@
 	NSData*					data2;
 	NSData*					data3;
 	
-	data1 = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
 	data2 = [data1 encryptAES256WithPassword:@"info@pol-online.net"];
 	AssertNotNil(data2, nil);
 	
 	//Generated with 'openssl aes-256-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes256'
-	data3 = [NSData dataWithContentsOfFile:@"Image.aes256"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes256"];
 	AssertNotNil(data3, nil);
 	
 	AssertEqualObjects(data2, data3, nil);
@@ -203,7 +203,7 @@
 	NSData*					data2;
 	NSError*				error;
 	
-	data1 = [[NSData alloc] initWithContentsOfFile:@"Image.jpg"];
+	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	AssertTrue([data1 writeToGZipFile:path], nil);
 	

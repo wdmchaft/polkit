@@ -253,7 +253,6 @@
 				E24D287B0E92977600E298A9 /* Release.xcconfig */,
 				E24D294A0E92996000E298A9 /* Prefix.pch */,
 				E24D2BF90E94957800E298A9 /* UnitTests */,
-				E24D29990E92C98900E298A9 /* Resources */,
 				E2D5896A0F3D82C4005575BD /* UnitTesting */,
 				E24D2E270E95C81100E298A9 /* Devices */,
 				E24D2A520E92F2CE00E298A9 /* Extensions */,
@@ -317,22 +316,6 @@
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
 		};
-		E24D29990E92C98900E298A9 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				E24D29940E92C96B00E298A9 /* Image.jpg */,
-				E24D2BED0E94924600E298A9 /* Image.b64 */,
-				E284E7EF0F0FAE8C0054C122 /* Image.md5 */,
-				E2E7AF130F1032280057A9A5 /* Image.sha1 */,
-				E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */,
-				E284E9270F0FCA580054C122 /* Image.bf */,
-				E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */,
-				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
-				E2C085410F3847C80058019D /* Volume.dmg */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
 		E24D2A520E92F2CE00E298A9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,6 +341,15 @@
 				E24D30130E95FBA800E298A9 /* TestFileTransferController.m */,
 				E230C3190F38318100421E40 /* TestNetworking.m */,
 				E24D2BE70E948BAC00E298A9 /* TestUtilities.m */,
+				E24D29940E92C96B00E298A9 /* Image.jpg */,
+				E24D2BED0E94924600E298A9 /* Image.b64 */,
+				E284E7EF0F0FAE8C0054C122 /* Image.md5 */,
+				E2E7AF130F1032280057A9A5 /* Image.sha1 */,
+				E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */,
+				E284E9270F0FCA580054C122 /* Image.bf */,
+				E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */,
+				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
+				E2C085410F3847C80058019D /* Volume.dmg */,
 			);
 			name = UnitTests;
 			sourceTree = "<group>";
