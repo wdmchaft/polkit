@@ -294,12 +294,12 @@ typedef struct {
 
 - (BOOL) writeToOutputStream:(NSOutputStream*)stream bytes:(const void*)bytes maxLength:(NSUInteger)length
 {
+	CFAbsoluteTime				time = 0.0;
 	BOOL						success = YES;
 	int							offset = 0,
 								realLength,
 								numBytes;
 	void*						realBytes;
-	CFAbsoluteTime				time;
 	
 	if(_maxSpeed)
 	time = CFAbsoluteTimeGetCurrent();
@@ -435,10 +435,10 @@ typedef struct {
 
 - (NSInteger) readFromInputStream:(NSInputStream*)stream bytes:(void*)bytes maxLength:(NSUInteger)length
 {
+	CFAbsoluteTime				time = 0.0;
 	void*						newBytes;
 	int							newLength;
 	NSInteger					result;
-	CFAbsoluteTime				time;
 	
 	if(_maxSpeed)
 	time = CFAbsoluteTimeGetCurrent();

@@ -25,7 +25,6 @@
 #define kLibraryPrefix		"/Library/"
 #define kUsrPrefix			"/usr/"
 #define kMethodPrefix		"test"
-#define kResourceDirectory	"Resources"
 
 @implementation UnitTest
 
@@ -68,14 +67,11 @@ int main(int argc, const char* argv[])
 	int						i;
 	SEL						method;
 	int						match;
-	char					path[PATH_MAX];
 	BOOL					didFail;
 	
 	if(argv[0][0] != '/')
 	return 1;
-	sprintf(path, "%s/%s", dirname((char*)argv[0]), kResourceDirectory);
-	printf("%s\n", path);
-	if(chdir(path) != 0)
+	if(chdir(dirname((char*)argv[0])) != 0)
 	return 1;
 	
 	printf("===== UNIT TESTS STARTED =====\n");
