@@ -45,7 +45,7 @@
 - (void) fileTransferControllerDidStart:(FileTransferController*)controller;
 - (void) fileTransferControllerDidUpdateProgress:(FileTransferController*)controller;
 - (void) fileTransferControllerDidSucceed:(FileTransferController*)controller;
-- (void) fileTransferControllerDidFail:(FileTransferController*)controller error:(NSError*)error;
+- (void) fileTransferControllerDidFail:(FileTransferController*)controller withError:(NSError*)error;
 - (BOOL) fileTransferControllerShouldAbort:(FileTransferController*)controller;
 @end
 

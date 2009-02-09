@@ -49,9 +49,13 @@
 	NSMutableDictionary*	entry;
 	NSDictionary*			info;
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+	[[self delegate] fileTransferControllerDidStart:self];
+	
 	array = [manager contentsOfDirectoryAtPath:[url path] error:&error];
 	if(array == nil) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return nil;
 	}
 	
@@ -72,6 +76,9 @@
 		[entry release];
 	}
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+	[[self delegate] fileTransferControllerDidSucceed:self];
+	
 	return dictionary;
 }
 
@@ -80,10 +87,17 @@
 	NSURL*					url = [self absoluteURLForRemotePath:remotePath];
 	NSError*				error;
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+	[[self delegate] fileTransferControllerDidStart:self];
+	
 	if(![[NSFileManager defaultManager] createDirectoryAtPath:[url path] withIntermediateDirectories:NO attributes:nil error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
+	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+	[[self delegate] fileTransferControllerDidSucceed:self];
 	
 	return YES;
 }
@@ -132,15 +146,23 @@
 	NSFileManager*			manager = [NSFileManager defaultManager];
 	NSError*				error;
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+	[[self delegate] fileTransferControllerDidStart:self];
+	
 	if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
 	
 	if(![manager moveItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
+	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+	[[self delegate] fileTransferControllerDidSucceed:self];
 	
 	return YES;
 }
@@ -152,15 +174,23 @@
 	NSFileManager*			manager = [NSFileManager defaultManager];
 	NSError*				error;
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+	[[self delegate] fileTransferControllerDidStart:self];
+	
 	if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
 	
 	if(![manager copyItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
+	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+	[[self delegate] fileTransferControllerDidSucceed:self];
 	
 	return YES;
 }
@@ -171,10 +201,17 @@
 	NSFileManager*			manager = [NSFileManager defaultManager];
 	NSError*				error;
 	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+	[[self delegate] fileTransferControllerDidStart:self];
+	
 	if([manager fileExistsAtPath:[url path]] && ![manager removeItemAtPath:[url path] error:&error]) {
-		NSLog(@"%s: %@", __FUNCTION__, error);
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:error];
 		return NO;
 	}
+	
+	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+	[[self delegate] fileTransferControllerDidSucceed:self];
 	
 	return YES;
 }

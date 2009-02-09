@@ -53,9 +53,9 @@
 	return [NSURL URLWithString:string];
 }
 
-- (void) fileTransferControllerDidFail:(FileTransferController*)controller error:(NSError*)error
+- (void) fileTransferControllerDidFail:(FileTransferController*)controller withError:(NSError*)error
 {
-	[self logMessage:@"[%i] %@\n%@", [error code], [error localizedDescription], [error userInfo]];
+	[self logMessage:@"[Error %i] %@\n%@", [error code], [error localizedDescription], [error userInfo]];
 }
 
 - (void) _testURL:(NSURL*)url

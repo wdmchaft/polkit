@@ -801,9 +801,9 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 		_transferLength = CFReadStreamRead(stream, _streamBuffer, kStreamBufferSize);
 		if(_transferLength > 0) {
 			if(_dataStream && ![self writeToOutputStream:_dataStream bytes:_streamBuffer maxLength:_transferLength]) {
-				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)]) {
+				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
 					error = [_dataStream streamError];
-					[[self delegate] fileTransferControllerDidFail:self error:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed writing to data stream"))];
+					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed writing to data stream"))];
 				}
 				[self _doneWithResult:nil];
 			}
@@ -813,8 +813,8 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 		break;
 		
 		case kCFStreamEventErrorOccurred:
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)])
-		[[self delegate] fileTransferControllerDidFail:self error:[(id)CFReadStreamCopyError(stream) autorelease]];
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:[(id)CFReadStreamCopyError(stream) autorelease]];
 		[self _doneWithResult:nil];
 		break;
 		
@@ -823,9 +823,9 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			success = [self flushOutputStream:_dataStream];
 			[self closeOutputStream:_dataStream];
 			if(success == NO) {
-				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)]) {
+				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
 					error = [_dataStream streamError];
-					[[self delegate] fileTransferControllerDidFail:self error:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed flushing data stream"))];
+					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed flushing data stream"))];
 				}
 				[self _doneWithResult:nil];
 				break;
@@ -833,8 +833,8 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 		}
 		result = [self processReadResultStream:_dataStream userInfo:_userInfo error:&error];
 		if(result == nil) {
-			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)])
-			[[self delegate] fileTransferControllerDidFail:self error:error];
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
 		}
 		[self _doneWithResult:result];
 		break;
@@ -935,8 +935,8 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 		if(_transferOffset == 0) {
 			_transferLength = (_dataStream ? [self readFromInputStream:_dataStream bytes:_streamBuffer maxLength:kStreamBufferSize] : 0);
 			if(_transferLength < 0) {
-				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)])
-				[[self delegate] fileTransferControllerDidFail:self error:MAKE_GENERIC_ERROR(@"Failed reading from data stream")];
+				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed reading from data stream")];
 				[self _doneWithResult:nil];
 			}
 		}
@@ -952,8 +952,8 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 		break;
 		
 		case kCFStreamEventErrorOccurred:
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:error:)])
-		[[self delegate] fileTransferControllerDidFail:self error:[(id)CFWriteStreamCopyError(stream) autorelease]];
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:[(id)CFWriteStreamCopyError(stream) autorelease]];
 		[self _doneWithResult:nil];
 		break;
 		
