@@ -254,7 +254,7 @@ Exit:
 	
 	error = [self runWithInputData:[string dataUsingEncoding:NSUTF8StringEncoding] arguments:arguments outputData:&data];
 	if(error) {
-#if __DEBUG__
+#ifdef __DEBUG__
 		NSLog(@"%s: %@ when executing \"%@\" with arguments:\n%@\n", __FUNCTION__, [error localizedDescription], _taskPath, [arguments description]);
 		if([error localizedFailureReason])
 		NSLog(@"%s: %@\n", __FUNCTION__, [error localizedFailureReason]);
