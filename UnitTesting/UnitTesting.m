@@ -117,7 +117,7 @@ int main(int argc, const char* argv[])
 			
 			match = 0;
 			for(i = 1; i < argc; ++i) {
-				if(argv[i][0] == '-')
+				if((argv[i][0] == '-') || (argv[i][0] == '/') || (argv[i][0] == ':'))
 				continue;
 				if(strncmp(argv[i], kMethodPrefix, strlen(kMethodPrefix)) != 0) {
 					match = -1;
@@ -138,7 +138,7 @@ int main(int argc, const char* argv[])
 				
 				match = 0;
 				for(i = 1; i < argc; ++i) {
-					if(argv[i][0] == '-')
+					if((argv[i][0] == '-') || (argv[i][0] == '/') || (argv[i][0] == ':'))
 					continue;
 					if(strncmp(argv[i], kMethodPrefix, strlen(kMethodPrefix)) == 0) {
 						match = -1;
