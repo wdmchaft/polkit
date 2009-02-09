@@ -26,6 +26,8 @@
 #define kUsrPrefix			"/usr/"
 #define kMethodPrefix		"test"
 
+static BOOL					_abortOnFailure = NO;
+
 @implementation UnitTest
 
 @synthesize numberOfSuccesses=_successes, numberOfFailures=_failures;
@@ -48,8 +50,16 @@
 {
 	if(success)
 	_successes += 1;
-	else
-	_failures += 1;
+	else {
+		_failures += 1;
+		if(_abortOnFailure)
+		*((unsigned char*)0x00) = 0x00;
+	}
+}
+
+- (BOOL) hasFailures
+{
+	return _failures;
 }
 
 @end
@@ -79,6 +89,11 @@ int main(int argc, const char* argv[])
 	if(chdir(dirname((char*)argv[0])) != 0)
 	return 1;
 	
+	for(i = 1; i < argc; ++i) {
+		if(strcmp(argv[i], "--abort") == 0)
+		_abortOnFailure = YES;
+	}
+	
 	printf("===== UNIT TESTS STARTED =====\n");
 	
 	images = objc_copyImageNames(&count1);
@@ -102,6 +117,8 @@ int main(int argc, const char* argv[])
 			
 			match = 0;
 			for(i = 1; i < argc; ++i) {
+				if(argv[i][0] == '-')
+				continue;
 				if(strncmp(argv[i], kMethodPrefix, strlen(kMethodPrefix)) != 0) {
 					match = -1;
 					if(strcmp(argv[i], classes[i2]) == 0) {
@@ -121,6 +138,8 @@ int main(int argc, const char* argv[])
 				
 				match = 0;
 				for(i = 1; i < argc; ++i) {
+					if(argv[i][0] == '-')
+					continue;
 					if(strncmp(argv[i], kMethodPrefix, strlen(kMethodPrefix)) == 0) {
 						match = -1;
 						if(strcmp(argv[i], sel_getName(method)) == 0) {

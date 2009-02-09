@@ -108,6 +108,7 @@ do { \
 }
 @property(nonatomic, readonly) NSUInteger numberOfSuccesses;
 @property(nonatomic, readonly) NSUInteger numberOfFailures;
+@property(nonatomic, readonly) BOOL hasFailures;
 - (void) logMessage:(NSString*)message, ...;
 - (void) reportResult:(BOOL)success;
 @end
