@@ -170,5 +170,5 @@ int main(int argc, const char* argv[])
 	
 	printf("===== %i UNIT TESTS COMPLETED WITH %i FAILURE(S) =====\n", successes + failures, failures);
 	
-	return 0;
+	return failures;
 }
