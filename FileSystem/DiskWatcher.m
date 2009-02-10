@@ -159,8 +159,8 @@ static void _DiskDescriptionChangedCallback(DADiskRef disk, CFArrayRef keys, voi
 	
 	session = (_delegate ? (DASessionRef)CFRetain(_session) : DASessionCreate(kCFAllocatorDefault));
 	if(session) {
-		for(name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[@"/Volumes" stringByAppendingPathComponent:name] error:NULL]) {
-			if(![name hasPrefix:@"."] && (outUUID = _CreateDiskUUIDFromPath(session, name))) {
+		for(name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL]) {
+			if(![name hasPrefix:@"."] && (outUUID = _CreateDiskUUIDFromPath(session, [@"/Volumes" stringByAppendingPathComponent:name]))) {
 				available = CFEqual(outUUID, inUUID);
 				CFRelease(outUUID);
 				if(available)
