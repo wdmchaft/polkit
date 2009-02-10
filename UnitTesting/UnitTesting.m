@@ -151,7 +151,7 @@ int main(int argc, const char* argv[])
 				if(match < 0)
 				continue;
 				
-				printf("-[%s %s]\n", classes[i2], sel_getName(method));
+				printf("\n-[%s %s]\n", classes[i2], sel_getName(method));
 				localPool = [NSAutoreleasePool new];
 				@try {
 					test = [class new];
@@ -168,7 +168,7 @@ int main(int argc, const char* argv[])
 		}
 	}
 	
-	printf("===== %i UNIT TESTS COMPLETED WITH %i FAILURE(S) =====\n", successes + failures, failures);
+	printf("\n===== %i UNIT TESTS COMPLETED WITH %i FAILURE(S) =====\n", successes + failures, failures);
 	
 	return failures;
 }

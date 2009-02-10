@@ -73,6 +73,8 @@
 	
 	controller = [FileTransferController fileTransferControllerWithURL:url];
 	AssertNotNil(controller, nil);
+	if([controller isKindOfClass:[HTTPTransferController class]])
+	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:YES];
 	[controller setDelegate:self];
 	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
