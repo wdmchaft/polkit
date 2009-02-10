@@ -341,7 +341,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	
 	mountPath = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
 	AssertNotNil(mountPath, nil);
-	uuid = [DiskWatcher diskUUIDForVolumeName:[mountPath lastPathComponent]];
+	uuid = [DiskWatcher diskUUIDForVolume:[mountPath lastPathComponent]];
 	AssertNotNil(uuid, nil);
 	AssertTrue([controller unmountDiskImageAtPath:mountPath force:NO], nil);
 	

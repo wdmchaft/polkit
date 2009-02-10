@@ -32,7 +32,8 @@
 	id<DiskWatcherDelegate>		_delegate;
 	void*						_session;
 }
-+ (NSString*) diskUUIDForVolumeName:(NSString*)name;
++ (NSString*) diskUUIDForPath:(NSString*)path;
++ (NSString*) diskUUIDForVolume:(NSString*)name;
 - (id) initWithDiskUUID:(NSString*)uuid;
 @property(nonatomic, readonly) NSString* diskUUID;
 

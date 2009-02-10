@@ -25,14 +25,14 @@
 
 @synthesize diskUUID=_uuid, delegate=_delegate;
 
-static CFUUIDRef _CreateDiskUUIDFromVolumeName(DASessionRef session, NSString* name)
+static CFUUIDRef _CreateDiskUUIDFromPath(DASessionRef session, NSString* path)
 {
 	CFUUIDRef				uuid = NULL;
 	DADiskRef				disk;
 	CFDictionaryRef			description;
 	struct statfs			stats;
 	
-	if(statfs([[@"/Volumes" stringByAppendingPathComponent:name] UTF8String], &stats) != 0)
+	if(statfs([path UTF8String], &stats) != 0)
 	return NULL;
 	
 	disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, stats.f_mntfromname);
@@ -49,15 +49,18 @@ static CFUUIDRef _CreateDiskUUIDFromVolumeName(DASessionRef session, NSString* n
 	return uuid;
 }
 
-+ (NSString*) diskUUIDForVolumeName:(NSString*)name
++ (NSString*) diskUUIDForPath:(NSString*)path
 {
 	NSString*				string = nil;
 	DASessionRef			session;
 	CFUUIDRef				uuid;
 	
+	if(![path length])
+	return nil;
+	
 	session = DASessionCreate(kCFAllocatorDefault);
 	if(session) {
-		if((uuid = _CreateDiskUUIDFromVolumeName(session, name))) {
+		if((uuid = _CreateDiskUUIDFromPath(session, path))) {
 			string = [(id)CFUUIDCreateString(kCFAllocatorDefault, uuid) autorelease];
 			CFRelease(uuid);
 		}
@@ -65,6 +68,14 @@ static CFUUIDRef _CreateDiskUUIDFromVolumeName(DASessionRef session, NSString* n
 	}
 	
 	return string;
+}
+
++ (NSString*) diskUUIDForVolume:(NSString*)name
+{
+	if(![name length])
+	return nil;
+	
+	return [self diskUUIDForPath:[@"/Volumes" stringByAppendingPathComponent:name]];
 }
 
 - (id) initWithDiskUUID:(NSString*)uuid
@@ -148,8 +159,8 @@ static void _DiskDescriptionChangedCallback(DADiskRef disk, CFArrayRef keys, voi
 	
 	session = (_delegate ? (DASessionRef)CFRetain(_session) : DASessionCreate(kCFAllocatorDefault));
 	if(session) {
-		for(name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL]) {
-			if(![name hasPrefix:@"."] && (outUUID = _CreateDiskUUIDFromVolumeName(session, name))) {
+		for(name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[@"/Volumes" stringByAppendingPathComponent:name] error:NULL]) {
+			if(![name hasPrefix:@"."] && (outUUID = _CreateDiskUUIDFromPath(session, name))) {
 				available = CFEqual(outUUID, inUUID);
 				CFRelease(outUUID);
 				if(available)
