@@ -63,11 +63,12 @@ do { \
 	[self reportResult:YES]; \
 } while(0)
 
-#define AssertNotNil(__OBJECT__, __DESCRIPTION__, ...) \
+#define AssertNotEquals(__VALUE1__, __VALUE2__, __DESCRIPTION__, ...) \
 do { \
-    id _object = (__OBJECT__); \
-	if(_object == nil) { \
-		NSString* _message = [NSString stringWithFormat:@"((%@) != nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
+    __typeof__(__VALUE1__) _value1 = (__VALUE1__); \
+	__typeof__(__VALUE2__) _value2 = (__VALUE2__); \
+	if((@encode(__typeof__(__VALUE1__)) == @encode(__typeof__(__VALUE2__))) && (_value1 == _value2)) { \
+		NSString* _message = [NSString stringWithFormat:@"((%@) != (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
@@ -80,6 +81,18 @@ do { \
     id _object = (__OBJECT__); \
 	if(_object != nil) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
+		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		[self reportResult:NO]; \
+	} \
+	else \
+	[self reportResult:YES]; \
+} while(0)
+
+#define AssertNotNil(__OBJECT__, __DESCRIPTION__, ...) \
+do { \
+    id _object = (__OBJECT__); \
+	if(_object == nil) { \
+		NSString* _message = [NSString stringWithFormat:@"((%@) != nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
 		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \

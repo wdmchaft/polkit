@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#import <SystemConfiguration/SCNetworkReachability.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 #import <netinet/in.h>
 
 #import "NetworkReachability.h"

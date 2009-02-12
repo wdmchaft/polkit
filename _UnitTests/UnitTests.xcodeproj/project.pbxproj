@@ -77,6 +77,7 @@
 		E2004A7F0F3D64D80025B23C /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB60E95FABF00E298A9 /* crypt.c */; };
 		E2004A800F3D64D90025B23C /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
 		E2004A810F3D64D90025B23C /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
+		E225A36C0F449ADD00023F66 /* NetworkConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */; };
 		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
 /* End PBXBuildFile section */
 
@@ -107,6 +108,8 @@
 		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
 		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
+		E225A36A0F449ADD00023F66 /* NetworkConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkConfiguration.h; sourceTree = "<group>"; };
+		E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkConfiguration.m; sourceTree = "<group>"; };
 		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
 		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
 		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
@@ -239,6 +242,8 @@
 			children = (
 				E24D2E2C0E95C81100E298A9 /* MiniUDPSocket.h */,
 				E24D2E2D0E95C81100E298A9 /* MiniUDPSocket.m */,
+				E225A36A0F449ADD00023F66 /* NetworkConfiguration.h */,
+				E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */,
 				E230C2FE0F37E99D00421E40 /* NetworkReachability.h */,
 				E230C2FF0F37E99D00421E40 /* NetworkReachability.m */,
 			);
@@ -551,6 +556,7 @@
 				E2004A800F3D64D90025B23C /* comp.c in Sources */,
 				E2004A810F3D64D90025B23C /* channel.c in Sources */,
 				E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */,
+				E225A36C0F449ADD00023F66 /* NetworkConfiguration.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

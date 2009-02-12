@@ -19,6 +19,7 @@
 #import "UnitTesting.h"
 #import	"MiniUDPSocket.h"
 #import "NetworkReachability.h"
+#import "NetworkConfiguration.h"
 
 @interface UnitTests_Networking : UnitTest
 @end
@@ -48,6 +49,21 @@
 	reachability = [[NetworkReachability alloc] initWithHostName:@"apple.com"];
 	AssertTrue([reachability isReachable], nil);
 	[reachability release];
+}
+
+- (void) testConfiguration
+{
+	NetworkConfiguration*	configuration;
+	
+	configuration = [NetworkConfiguration sharedNetworkConfiguration];
+	AssertNotNil(configuration, nil);
+	
+	AssertNotNil([configuration locationName], nil);
+	AssertNotNil([configuration dnsDomainName], nil);
+	AssertNotEquals([[configuration dnsServerAddresses] count], 0, nil);
+	AssertNotEquals([[configuration networkAddresses] count], 0, nil);
+	AssertNotNil([configuration airportNetworkName], nil);
+	AssertNotNil([configuration airportNetworkSSID], nil);
 }
 
 @end
