@@ -22,7 +22,7 @@
 @class NetworkReachability;
 
 @protocol NetworkReachabilityDelegate <NSObject>
-- (void) networkReachabilityDidChange:(NetworkReachability*)reachability;
+- (void) networkReachabilityDidUpdate:(NetworkReachability*)reachability;
 @end
 
 @interface NetworkReachability : NSObject

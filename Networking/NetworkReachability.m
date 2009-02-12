@@ -32,7 +32,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 	NSAutoreleasePool*		pool = [NSAutoreleasePool new];
 	NetworkReachability*	self = (NetworkReachability*)info;
 	
-	[self->_delegate networkReachabilityDidChange:self];
+	[self->_delegate networkReachabilityDidUpdate:self];
 	
 	[pool release];
 }
