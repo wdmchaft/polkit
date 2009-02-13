@@ -17,17 +17,63 @@
 */
 
 #import <DiskArbitration/DiskArbitration.h>
+#import <CommonCrypto/CommonDigest.h>
 #import <sys/mount.h>
 
 #import "DiskWatcher.h"
 
 @implementation DiskWatcher
 
-@synthesize diskUUID=_uuid, delegate=_delegate;
+@synthesize diskIdentifier=_identifier, delegate=_delegate;
 
-static CFUUIDRef _CreateDiskUUIDFromPath(DASessionRef session, NSString* path)
+static inline void _AppendToData(NSMutableData* data, id value)
 {
-	CFUUIDRef				uuid = NULL;
+	[data appendData:[[value description] dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+static NSString* _DiskIdentifierFromDiskDescription(NSDictionary* description)
+{
+	NSString*				string = nil;
+	CFUUIDRef				uuid;
+	NSMutableData*			data;
+	unsigned char			md5[16];
+	
+	uuid = (CFUUIDRef)[description objectForKey:(id)kDADiskDescriptionVolumeUUIDKey];
+	if(uuid)
+	string = [(id)CFUUIDCreateString(kCFAllocatorDefault, uuid) autorelease];
+	
+	if(string == nil) {
+		uuid = (CFUUIDRef)[description objectForKey:(id)kDADiskDescriptionMediaUUIDKey];
+		if(uuid)
+		string = [(id)CFUUIDCreateString(kCFAllocatorDefault, uuid) autorelease];
+	}
+	
+	if(string == nil) {
+#ifdef __DEBUG__
+		string = [description objectForKey:(id)kDADiskDescriptionVolumeNameKey];
+		if(string == nil)
+		string = [description objectForKey:(id)kDADiskDescriptionMediaNameKey];
+		NSLog(@"%s: DADiskCopyDescription() contains no UUID for \"%@\"", __FUNCTION__, string);
+#endif
+		data = [NSMutableData new];
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionVolumeKindKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionVolumeNameKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionMediaNameKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionDeviceVendorKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionDeviceModelKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionDeviceProtocolKey]);
+		_AppendToData(data, [description objectForKey:(id)kDADiskDescriptionMediaSizeKey]);
+		CC_MD5([data mutableBytes], [data length], md5);
+		[data release];
+		string = [NSString stringWithFormat:@"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", md5[0], md5[1], md5[2], md5[3], md5[4], md5[5], md5[6], md5[7], md5[8], md5[9], md5[10], md5[11], md5[12], md5[13], md5[14],md5[15]];
+	}
+	
+	return string;
+}
+
+static NSString* _DiskIdentifierFromPath(DASessionRef session, NSString* path)
+{
+	NSString*				string = nil;
 	DADiskRef				disk;
 	CFDictionaryRef			description;
 	struct statfs			stats;
@@ -39,54 +85,53 @@ static CFUUIDRef _CreateDiskUUIDFromPath(DASessionRef session, NSString* path)
 	if(disk) {
 		description = DADiskCopyDescription(disk);
 		if(description) {
-			if((uuid = CFDictionaryGetValue(description, kDADiskDescriptionVolumeUUIDKey)))
-			CFRetain(uuid);
+			string = _DiskIdentifierFromDiskDescription((NSDictionary*)description);
 			CFRelease(description);
 		}
+		else
+		NSLog(@"%s: DADiskCopyDescription() failed for path \"%s\"", __FUNCTION__, stats.f_mntfromname);
 		CFRelease(disk);
 	}
+	else
+	NSLog(@"%s: DADiskCreateFromBSDName() failed for path \"%s\"", __FUNCTION__, stats.f_mntfromname);
 	
-	return uuid;
+	return string;
 }
 
-+ (NSString*) diskUUIDForPath:(NSString*)path
++ (NSString*) diskIdentifierForPath:(NSString*)path
 {
 	NSString*				string = nil;
 	DASessionRef			session;
-	CFUUIDRef				uuid;
 	
 	if(![path length])
 	return nil;
 	
 	session = DASessionCreate(kCFAllocatorDefault);
 	if(session) {
-		if((uuid = _CreateDiskUUIDFromPath(session, path))) {
-			string = [(id)CFUUIDCreateString(kCFAllocatorDefault, uuid) autorelease];
-			CFRelease(uuid);
-		}
+		string = _DiskIdentifierFromPath(session, path);
 		CFRelease(session);
 	}
 	
 	return string;
 }
 
-+ (NSString*) diskUUIDForVolume:(NSString*)name
++ (NSString*) diskIdentifierForVolume:(NSString*)name
 {
 	if(![name length])
 	return nil;
 	
-	return [self diskUUIDForPath:[@"/Volumes" stringByAppendingPathComponent:name]];
+	return [self diskIdentifierForPath:[@"/Volumes" stringByAppendingPathComponent:name]];
 }
 
-- (id) initWithDiskUUID:(NSString*)uuid
+- (id) initWithDiskIdentifier:(NSString*)identifier
 {
-	if(![uuid length]) {
+	if(![identifier length]) {
 		[self release];
 		return nil;
 	}
 	
 	if((self = [super init])) {
-		_uuid = [uuid copy];
+		_identifier = [identifier copy];
 		_runLoop = (CFRunLoopRef)CFRetain(CFRunLoopGetCurrent());
 	}
 	
@@ -99,27 +144,21 @@ static CFUUIDRef _CreateDiskUUIDFromPath(DASessionRef session, NSString* path)
 	
 	if(_runLoop)
 	CFRelease(_runLoop);
-	[_uuid release];
+	[_identifier release];
 	
 	[super dealloc];
 }
 
-static void _DiskDescriptionChangedCallback(DADiskRef disk, CFArrayRef keys, void* context)
+static void _DiskCallback(DADiskRef disk, void* context)
 {
 	NSAutoreleasePool*			pool = [NSAutoreleasePool new];
 	DiskWatcher*				self = (DiskWatcher*)context;
 	CFDictionaryRef				description;
-	CFUUIDRef					inUUID,
-								outUUID;
-								
-	if((inUUID = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)self->_uuid))) {
-		if((description = DADiskCopyDescription(disk))) {
-			outUUID = CFDictionaryGetValue(description, kDADiskDescriptionVolumeUUIDKey);
-			if(outUUID && CFEqual(outUUID, inUUID))
-			[self->_delegate diskWatcherDidUpdateAvailability:self];
-			CFRelease(description);
-		}
-		CFRelease(inUUID);
+	
+	if((description = DADiskCopyDescription(disk))) {
+		if([_DiskIdentifierFromDiskDescription((NSDictionary*)description) isEqualToString:self->_identifier])
+		[self->_delegate diskWatcherDidUpdateAvailability:self];
+		CFRelease(description);
 	}
 	
 	[pool release];
@@ -130,16 +169,17 @@ static void _DiskDescriptionChangedCallback(DADiskRef disk, CFArrayRef keys, voi
 	if(delegate && !_delegate) {
 		_session = DASessionCreate(kCFAllocatorDefault);
 		if(_session) {
+			DARegisterDiskAppearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, self);
+			DARegisterDiskDisappearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, self);
 			DASessionScheduleWithRunLoop(_session, _runLoop, kCFRunLoopCommonModes);
-			DARegisterDiskDescriptionChangedCallback(_session, kDADiskDescriptionMatchVolumeMountable, kDADiskDescriptionWatchVolumePath, _DiskDescriptionChangedCallback, self);
 			_delegate = delegate;
 		}
 		else
 		NSLog(@"%s: DASessionCreate() failed", __FUNCTION__);
 	}
 	else if(!delegate && _delegate) {
-		DAUnregisterCallback(_session, _DiskDescriptionChangedCallback, self);
 		DASessionUnscheduleFromRunLoop(_session, _runLoop, kCFRunLoopCommonModes);
+		DAUnregisterCallback(_session, _DiskCallback, self);
 		CFRelease(_session);
 		_delegate = nil;
 	}
@@ -150,27 +190,19 @@ static void _DiskDescriptionChangedCallback(DADiskRef disk, CFArrayRef keys, voi
 	BOOL					available = NO;
 	DASessionRef			session;
 	NSString*				name;
-	CFUUIDRef				inUUID,
-							outUUID;
-	
-	inUUID = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)_uuid);
-	if(inUUID == NULL)
-	return NO;
+	NSString*				identifier;
 	
 	session = (_delegate ? (DASessionRef)CFRetain(_session) : DASessionCreate(kCFAllocatorDefault));
 	if(session) {
 		for(name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL]) {
-			if(![name hasPrefix:@"."] && (outUUID = _CreateDiskUUIDFromPath(session, [@"/Volumes" stringByAppendingPathComponent:name]))) {
-				available = CFEqual(outUUID, inUUID);
-				CFRelease(outUUID);
+			if(![name hasPrefix:@"."] && (identifier = _DiskIdentifierFromPath(session, [@"/Volumes" stringByAppendingPathComponent:name]))) {
+				available = [identifier isEqualToString:_identifier];
 				if(available)
 				break;
 			}
 		}
 		CFRelease(session);
 	}
-	
-	CFRelease(inUUID);
 	
 	return available;
 }

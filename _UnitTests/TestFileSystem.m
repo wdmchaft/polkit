@@ -60,7 +60,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	AssertTrue([[NSFileManager defaultManager] createSymbolicLinkAtPath:[path stringByAppendingPathComponent:@"Test.jpg"] withDestinationPath:@"Resources/Image.jpg" error:&error], [error localizedDescription]);
 }
 
-- (void) testWatcher
+- (void) testDirectoryWatcher
 {
 	NSString*				path = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	DirectoryWatcher*		watcher;
@@ -341,11 +341,11 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	
 	mountPath = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
 	AssertNotNil(mountPath, nil);
-	uuid = [DiskWatcher diskUUIDForVolume:[mountPath lastPathComponent]];
+	uuid = [DiskWatcher diskIdentifierForVolume:[mountPath lastPathComponent]];
 	AssertNotNil(uuid, nil);
 	AssertTrue([controller unmountDiskImageAtPath:mountPath force:NO], nil);
 	
-	watcher = [[DiskWatcher alloc] initWithDiskUUID:uuid];
+	watcher = [[DiskWatcher alloc] initWithDiskIdentifier:uuid];
 	AssertNotNil(watcher, nil);
 	AssertFalse([watcher isDiskAvailable], nil);
 	mountPath = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
@@ -355,7 +355,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	[watcher release];
 	
 	_didUpdate = NO;
-	watcher = [[DiskWatcher alloc] initWithDiskUUID:uuid];
+	watcher = [[DiskWatcher alloc] initWithDiskIdentifier:uuid];
 	[watcher setDelegate:self];
 	AssertNotNil(watcher, nil);
 	[NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(_mount:) userInfo:imagePath repeats:NO];

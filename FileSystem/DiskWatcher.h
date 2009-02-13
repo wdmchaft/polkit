@@ -21,21 +21,21 @@
 @class DiskWatcher;
 
 @protocol DiskWatcherDelegate <NSObject>
-- (void) diskWatcherDidUpdateAvailability:(DiskWatcher*)watcher;
+- (void) diskWatcherDidUpdateAvailability:(DiskWatcher*)watcher; //USB or FireWire disk may not report disconnections until the cable is physically unplugged
 @end
 
 @interface DiskWatcher : NSObject
 {
 @private
-	NSString*					_uuid;
+	NSString*					_identifier;
 	CFRunLoopRef				_runLoop;
 	id<DiskWatcherDelegate>		_delegate;
 	void*						_session;
 }
-+ (NSString*) diskUUIDForPath:(NSString*)path;
-+ (NSString*) diskUUIDForVolume:(NSString*)name;
-- (id) initWithDiskUUID:(NSString*)uuid;
-@property(nonatomic, readonly) NSString* diskUUID;
++ (NSString*) diskIdentifierForPath:(NSString*)path;
++ (NSString*) diskIdentifierForVolume:(NSString*)name;
+- (id) initWithDiskIdentifier:(NSString*)identifier;
+@property(nonatomic, readonly) NSString* diskIdentifier;
 
 @property(nonatomic, assign) id<DiskWatcherDelegate> delegate;
 @property(nonatomic, readonly, getter=isDiskAvailable) BOOL diskAvailable;

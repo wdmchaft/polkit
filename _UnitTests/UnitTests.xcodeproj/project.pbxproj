@@ -78,6 +78,15 @@
 		E2004A800F3D64D90025B23C /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB50E95FABF00E298A9 /* comp.c */; };
 		E2004A810F3D64D90025B23C /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = E24D2FB40E95FABF00E298A9 /* channel.c */; };
 		E225A36C0F449ADD00023F66 /* NetworkConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */; };
+		E225A7C30F44E8C800023F66 /* NetworkReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C2FF0F37E99D00421E40 /* NetworkReachability.m */; };
+		E225A7CA0F44E8C800023F66 /* DiskWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E230C37D0F3837BD00421E40 /* DiskWatcher.m */; };
+		E225A7CB0F44E8C800023F66 /* DirectoryWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E260E95C81100E298A9 /* DirectoryWatcher.m */; };
+		E225A8040F44E8EC00023F66 /* NetworkConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */; };
+		E225A80E0F44E95300023F66 /* TestObservers.m in Sources */ = {isa = PBXBuildFile; fileRef = E225A80D0F44E95300023F66 /* TestObservers.m */; };
+		E225A81C0F44E98000023F66 /* DiskArbitration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230C3C40F3841F800421E40 /* DiskArbitration.framework */; };
+		E225A81D0F44E98100023F66 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2FEC0E95FB4D00E298A9 /* SystemConfiguration.framework */; };
+		E225A81E0F44E98300023F66 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28BE0E9298FF00E298A9 /* Foundation.framework */; };
+		E225A8210F44E98C00023F66 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
 		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
 /* End PBXBuildFile section */
 
@@ -110,6 +119,8 @@
 		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		E225A36A0F449ADD00023F66 /* NetworkConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkConfiguration.h; sourceTree = "<group>"; };
 		E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkConfiguration.m; sourceTree = "<group>"; };
+		E225A8020F44E8C800023F66 /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
+		E225A80D0F44E95300023F66 /* TestObservers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestObservers.m; sourceTree = "<group>"; };
 		E230C2FE0F37E99D00421E40 /* NetworkReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkReachability.h; sourceTree = "<group>"; };
 		E230C2FF0F37E99D00421E40 /* NetworkReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkReachability.m; sourceTree = "<group>"; };
 		E230C3190F38318100421E40 /* TestNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestNetworking.m; sourceTree = "<group>"; };
@@ -234,6 +245,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E225A7E80F44E8C800023F66 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E225A81C0F44E98000023F66 /* DiskArbitration.framework in Frameworks */,
+				E225A81D0F44E98100023F66 /* SystemConfiguration.framework in Frameworks */,
+				E225A81E0F44E98300023F66 /* Foundation.framework in Frameworks */,
+				E225A8210F44E98C00023F66 /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -257,7 +279,7 @@
 				E24D287C0E92977600E298A9 /* Debug.xcconfig */,
 				E24D287B0E92977600E298A9 /* Release.xcconfig */,
 				E24D294A0E92996000E298A9 /* Prefix.pch */,
-				E24D2BF90E94957800E298A9 /* UnitTests */,
+				E24D2BF90E94957800E298A9 /* _UnitTests */,
 				E2D5896A0F3D82C4005575BD /* UnitTesting */,
 				E24D2E270E95C81100E298A9 /* Devices */,
 				E24D2A520E92F2CE00E298A9 /* Extensions */,
@@ -274,6 +296,7 @@
 			isa = PBXGroup;
 			children = (
 				E20048E80F3D641A0025B23C /* UnitTests */,
+				E225A8020F44E8C800023F66 /* UnitTests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -337,9 +360,10 @@
 			path = ../Extensions;
 			sourceTree = SOURCE_ROOT;
 		};
-		E24D2BF90E94957800E298A9 /* UnitTests */ = {
+		E24D2BF90E94957800E298A9 /* _UnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				E225A80D0F44E95300023F66 /* TestObservers.m */,
 				E24D2E430E95E6F600E298A9 /* TestDevices.m */,
 				E24D2BE90E948BE100E298A9 /* TestExtensions.m */,
 				E24D2F480E95EEB100E298A9 /* TestFileSystem.m */,
@@ -356,7 +380,7 @@
 				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
 				E2C085410F3847C80058019D /* Volume.dmg */,
 			);
-			name = UnitTests;
+			name = _UnitTests;
 			sourceTree = "<group>";
 		};
 		E24D2E220E95C81100E298A9 /* FileSystem */ = {
@@ -483,6 +507,22 @@
 			productReference = E20048E80F3D641A0025B23C /* UnitTests */;
 			productType = "com.apple.product-type.tool";
 		};
+		E225A7B30F44E8C800023F66 /* TestObservers */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E225A7FF0F44E8C800023F66 /* Build configuration list for PBXNativeTarget "TestObservers" */;
+			buildPhases = (
+				E225A7B40F44E8C800023F66 /* Sources */,
+				E225A7E80F44E8C800023F66 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TestObservers;
+			productName = UnitTests;
+			productReference = E225A8020F44E8C800023F66 /* UnitTests */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -497,6 +537,7 @@
 			projectRoot = ..;
 			targets = (
 				E20048E70F3D641A0025B23C /* UnitTests */,
+				E225A7B30F44E8C800023F66 /* TestObservers */,
 			);
 		};
 /* End PBXProject section */
@@ -560,6 +601,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E225A7B40F44E8C800023F66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E225A7C30F44E8C800023F66 /* NetworkReachability.m in Sources */,
+				E225A7CA0F44E8C800023F66 /* DiskWatcher.m in Sources */,
+				E225A7CB0F44E8C800023F66 /* DirectoryWatcher.m in Sources */,
+				E225A8040F44E8EC00023F66 /* NetworkConfiguration.m in Sources */,
+				E225A80E0F44E95300023F66 /* TestObservers.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -575,6 +628,28 @@
 			name = Debug;
 		};
 		E20048EB0F3D641B0025B23C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				PRODUCT_NAME = UnitTests;
+			};
+			name = Release;
+		};
+		E225A8000F44E8C800023F66 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/usr/include/subversion-1",
+					"/usr/include/apr-1",
+				);
+				PRODUCT_NAME = UnitTests;
+			};
+			name = Debug;
+		};
+		E225A8010F44E8C800023F66 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
@@ -609,6 +684,15 @@
 			buildConfigurations = (
 				E20048EA0F3D641B0025B23C /* Debug */,
 				E20048EB0F3D641B0025B23C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E225A7FF0F44E8C800023F66 /* Build configuration list for PBXNativeTarget "TestObservers" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E225A8000F44E8C800023F66 /* Debug */,
+				E225A8010F44E8C800023F66 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
