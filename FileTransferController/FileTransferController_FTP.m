@@ -82,8 +82,6 @@
 			[self setMaxLength:[(NSNumber*)value unsignedIntegerValue]];
 			CFRelease(value);
 		}
-		else
-		[self setMaxLength:0];
 		break;
 		
 	}
@@ -138,7 +136,7 @@
 	return [self runReadStream:readStream dataStream:[NSOutputStream outputStreamToMemory] userInfo:[NSNull null] isFileTransfer:NO];
 }
 
-- (BOOL) downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
 {
 	CFReadStreamRef			readStream;
 	
@@ -177,12 +175,10 @@
 		CFRelease(proxySettings);
 	}
 	
-	[self setMaxLength:0];
-	
 	return writeStream;
 }
 
-- (BOOL) uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	CFWriteStreamRef		writeStream;
 	

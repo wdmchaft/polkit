@@ -27,6 +27,9 @@
 @property(nonatomic) NSUInteger currentLength;
 @property(nonatomic) NSUInteger maxLength;
 
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream; //To be implemented by subclasses
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream; //To be implemented by subclasses
+
 + (BOOL) useAsyncStreams;
 + (NSString*) urlScheme;
 - (void) invalidate;

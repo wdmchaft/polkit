@@ -102,7 +102,7 @@
 	return YES;
 }
 
-- (BOOL) downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
 {
 	NSURL*					url = [self absoluteURLForRemotePath:remotePath];
 	NSDictionary*			info;
@@ -124,7 +124,7 @@
 	return [[self runReadStream:readStream dataStream:stream userInfo:nil isFileTransfer:YES] boolValue];
 }
 
-- (BOOL) uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	NSURL*					url = [self absoluteURLForRemotePath:remotePath];
 	CFWriteStreamRef		writeStream;

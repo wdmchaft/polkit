@@ -199,7 +199,22 @@ typedef struct {
 	return [NSURL URLWithScheme:[_baseURL scheme] user:nil password:nil host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:path];
 }
 
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+{
+	[self doesNotRecognizeSelector:_cmd];
+	return NO;
+}
+
 - (BOOL) downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+{
+	BOOL						result = [self _downloadFileFromPath:remotePath toStream:stream];
+	
+	[self setMaxLength:0];
+	
+	return result;
+}
+
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	[self doesNotRecognizeSelector:_cmd];
 	return NO;
@@ -207,8 +222,11 @@ typedef struct {
 
 - (BOOL) uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
-	[self doesNotRecognizeSelector:_cmd];
-	return NO;
+	BOOL						result = [self _uploadFileToPath:remotePath fromStream:stream];
+	
+	[self setMaxLength:0];
+	
+	return result;
 }
 
 - (BOOL) _createDigestContext
@@ -537,8 +555,6 @@ typedef struct {
 	
 	success = [self uploadFileToPath:remotePath fromStream:stream];
 	
-	[self setMaxLength:0];
-	
 	return success;
 }
 
@@ -586,8 +602,6 @@ typedef struct {
 	
 	success = [self uploadFileToPath:remotePath fromStream:[NSInputStream inputStreamWithFileAtPath:localPath]];
 	
-	[self setMaxLength:0];
-	
 	return success;
 }
 
@@ -616,8 +630,6 @@ typedef struct {
 	[self setMaxLength:maxLength];
 	
 	success = [self uploadFileToPath:remotePath fromStream:[NSInputStream inputStreamWithData:data]];
-	
-	[self setMaxLength:0];
 	
 	return success;
 }
@@ -694,8 +706,6 @@ typedef struct {
 	readStream = [[DataReadStream alloc] initWithDataSource:(id<DataStreamSource>)self userInfo:[NSValue valueWithPointer:&info]];
 	success = [self uploadFileToPath:remotePath fromStream:readStream];
 	[readStream release];
-	
-	[self setMaxLength:0];
 	
 	return success;
 }
@@ -807,7 +817,6 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 				}
 				[self _doneWithResult:nil];
 			}
-			
 			[self setCurrentLength:([self currentLength] + _transferLength)];
 		}
 		break;

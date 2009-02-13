@@ -135,8 +135,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 				[self setMaxLength:[(NSString*)value integerValue]];
 				CFRelease(value);
 			}
-			else
-			[self setMaxLength:0];
 		}
 		break;
 		
@@ -179,7 +177,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	return result;
 }
 
-- (BOOL) downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
 {
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			readStream;
@@ -224,7 +222,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	[(id<DataStreamSource>)super closeDataStream:userInfo];
 }
 
-- (BOOL) uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	NSString*				type = nil;
 	BOOL					success = NO;

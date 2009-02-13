@@ -145,7 +145,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	}
 }
 
-- (BOOL) downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
+- (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
@@ -210,7 +210,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	return success;
 }
 
-- (BOOL) uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
+- (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
