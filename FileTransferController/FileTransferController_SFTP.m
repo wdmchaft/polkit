@@ -233,7 +233,9 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 			do {
 				numBytes = [self readFromInputStream:stream bytes:buffer maxLength:kTransferBufferSize];
 				if(numBytes > 0) {
-					result = libssh2_sftp_write(handle, (char*)buffer, numBytes);
+					do {
+						result = libssh2_sftp_write(handle, (char*)buffer, numBytes);
+					} while((result == 0) && (libssh2_sftp_last_error(_sftp) == 0));
 					if(result != numBytes) {
 						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
 						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed writing to SFTP stream (error %i)", libssh2_sftp_last_error(_sftp))];
