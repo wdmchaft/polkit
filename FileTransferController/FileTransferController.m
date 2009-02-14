@@ -813,7 +813,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			if(_dataStream && ![self writeToOutputStream:_dataStream bytes:_streamBuffer maxLength:_transferLength]) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
 					error = [_dataStream streamError];
-					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed writing to data stream"))];
+					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed writing to output stream (status = %i)", [_dataStream streamStatus]))];
 				}
 				[self _doneWithResult:nil];
 			}
@@ -834,7 +834,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			if(success == NO) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
 					error = [_dataStream streamError];
-					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_ERROR([_dataStream streamStatus], @"Failed flushing data stream"))];
+					[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed flushing output stream (status = %i)", [_dataStream streamStatus]))];
 				}
 				[self _doneWithResult:nil];
 				break;
@@ -945,7 +945,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 			_transferLength = (_dataStream ? [self readFromInputStream:_dataStream bytes:_streamBuffer maxLength:kStreamBufferSize] : 0);
 			if(_transferLength < 0) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed reading from data stream")];
+				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed reading from data stream")];
 				[self _doneWithResult:nil];
 			}
 		}

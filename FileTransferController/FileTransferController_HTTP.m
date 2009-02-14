@@ -36,6 +36,8 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 #define kUpdateInterval					0.5
 #define kFileBufferSize					(256 * 1024)
 
+#define MAKE_HTTP_ERROR(__STATUS__, ...) MAKE_ERROR(@"http", __STATUS__, __VA_ARGS__)
+
 @interface HTTPTransferController () <DataStreamSource>
 @property(nonatomic, readonly) CFHTTPMessageRef responseHeaders;
 @end
@@ -172,7 +174,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	}
 	
 	if((result == nil) && error && (*error == nil))
-	*error = MAKE_ERROR(status, @"Unsupported HTTP response (status = %i)", status);
+	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
 	
 	return result;
 }
@@ -372,7 +374,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		body = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
 		else if([mime length]) {
 			if(error)
-			*error = MAKE_GENERIC_ERROR(@"Unsupported MIME type \"%@\"", mime);
+			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Unsupported MIME type \"%@\"", mime);
 		}
 	}
 	
@@ -406,7 +408,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[body release];
 	
 	if((result == nil) && error && (*error == nil))
-	*error = MAKE_ERROR(status, @"Unsupported HTTP response (status = %i)", status);
+	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
 	
 	return result;
 }
@@ -724,7 +726,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		body = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
 		else if([mime length]) {
 			if(error)
-			*error = MAKE_GENERIC_ERROR(@"Unsupported MIME type \"%@\"", mime);
+			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Unsupported MIME type \"%@\"", mime);
 		}
 	}
 	
@@ -755,7 +757,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 			}
 		}
 		else if(body)
-		*error = MAKE_GENERIC_ERROR(@"Invalid response (status = %i):\n%@", status, body);
+		*error = MAKE_HTTP_ERROR(status, @"Invalid response:\n%@", body);
 	}
 	else if([method isEqualToString:@"DELETE"]) {
 		if(status == 204)
@@ -771,7 +773,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	[body release];
 	
 	if((result == nil) && error && (*error == nil))
-	*error = MAKE_ERROR(status, @"Unsupported HTTP response (status = %i)", status);
+	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
 	
 	return result;
 }

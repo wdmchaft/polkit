@@ -20,8 +20,8 @@
 
 #define kFileTransferRunLoopMode			CFSTR("FileTransferMode")
 
-#define MAKE_ERROR(__CODE__, ...) [NSError errorWithDomain:@"FileControllerErrorDomain" code:__CODE__ userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:__VA_ARGS__] forKey:NSLocalizedDescriptionKey]]
-#define MAKE_GENERIC_ERROR(...) MAKE_ERROR(1, __VA_ARGS__)
+#define MAKE_ERROR(__DOMAIN__, __CODE__, ...) [NSError errorWithDomain:__DOMAIN__ code:__CODE__ userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:__VA_ARGS__] forKey:NSLocalizedDescriptionKey]]
+#define MAKE_FILETRANSFERCONTROLLER_ERROR(...) MAKE_ERROR(@"FileTransferController", -1, __VA_ARGS__)
 
 @interface FileTransferController ()
 @property(nonatomic) NSUInteger currentLength;

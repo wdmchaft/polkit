@@ -29,6 +29,16 @@
 #define kNameBufferSize					1024
 #define kTransferBufferSize				(32 * 1024)
 
+static inline NSError* _MakeLibSSH2Error(LIBSSH2_SESSION* session, LIBSSH2_SFTP* sftp)
+{
+	char*						message;
+	int							error;
+	
+	error = libssh2_session_last_error(session, &message, NULL, 0);
+	
+	return [NSError errorWithDomain:@"libssh2" code:error userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, (libssh2_sftp_last_error(sftp) ? [NSNumber numberWithUnsignedLong:libssh2_sftp_last_error(sftp)] : nil), @"SFTPLastError", nil]];
+}
+
 static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFOptionFlags callBackTypes, CFSocketCallBack callback, const CFSocketContext* context)
 {
 	struct sockaddr_in			ipAddress;
@@ -155,6 +165,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	ssize_t					numBytes;
 	LIBSSH2_SFTP_HANDLE*	handle;
 	LIBSSH2_SFTP_ATTRIBUTES	attributes;
+	NSError*				error;
 	
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
 	return NO;
@@ -176,27 +187,31 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 				numBytes = libssh2_sftp_read(handle, (char*)buffer, kTransferBufferSize);
 				if(numBytes > 0) {
 					if(![self writeToOutputStream:stream bytes:buffer maxLength:numBytes]) {
-						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed writing to file")];
+						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
+							error = [stream streamError];
+							[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed writing to output stream (status = %i)", [stream streamStatus]))];
+						}
 						break;
 					}
 					
 					length += numBytes;
 					[self setCurrentLength:length];
 				}
-				else {
-					if(![self flushOutputStream:stream])
-					numBytes = -1;
-					
-					if(numBytes == 0) {
+				else if(numBytes == 0) {
+					if([self flushOutputStream:stream]) {
 						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
 						[[self delegate] fileTransferControllerDidSucceed:self];
 						success = YES;
 					}
-					else {
-						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed reading from SFTP stream (error %i)", libssh2_sftp_last_error(_sftp))];
+					else if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)]) {
+						error = [stream streamError];
+						[[self delegate] fileTransferControllerDidFail:self withError:([error code] ? error : MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed flushing output stream (status = %i)", [stream streamStatus]))];
 					}
+					break;
+				}
+				else {
+					if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+					[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 					break;
 				}
 			} while(!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]);
@@ -219,7 +234,8 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	LIBSSH2_SFTP_HANDLE*	handle;
 	unsigned char			buffer[kTransferBufferSize];
 	ssize_t					numBytes,
-							result;
+							result,
+							offset;
 	
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
 	return NO;
@@ -233,12 +249,14 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 			do {
 				numBytes = [self readFromInputStream:stream bytes:buffer maxLength:kTransferBufferSize];
 				if(numBytes > 0) {
+					offset = 0;
 					do {
-						result = libssh2_sftp_write(handle, (char*)buffer, numBytes);
-					} while((result == 0) && (libssh2_sftp_last_error(_sftp) == 0));
-					if(result != numBytes) {
+						result = libssh2_sftp_write(handle, (char*)buffer + offset, numBytes - offset);
+						offset += result;
+					} while((result >= 0) && (offset < numBytes));
+					if(result < 0) {
 						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed writing to SFTP stream (error %i)", libssh2_sftp_last_error(_sftp))];
+						[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 						break;
 					}
 					
@@ -253,7 +271,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 					}
 					else {
 						if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_GENERIC_ERROR(@"Failed reading from file stream")];
+						[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed reading from input stream")];
 					}
 					break;
 				}
@@ -283,7 +301,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	handle = libssh2_sftp_opendir(_sftp, serverPath);
 	if(handle == NULL) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_ERROR(libssh2_sftp_last_error(_sftp), @"Function libssh2_sftp_opendir() failed")];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 		return nil;
 	}
 	
@@ -322,7 +340,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	
 	if(libssh2_sftp_mkdir(_sftp, serverPath, kDefaultMode)) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_ERROR(libssh2_sftp_last_error(_sftp), @"Function libssh2_sftp_mkdir() failed")];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 		return NO;
 	}
 	
@@ -342,7 +360,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	
 	if(libssh2_sftp_rename(_sftp, fromPath, toPath)) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_ERROR(libssh2_sftp_last_error(_sftp), @"Function libssh2_sftp_rename() failed")];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 		return NO;
 	}
 	
@@ -362,7 +380,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	
 	if(!libssh2_sftp_lstat(_sftp, serverPath, &attributes) && libssh2_sftp_unlink(_sftp, serverPath)) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_ERROR(libssh2_sftp_last_error(_sftp), @"Function libssh2_sftp_unlink() failed")];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 		return NO;
 	}
 	
@@ -382,7 +400,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	
 	if(!libssh2_sftp_lstat(_sftp, serverPath, &attributes) && libssh2_sftp_rmdir(_sftp, serverPath)) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_ERROR(libssh2_sftp_last_error(_sftp), @"Function libssh2_sftp_rmdir() failed")];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeLibSSH2Error(_session, _sftp)];
 		return NO;
 	}
 	
