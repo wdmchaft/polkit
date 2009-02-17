@@ -18,8 +18,55 @@
 
 #import <openssl/hmac.h>
 #import <openssl/evp.h>
+#import <pthread.h>
 
 #define kBufferSize				1024
+
+static pthread_mutex_t*			_opensslLocks = NULL;
+
+static unsigned long _opensslThreadID()
+{
+	return (unsigned long)pthread_self();
+}
+
+static void _opensslLocking(int mode, int type, const char* file, int line)
+{
+	if(mode & CRYPTO_LOCK)
+	pthread_mutex_lock(&_opensslLocks[type]);
+	else
+	pthread_mutex_unlock(&_opensslLocks[type]);
+}
+
+static void EnableOpenSSLMultiThreading()
+{
+	int							i;
+	
+	if(_opensslLocks == NULL) {
+		_opensslLocks = malloc(CRYPTO_num_locks() * sizeof(pthread_mutex_t));
+		for(i = 0; i < CRYPTO_num_locks(); ++i)
+		pthread_mutex_init(&_opensslLocks[i], NULL);
+		
+		CRYPTO_set_id_callback(_opensslThreadID);
+		CRYPTO_set_locking_callback(_opensslLocking);
+	}
+}
+
+/*
+static void DisableOpenSSLMultiThreading()
+{
+	int							i;
+
+	if(_opensslLocks) {
+		CRYPTO_set_id_callback(NULL);
+		CRYPTO_set_locking_callback(NULL);
+		
+		for(i = 0; i < CRYPTO_num_locks(); ++i)
+		pthread_mutex_destroy(&_opensslLocks[i]);
+		free(_opensslLocks);
+		_opensslLocks = NULL;
+	}
+}
+*/
 
 static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger length)
 {
@@ -38,6 +85,11 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 }
 
 @implementation NSData (Encryption)
+
++ (void) load
+{
+	EnableOpenSSLMultiThreading();
+}
 
 + (NSData*) md5DigestWithBytes:(const void*)bytes length:(NSUInteger)length
 {
