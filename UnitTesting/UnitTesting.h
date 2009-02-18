@@ -18,7 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define LogFailureMessage(__MESSAGE__, __DESCRIPTION__, ...) \
+#define _LogAssertionFailureMessage(__MESSAGE__, __DESCRIPTION__, ...) \
 	do { \
 		NSString* _description = (__DESCRIPTION__); \
 		if(_description) \
@@ -31,7 +31,7 @@ do { \
     BOOL _bool = (__EXPRESSION__); \
 	if(!_bool) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == TRUE)", [NSString stringWithUTF8String: #__EXPRESSION__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -43,7 +43,7 @@ do { \
     BOOL _bool = (__EXPRESSION__); \
 	if(_bool) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == FALSE)", [NSString stringWithUTF8String: #__EXPRESSION__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -56,7 +56,7 @@ do { \
 	__typeof__(__VALUE2__) _value2 = (__VALUE2__); \
 	if((@encode(__typeof__(__VALUE1__)) != @encode(__typeof__(__VALUE2__))) || (_value1 != _value2)) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -69,7 +69,7 @@ do { \
 	__typeof__(__VALUE2__) _value2 = (__VALUE2__); \
 	if((@encode(__typeof__(__VALUE1__)) == @encode(__typeof__(__VALUE2__))) && (_value1 == _value2)) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) != (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -81,7 +81,7 @@ do { \
     id _object = (__OBJECT__); \
 	if(_object != nil) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -93,7 +93,7 @@ do { \
     id _object = (__OBJECT__); \
 	if(_object == nil) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) != nil)", [NSString stringWithUTF8String: #__OBJECT__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 	else \
@@ -108,7 +108,7 @@ do { \
 	[self reportResult:YES]; \
 	else { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__OBJECT1__], [NSString stringWithUTF8String: #__OBJECT2__]]; \
-		LogFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
+		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
 	} \
 } while(0)

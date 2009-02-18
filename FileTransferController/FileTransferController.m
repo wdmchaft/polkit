@@ -35,7 +35,7 @@ typedef struct {
 
 @implementation FileTransferController
 
-@synthesize baseURL=_baseURL, delegate=_delegate, transferSize=_maxLength, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
+@synthesize baseURL=_baseURL, delegate=_delegate, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
 
 + (id) allocWithZone:(NSZone*)zone
 {
@@ -153,6 +153,11 @@ typedef struct {
 		if([_delegate respondsToSelector:@selector(fileTransferControllerDidUpdateProgress:)])
 		[_delegate fileTransferControllerDidUpdateProgress:self];
 	}
+}
+
+- (NSUInteger) transferSize
+{
+	return _maxLength;
 }
 
 - (float) transferProgress
@@ -591,9 +596,15 @@ typedef struct {
 	NSUInteger				maxLength;
 	
 	localPath = [localPath stringByStandardizingPath];
-	info = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
-	if(info == nil)
-	return NO;
+	while(1) {
+		info = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:NULL];
+		if(info == nil)
+		return NO;
+		if([[info objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+		localPath = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath:localPath error:NULL];
+		else
+		break;
+	}
 	
 	maxLength = [[info objectForKey:NSFileSize] unsignedIntegerValue];
 	if([self encryptionPassword])

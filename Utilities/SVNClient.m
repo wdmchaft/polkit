@@ -462,7 +462,7 @@ static void _svnAddFunction(void* baton, const char* path, svn_wc_status2_t* sta
 	if(![name length] || ![path length])
 	return NO;
 	
-	if(![manager createDirectoryAtPath:directoryPath attributes:nil]) {
+	if(![manager createDirectoryAtPath:directoryPath withIntermediateDirectories:NO attributes:nil error:NULL]) {
 		printf("SVNClient: Failed creating directory at \"%s\"\n", [directoryPath UTF8String]);
 		return NO;
 	}
@@ -472,7 +472,7 @@ static void _svnAddFunction(void* baton, const char* path, svn_wc_status2_t* sta
 	apr_pool_clear(_localPool);
 	
 	if(error)
-	[manager removeFileAtPath:directoryPath handler:nil];
+	[manager removeItemAtPath:directoryPath error:NULL];
 	
 	return (error ? NO : YES);
 }

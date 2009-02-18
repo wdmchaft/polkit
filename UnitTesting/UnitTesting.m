@@ -40,7 +40,7 @@ static BOOL					_abortOnFailure = NO;
 	va_start(list, message);
 	string = [[NSString alloc] initWithFormat:message arguments:list];
 	printf("\t");
-	printf([[string stringByReplacingOccurrencesOfString:@"\n" withString:@"\n\t"] UTF8String]);
+	printf("%s", [[string stringByReplacingOccurrencesOfString:@"\n" withString:@"\n\t"] UTF8String]);
 	printf("\n");
 	[string release];
 	va_end(list);
