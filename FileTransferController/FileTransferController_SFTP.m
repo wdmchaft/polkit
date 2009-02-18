@@ -96,6 +96,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	const char*					user = [[url user] UTF8String];
 	const char*					password = [[url passwordByReplacingPercentEscapes] UTF8String];
 	char*						message;
+	int							error;
 	
 	if((user == NULL) || (password == NULL)) {
 		[self release];
@@ -110,17 +111,19 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 				if(libssh2_session_startup(_session, CFSocketGetNative(_socket)) == 0) {
 					if(libssh2_userauth_password(_session, user, password) == 0) {
 						_sftp = libssh2_sftp_init(_session);
-						if(_sftp == NULL)
-						NSLog(@"%s: libssh2_sftp_init() failed", __FUNCTION__);
+						if(_sftp == NULL) {
+							error = libssh2_session_last_error(_session, &message, NULL, 0);
+							NSLog(@"%s: libssh2_sftp_init() failed (error %i): %s", __FUNCTION__, error, message);
+						}
 					}
 					else {
-						libssh2_session_last_error(_session, &message, NULL, 0);
-						NSLog(@"%s: libssh2_userauth_password() failed: %s", __FUNCTION__, message);
+						error = libssh2_session_last_error(_session, &message, NULL, 0);
+						NSLog(@"%s: libssh2_userauth_password() failed (error %i): %s", __FUNCTION__, error, message);
 					}
 				}
 				else {
-					libssh2_session_last_error(_session, &message, NULL, 0);
-					NSLog(@"%s: libssh2_session_startup() failed: %s", __FUNCTION__, message);
+					error = libssh2_session_last_error(_session, &message, NULL, 0);
+					NSLog(@"%s: libssh2_session_startup() failed (error %i): %s", __FUNCTION__, error, message);
 				}
 			}
 			else
