@@ -57,6 +57,8 @@ static void _ResetCURLHandle(CURL* handle)
 
 @implementation FTPTransferController
 
+@synthesize stringEncoding=_stringEncoding;
+
 + (void) initialize
 {
 	if(self == [FTPTransferController class])
@@ -77,6 +79,7 @@ static void _ResetCURLHandle(CURL* handle)
 			[self release];
 			return nil;
 		}
+		_stringEncoding = NSISOLatin1StringEncoding;
 	}
 	
 	return self;
@@ -129,7 +132,7 @@ static size_t _WriteCallback(void* buffer, size_t size, size_t nmemb, void* user
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
 	_ResetCURLHandle(_handle);
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] UTF8String]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _WriteCallback);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, params);
@@ -199,7 +202,7 @@ static size_t _ReadCallback(char* bufptr, size_t size, size_t nitems, void* user
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
 	_ResetCURLHandle(_handle);
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] UTF8String]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_READFUNCTION, _ReadCallback);
 	curl_easy_setopt(_handle, CURLOPT_READDATA, params);
@@ -230,7 +233,7 @@ static size_t _ReadCallback(char* bufptr, size_t size, size_t nitems, void* user
 	return success;
 }
 
-static NSDictionary* _ParseFTPDirectoryListing(NSData* data)
+- (NSDictionary*) _ParseFTPDirectoryListing:(NSData*)data
 {
 	NSMutableDictionary*	result = [NSMutableDictionary dictionary];
 	NSUInteger				offset = 0;
@@ -238,6 +241,16 @@ static NSDictionary* _ParseFTPDirectoryListing(NSData* data)
 	CFDictionaryRef			entry;
 	CFIndex					length;
 	NSInteger				type;
+	NSString*				string;
+	
+	//HACK: CFFTPCreateParsedResourceListing() creates strings with the kCFStringEncodingMacRoman encoding
+	if(_stringEncoding != NSMacOSRomanStringEncoding) {
+		string = [[NSString alloc] initWithData:data encoding:_stringEncoding];
+		data = [string dataUsingEncoding:NSMacOSRomanStringEncoding];
+		[string release];
+		if(data == nil)
+		return nil;
+	}
 	
 	while(1) {
 		length = CFFTPCreateParsedResourceListing(kCFAllocatorDefault, (unsigned char*)[data bytes] + offset, [data length] - offset, &entry);
@@ -314,7 +327,7 @@ static size_t _ListingCallback(void* buffer, size_t size, size_t nmemb, void* us
 #endif
 	
 	_ResetCURLHandle(_handle);
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] UTF8String]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _ListingCallback);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, params);
@@ -331,9 +344,15 @@ static size_t _ListingCallback(void* buffer, size_t size, size_t nmemb, void* us
 	
 	result = curl_easy_perform(_handle);
 	if(result == CURLE_OK) {
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
-		[[self delegate] fileTransferControllerDidSucceed:self];
-		dictionary = _ParseFTPDirectoryListing(data);
+		dictionary = [self _ParseFTPDirectoryListing:data];
+		if(dictionary) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
+			[[self delegate] fileTransferControllerDidSucceed:self];
+		}
+		else {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Failed parsing FTP listing (invalid character encoding)")];
+		}
 	}
 	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
@@ -371,7 +390,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	file = fopen("/dev/null", "a");
 	
 	_ResetCURLHandle(_handle);
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] UTF8String]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, file);
 #if __USE_COMMAND_PROGRESS__
@@ -408,8 +427,8 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", [self absolutePathForRemotePath:fromRemotePath]] UTF8String]);
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", [self absolutePathForRemotePath:toRemotePath]] UTF8String]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", [self absolutePathForRemotePath:fromRemotePath]] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", [self absolutePathForRemotePath:toRemotePath]] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
 }
@@ -418,7 +437,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", [self absolutePathForRemotePath:remotePath]] UTF8String]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
 }
@@ -427,7 +446,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", [self absolutePathForRemotePath:remotePath]] UTF8String]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
 }
@@ -436,7 +455,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", [self absolutePathForRemotePath:remotePath]] UTF8String]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
 }

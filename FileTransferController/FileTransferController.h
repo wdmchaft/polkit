@@ -194,7 +194,9 @@
 {
 @private
 	void*								_handle;
+	NSStringEncoding					_stringEncoding;
 }
+@property(nonatomic) NSStringEncoding stringEncoding; //ISO Latin 1 by default
 @end
 
 /* Supports everything except copy - Always use passive mode */
