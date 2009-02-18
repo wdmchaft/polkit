@@ -400,8 +400,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 #else
 	curl_easy_setopt(_handle, CURLOPT_NOPROGRESS, (long)1);
 #endif
-	curl_easy_setopt(_handle, CURLOPT_NOBODY, (long)1);
-	curl_easy_setopt(_handle, CURLOPT_QUOTE, headerList);
+	curl_easy_setopt(_handle, CURLOPT_POSTQUOTE, headerList);
 	
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
@@ -430,7 +429,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", [self absolutePathForRemotePath:fromRemotePath]] cStringUsingEncoding:_stringEncoding]);
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", [self absolutePathForRemotePath:toRemotePath]] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
+	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 - (BOOL) createDirectoryAtPath:(NSString*)remotePath
@@ -439,7 +438,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
+	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 - (BOOL) deleteFileAtPath:(NSString*)remotePath
@@ -448,7 +447,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
+	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 - (BOOL) deleteDirectoryAtPath:(NSString*)remotePath
@@ -457,7 +456,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:nil]];
+	return [self _performCommands:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 @end
