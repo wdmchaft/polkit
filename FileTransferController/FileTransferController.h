@@ -89,7 +89,9 @@
 @property(nonatomic) NSUInteger maximumDownloadSpeed; //In bytes per second
 @property(nonatomic) NSUInteger maximumUploadSpeed; //In bytes per second
 
+- (NSString*) absolutePathForRemotePath:(NSString*)path;
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path; //Returned URL does not contain user or password
+- (NSURL*) fullAbsoluteURLForRemotePath:(NSString*)path;
 @end
 
 @interface FileTransferController (Extensions)
@@ -187,8 +189,16 @@
 @interface SecureAmazonS3TransferController : AmazonS3TransferController
 @end
 
-/* Only supports downloads, uploads, delete and directory listing */
-@interface FTPTransferController : StreamTransferController
+/* Supports everything except copy - Always use passive mode */
+@interface FTPTransferController : FileTransferController
+{
+@private
+	void*								_handle;
+}
+@end
+
+/* Supports everything except copy - Always use passive mode */
+@interface FTPSTransferController : FTPTransferController
 @end
 
 /* Supports everything except copy */

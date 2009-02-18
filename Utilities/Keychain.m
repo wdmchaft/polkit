@@ -104,6 +104,8 @@ static SecProtocolType _ProtocolFromURLScheme(NSString* scheme)
 	return kSecProtocolTypeHTTPS;
 	else if([scheme isEqualToString:@"ftp"])
 	return kSecProtocolTypeFTP;
+	else if([scheme isEqualToString:@"ftps"])
+	return kSecProtocolTypeFTPS;
 	else if([scheme isEqualToString:@"ssh"])
 	return kSecProtocolTypeSSH;
 	

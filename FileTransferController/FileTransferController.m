@@ -100,6 +100,8 @@ typedef struct {
 	
 	if([[url scheme] isEqualToString:@"ftp"])
 	return [[[FTPTransferController alloc] initWithURL:url] autorelease];
+	if([[url scheme] isEqualToString:@"ftps"])
+	return [[[FTPSTransferController alloc] initWithURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"ssh"])
 	return [[[SFTPTransferController alloc] initWithURL:url] autorelease];
@@ -186,7 +188,7 @@ typedef struct {
 	[self doesNotRecognizeSelector:_cmd];
 }
 
-- (NSURL*) absoluteURLForRemotePath:(NSString*)path
+- (NSString*) absolutePathForRemotePath:(NSString*)path
 {
 	NSString*					basePath = [_baseURL path];
 	
@@ -201,7 +203,17 @@ typedef struct {
 		path = basePath;
 	}
 	
-	return [NSURL URLWithScheme:[_baseURL scheme] user:nil password:nil host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:path];
+	return path;
+}
+
+- (NSURL*) absoluteURLForRemotePath:(NSString*)path
+{
+	return [NSURL URLWithScheme:[_baseURL scheme] user:nil password:nil host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path]];
+}
+
+- (NSURL*) fullAbsoluteURLForRemotePath:(NSString*)path
+{
+	return [NSURL URLWithScheme:[_baseURL scheme] user:[_baseURL user] password:[_baseURL passwordByReplacingPercentEscapes] host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path]];
 }
 
 - (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
@@ -978,10 +990,6 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 		break;
 		
 		case kCFStreamEventEndEncountered:
-#if 1 //FIXME: Workaround CF FTP not closing upload connection properly (radr://6078711)
-		if([self isKindOfClass:[FTPTransferController class]])
-		sleep(5);
-#endif
 		if(_dataStream)
 		[self closeInputStream:_dataStream];
 		[self _doneWithResult:[NSNumber numberWithBool:YES]];
