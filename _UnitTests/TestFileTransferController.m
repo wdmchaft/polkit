@@ -121,7 +121,7 @@
 		}
 		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)]) {
 			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
-			if(![controller isKindOfClass:[FTPTransferController class]])
+			if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]])
 			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
 		}
 	}
@@ -139,7 +139,7 @@
 	}
 	if([controller respondsToSelector:@selector(deleteFileAtPath:)]) {
 		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
-		if(![controller isKindOfClass:[FTPTransferController class]])
+		if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]])
 		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
 	}
 	
@@ -270,6 +270,11 @@
 - (void) testFTP
 {
 	[self _testURL:[[self class] testURLForProtocol:@"FTP"]]; //FIXME: FTP fails deleting non-existent files or directories (issue #4)
+}
+
+- (void) testFTPS
+{
+	//FIXME: [self _testURL:[[self class] testURLForProtocol:@"FTPS"]];
 }
 
 - (void) testIDisk

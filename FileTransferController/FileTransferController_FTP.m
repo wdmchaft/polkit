@@ -25,39 +25,19 @@
 #define __USE_COMMAND_PROGRESS__ 0
 #define __USE_LISTING_PROGRESS__ 0
 
+@interface FTPTransferController ()
+@property(nonatomic, readonly) void* handle;
+- (void) _reset;
+@end
+
 static inline NSError* _MakeCURLError(CURLcode code, const char* message)
 {
 	return [NSError errorWithDomain:@"curl" code:code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, nil]];
 }
 
-static void _ResetCURLHandle(CURL* handle)
-{
-	CFDictionaryRef			proxySettings;
-	const char*				host;
-	long					port;
-	//NSArray*				array;
-	
-	curl_easy_reset(handle);
-	//curl_easy_setopt(handle, CURLOPT_VERBOSE, (long)1);
-	
-	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
-		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
-			if((host = [[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPProxy] UTF8String]))
-			curl_easy_setopt(handle, CURLOPT_PROXY, host);
-			if((port = [[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPPort] longValue]))
-			curl_easy_setopt(handle, CURLOPT_PROXYPORT, port);
-			/*
-			if((array = [(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesExceptionsList])) 
-			curl_easy_setopt(handle, CURLOPT_NOPROXY, [[array componentsJoinedByString:@","] UTF8String]);
-			*/
-		}
-		CFRelease(proxySettings);
-	}
-}
-
 @implementation FTPTransferController
 
-@synthesize stringEncoding=_stringEncoding;
+@synthesize stringEncoding=_stringEncoding, handle=_handle;
 
 + (void) initialize
 {
@@ -91,6 +71,35 @@ static void _ResetCURLHandle(CURL* handle)
 		curl_easy_cleanup(_handle);
 		_handle = NULL;
 	}
+}
+
+- (void) _reset
+{
+	CFDictionaryRef			proxySettings;
+	const char*				host;
+	long					port;
+	//NSArray*				array;
+	
+	curl_easy_reset(_handle);
+	//curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
+	
+	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
+		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
+			if((host = [[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPProxy] UTF8String]))
+			curl_easy_setopt(_handle, CURLOPT_PROXY, host);
+			if((port = [[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPPort] longValue]))
+			curl_easy_setopt(_handle, CURLOPT_PROXYPORT, port);
+			/*
+			if((array = [(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesExceptionsList])) 
+			curl_easy_setopt(_handle, CURLOPT_NOPROXY, [[array componentsJoinedByString:@","] UTF8String]);
+			*/
+		}
+		CFRelease(proxySettings);
+	}
+	
+	curl_easy_setopt(_handle, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+	curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYPEER, (long)0);
+	curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYHOST, (long)0);
 }
 
 static int _WriteProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow)
@@ -131,7 +140,7 @@ static size_t _WriteCallback(void* buffer, size_t size, size_t nmemb, void* user
 	params[1] = stream;
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
-	_ResetCURLHandle(_handle);
+	[self _reset];
 	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _WriteCallback);
@@ -201,7 +210,7 @@ static size_t _ReadCallback(char* bufptr, size_t size, size_t nitems, void* user
 	params[1] = stream;
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
-	_ResetCURLHandle(_handle);
+	[self _reset];
 	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_READFUNCTION, _ReadCallback);
@@ -326,7 +335,7 @@ static size_t _ListingCallback(void* buffer, size_t size, size_t nmemb, void* us
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 #endif
 	
-	_ResetCURLHandle(_handle);
+	[self _reset];
 	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _ListingCallback);
@@ -389,7 +398,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 #endif
 	file = fopen("/dev/null", "a");
 	
-	_ResetCURLHandle(_handle);
+	[self _reset];
 	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, file);
@@ -466,6 +475,11 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 + (NSString*) urlScheme;
 {
 	return @"ftps";
+}
+
+- (void) _reset
+{
+	[super _reset];
 }
 
 @end
