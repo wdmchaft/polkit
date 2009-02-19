@@ -21,6 +21,8 @@
 #import <IOKit/network/IOEthernetInterface.h>
 #import <IOKit/network/IONetworkInterface.h>
 #import <IOKit/network/IOEthernetController.h>
+#import <IOKit/ps/IOPowerSources.h>
+#import <IOKit/ps/IOPSKeys.h>
 
 #import "SystemInfo.h"
 
@@ -154,6 +156,48 @@ static NSString* _GetPrimaryMACAddress()
 	}
 	
 	return self;
+}
+
+- (id) _getPowerSourceKey:(id)key
+{
+	id						result = nil;
+	CFTypeRef				info;
+	CFArrayRef				list;
+	CFIndex					count,
+							i;
+	CFDictionaryRef			description;
+	
+	if((info = IOPSCopyPowerSourcesInfo())) {
+		if((list = IOPSCopyPowerSourcesList(info))) {
+			for(i = 0, count = CFArrayGetCount(list); i < count; ++i) {
+				description = IOPSGetPowerSourceDescription(info, CFArrayGetValueAtIndex(list, i));
+				if(description == NULL)
+				continue;
+				result = [[[(NSDictionary*)description objectForKey:key] retain] autorelease];
+				if(result)
+				break;
+			}
+			CFRelease(list);
+		}
+		CFRelease(info);
+	}
+	
+	return result;
+}
+
+- (BOOL) isBatteryPresent
+{
+	return [[self _getPowerSourceKey:@kIOPSIsPresentKey] boolValue];
+}
+
+- (BOOL) isRunningOnBattery
+{
+	return [[self _getPowerSourceKey:@kIOPSPowerSourceStateKey] isEqualToString:@kIOPSBatteryPowerValue];
+}
+
+- (BOOL) isBatteryCharging
+{
+	return [[self _getPowerSourceKey:@kIOPSIsChargingKey] boolValue];
 }
 
 @end

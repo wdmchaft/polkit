@@ -46,4 +46,8 @@
 @property(nonatomic, readonly) NSUInteger busFrequency;
 @property(nonatomic, readonly) unsigned long long physicalMemory;
 @property(nonatomic, readonly) BOOL supports64Bit;
+
+@property(nonatomic, readonly, getter=isBatteryPresent) BOOL batteryPresent;
+@property(nonatomic, readonly, getter=isRunningOnBattery) BOOL runningOnBattery;
+@property(nonatomic, readonly, getter=isBatteryCharging) BOOL batteryCharging;
 @end
