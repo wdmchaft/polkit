@@ -78,6 +78,17 @@
 	[controller setDelegate:self];
 	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
+	AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+	AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+	AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+	
+	AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
+	AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder/Temp.jpg"], nil);
+	AssertTrue([controller deleteFileAtPath:@"Folder/Temp.jpg"], nil);
+	AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+	
+	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
 	AssertTrue([controller downloadFileFromPath:@"Test.jpg" toPath:filePath], nil);
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
 	AssertTrue([controller downloadFileFromPath:@"Test.jpg" toPath:filePath], nil);
