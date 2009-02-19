@@ -81,8 +81,6 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 
 - (void) dealloc
 {
-	[self setDelegate:nil];
-	
 	if(_runLoop)
 	CFRelease(_runLoop);
 	if(_reachability)

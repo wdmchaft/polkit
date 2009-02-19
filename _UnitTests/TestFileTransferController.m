@@ -69,7 +69,7 @@
 	NSData*						destinationData;
 	
 	if(!url)
-	return;
+	goto Exit;
 	
 	controller = [FileTransferController fileTransferControllerWithURL:url];
 	AssertNotNil(controller, nil);
@@ -157,6 +157,8 @@
 	[controller setEncryptionPassword:nil];
 	
 	[controller setDelegate:nil];
+	
+Exit:
 	[pool release];
 }
 

@@ -311,6 +311,8 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	[otherScanner release];
 	AssertTrue([manager removeItemAtPath:tmpPath error:&error], [error localizedDescription]);
 	
+	[scanner release];
+	
 	acl_free(aclText);
 	AssertEquals(chflags([file UTF8String], 0), (int)0, nil);
 	AssertTrue([manager removeItemAtPath:scratchPath error:&error], [error localizedDescription]);

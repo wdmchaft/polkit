@@ -755,8 +755,10 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 				}
 			}
 		}
-		else if(body)
-		*error = MAKE_HTTP_ERROR(status, @"Invalid response:\n%@", body);
+		else if(body) {
+			if(error)
+			*error = MAKE_HTTP_ERROR(status, @"Invalid response:\n%@", body);
+		}
 	}
 	else if([method isEqualToString:@"DELETE"]) {
 		if(status == 204)

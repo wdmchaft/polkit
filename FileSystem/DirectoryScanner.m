@@ -249,6 +249,7 @@ static DirectoryItemData* _CreateDirectoryItemData(const char* fullPath, const s
 							free((void*)data->aclString);
 							free(data);
 							data = NULL;
+							break;
 						}
 					}
 					xattrOffset += strlen(&xattrBuffer[xattrOffset]) + 1;

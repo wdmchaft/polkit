@@ -124,9 +124,9 @@
 	if(input1)
 	*input1 = (status & 1 ? YES : NO);
 	if(input2)
-	*input1 = (status & 2 ? YES : NO);
+	*input2 = (status & 2 ? YES : NO);
 	if(input3)
-	*input1 = (status & 4 ? YES : NO);
+	*input3 = (status & 4 ? YES : NO);
 	
 	return YES;
 }
