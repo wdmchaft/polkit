@@ -556,6 +556,40 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 
 @implementation AmazonS3TransferController
 
++ (BOOL) instancesRespondToSelector:(SEL)aSelector
+{
+	if((aSelector == @selector(createDirectoryAtPath:)) || (aSelector == @selector(deleteDirectoryRecursivelyAtPath:)) || (aSelector == @selector(movePath:toPath:)))
+	return NO;
+	
+	return [super instancesRespondToSelector:aSelector];
+}
+
+- (BOOL) respondsToSelector:(SEL)aSelector
+{
+	if((aSelector == @selector(createDirectoryAtPath:)) || (aSelector == @selector(deleteDirectoryRecursivelyAtPath:)) || (aSelector == @selector(movePath:toPath:)))
+	return NO;
+	
+	return [super respondsToSelector:aSelector];
+}
+
+- (BOOL) createDirectoryAtPath:(NSString*)remotePath
+{
+	[self doesNotRecognizeSelector:_cmd];
+	return NO;
+}
+
+- (BOOL) movePath:(NSString*)fromRemotePath toPath:(NSString*)toRemotePath
+{
+	[self doesNotRecognizeSelector:_cmd];
+	return NO;
+}
+
+- (BOOL) deleteDirectoryRecursivelyAtPath:(NSString*)remotePath
+{
+	[self doesNotRecognizeSelector:_cmd];
+	return NO;
+}
+
 - (id) initWithURL:(NSURL*)url
 {
 	if(![[url host] hasSuffix:kFileTransferHost_AmazonS3] || [url port] || ![url user] || ![url passwordByReplacingPercentEscapes] || [[url path] length]) {

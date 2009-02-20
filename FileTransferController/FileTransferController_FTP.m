@@ -30,14 +30,14 @@
 - (void) _reset;
 @end
 
-static inline NSError* _MakeCURLError(CURLcode code, const char* message)
+static inline NSError* _MakeCURLError(CURLcode code, const char* message, id transcript)
 {
-	return [NSError errorWithDomain:@"curl" code:code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, nil]];
+	return [NSError errorWithDomain:@"curl" code:code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, transcript, @"Transcript", nil]];
 }
 
 @implementation FTPTransferController
 
-@synthesize stringEncoding=_stringEncoding, handle=_handle;
+@synthesize handle=_handle, stringEncoding=_stringEncoding, attemptTLSOrSSL=_attemptTLSOrSSL;
 
 + (void) initialize
 {
@@ -67,10 +67,43 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message)
 
 - (void) invalidate
 {
+	[_transcript release];
+	_transcript = nil;
+	
 	if(_handle) {
 		curl_easy_cleanup(_handle);
 		_handle = NULL;
 	}
+}
+
+static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t size, void* userptr)
+{
+	FTPTransferController*	self = (FTPTransferController*)userptr;
+	NSString*				string;
+	
+#ifdef __DEBUG__
+	if((type == CURLINFO_HEADER_IN) || (type == CURLINFO_TEXT) || (type == CURLINFO_HEADER_OUT))
+#else
+	if(type == CURLINFO_HEADER_IN)
+#endif
+	{
+		if(data[size - 1] == '\n')
+		--size;
+		if(data[size - 1] == '\r')
+		--size;
+		string = [[NSString alloc] initWithBytes:data length:size encoding:self->_stringEncoding];
+#ifdef __DEBUG__
+		if(self->_transcript == nil)
+		self->_transcript = [NSMutableArray new];
+		[self->_transcript addObject:string];
+		[string release];
+#else
+		[self->_transcript release];
+		self->_transcript = string;
+#endif
+	}
+	
+	return 0;
 }
 
 - (void) _reset
@@ -80,8 +113,9 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message)
 	long					port;
 	//NSArray*				array;
 	
+	[_transcript release];
+	_transcript = nil;
 	curl_easy_reset(_handle);
-	//curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
 	
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
@@ -97,9 +131,15 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message)
 		CFRelease(proxySettings);
 	}
 	
-	curl_easy_setopt(_handle, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
-	curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYPEER, (long)0);
-	curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYHOST, (long)0);
+	curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
+	curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, _DebugCallback);
+	curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, self);
+	
+	if(_attemptTLSOrSSL) {
+		curl_easy_setopt(_handle, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+		curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYPEER, (long)0);
+		curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYHOST, (long)0);
+	}
 }
 
 static int _WriteProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow)
@@ -167,7 +207,7 @@ static size_t _WriteCallback(void* buffer, size_t size, size_t nmemb, void* user
 		}
 		else {
 			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-			[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer)];
+			[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer, _transcript)];
 		}
 		
 		[self closeOutputStream:stream];
@@ -233,7 +273,7 @@ static size_t _ReadCallback(char* bufptr, size_t size, size_t nitems, void* user
 		}
 		else {
 			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-			[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer)];
+			[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer, _transcript)];
 		}
 		
 		[self closeInputStream:stream];
@@ -365,7 +405,7 @@ static size_t _ListingCallback(void* buffer, size_t size, size_t nmemb, void* us
 	}
 	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer)];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer, _transcript)];
 	}
 	
 	return dictionary;
@@ -422,7 +462,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	}
 	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer)];
+		[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer, _transcript)];
 	}
 	
 	curl_slist_free_all(headerList);

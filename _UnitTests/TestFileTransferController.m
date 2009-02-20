@@ -26,31 +26,36 @@
 
 @implementation UnitTests_FileTransferController
 
-+ (NSURL*) testURLForProtocol:(NSString*)protocol
+- (NSArray*) _testURLsForProtocol:(NSString*)protocol
 {
 	static NSMutableDictionary*	servers = nil;
 	NSString*					string;
-	NSArray*					array;
+	NSArray*					components;
+	NSMutableArray*				array;
 	
 	if(servers == nil) {
 		servers = [NSMutableDictionary new];
 		
 		string = [[Keychain sharedKeychain] genericPasswordForService:@"PolKit" account:@"TestURLs"];
-		array = [string componentsSeparatedByString:@"\n"];
-		for(string in array) {
-			array = [string componentsSeparatedByString:@" "];
-			if([array count] == 2)
-			[servers setObject:[array objectAtIndex:1] forKey:[array objectAtIndex:0]];
+		for(string in [string componentsSeparatedByString:@"\n"]) {
+			components = [string componentsSeparatedByString:@" "];
+			if([components count] == 2) {
+				array = [servers objectForKey:[components objectAtIndex:0]];
+				if(array == nil) {
+					array = [NSMutableArray new];
+					[servers setObject:array forKey:[components objectAtIndex:0]];
+					[array release];
+				}
+				[array addObject:[NSURL URLWithString:[components objectAtIndex:1]]];
+			}
 		}
 	}
 	
-	string = [servers objectForKey:protocol];
-	if(string == nil) {
-		NSLog(@"WARNING: No test server for \"%@\" protocol", protocol);
-		return nil;
-	}
+	array = [servers objectForKey:protocol];
+	if(array == nil)
+	[self logMessage:@"WARNING: No test server for \"%@\" protocol", protocol];
 	
-	return [NSURL URLWithString:string];
+	return array;
 }
 
 - (void) fileTransferControllerDidFail:(FileTransferController*)controller withError:(NSError*)error
@@ -77,31 +82,36 @@
 	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:YES];
 	[controller setDelegate:self];
 	
+	if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)] && ![controller contentsOfDirectoryAtPath:nil]) {
+		[self logMessage:@"WARNING: \"%@\" is not reachable", [url URLByDeletingPassword]];
+		goto Exit;
+	}
+	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
 	if([controller respondsToSelector:@selector(deleteFileAtPath:)])
 	AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
 	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
-		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+		AssertTrue([controller createDirectoryAtPath:@"Folder1"], nil);
 		if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
-		AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);
+		AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder1"], nil);
 		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
-		AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+		AssertTrue([controller deleteDirectoryAtPath:@"Folder1"], nil);
 	}
 	
 	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
-		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+		AssertTrue([controller createDirectoryAtPath:@"Folder2"], nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
-		if([controller respondsToSelector:@selector(movePath:toPath:)]) {
-			AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder/Temp.jpg"], nil);
+		if([controller respondsToSelector:@selector(movePath:toPath:)] && ![[url host] isEqualToString:@"ftp.drivehq.com"]) {
+			AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder2/Temp.jpg"], nil);
 			if([controller respondsToSelector:@selector(deleteFileAtPath:)])
-			AssertTrue([controller deleteFileAtPath:@"Folder/Temp.jpg"], nil);
-			if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
-			AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);
-			else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
-			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+			AssertTrue([controller deleteFileAtPath:@"Folder2/Temp.jpg"], nil);
 		}
 		else if([controller respondsToSelector:@selector(deleteFileAtPath:)])
 		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+		if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
+		AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder2"], nil);
+		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
+		AssertTrue([controller deleteDirectoryAtPath:@"Folder2"], nil);
 	}
 	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
@@ -117,16 +127,20 @@
 	
 	if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)]) {
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
+		[controller setDelegate:nil];
 		AssertNil([controller contentsOfDirectoryAtPath:@"invalid-directory"], nil);
+		[controller setDelegate:self];
 	}
 	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
 		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+		[controller setDelegate:nil];
 		AssertFalse([controller createDirectoryAtPath:@"Folder"], nil);
+		[controller setDelegate:self];
 		if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)]) {
 			BOOL isSubset = [[NSSet setWithObjects:@"Test.jpg", @"Folder", nil] isSubsetOfSet:[NSSet setWithArray:[[controller contentsOfDirectoryAtPath:nil] allKeys]]];
 			AssertTrue(isSubset, nil);
 		}
-		if([controller respondsToSelector:@selector(movePath:toPath:)]) {
+		if([controller respondsToSelector:@selector(movePath:toPath:)] && ![[url host] isEqualToString:@"ftp.drivehq.com"]) {
 			AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder/NewTest.jpg"], nil);
 			if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)])
 			AssertEqualObjects([[controller contentsOfDirectoryAtPath:@"Folder"] allKeys], [NSArray arrayWithObject:@"NewTest.jpg"], nil);
@@ -135,7 +149,7 @@
 		if([controller respondsToSelector:@selector(copyPath:toPath:)]) {
 			AssertTrue([controller copyPath:@"Test.jpg" toPath:@"Folder/~Test.jpg"], nil);
 			AssertTrue([controller copyPath:@"Test.jpg" toPath:@"Folder/~Test.jpg"], nil);
-			if([controller respondsToSelector:@selector(movePath:toPath:)]) {
+			if([controller respondsToSelector:@selector(movePath:toPath:)] && ![[url host] isEqualToString:@"www.box.net"]) {
 				AssertTrue([controller copyPath:@"Test.jpg" toPath:@"Folder/Test-2.jpg"], nil);
 				AssertTrue([controller movePath:@"Folder/Test-2.jpg" toPath:@"Folder/~Test.jpg"], nil);
 			}
@@ -148,8 +162,11 @@
 		}
 		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)]) {
 			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
-			if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]])
-			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+			if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]]) {
+				[controller setDelegate:nil];
+				AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+				[controller setDelegate:self];
+			}
 		}
 	}
 	else {
@@ -166,8 +183,11 @@
 	}
 	if([controller respondsToSelector:@selector(deleteFileAtPath:)]) {
 		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
-		if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]])
-		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+		if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]]) {
+			[controller setDelegate:nil];
+			AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+			[controller setDelegate:self];
+		}
 	}
 	
 	[controller setEncryptionPassword:@"info@pol-online.net"];
@@ -283,65 +303,93 @@ Exit:
 
 - (void) testAFP
 {
-	[self _testURL:[[self class] testURLForProtocol:@"AFP"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"AFP"])
+	[self _testURL:url];
 }
 
 - (void) testSMB
 {
-	//FIXME: [self _testURL:[[self class] testURLForProtocol:@"SMB"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"SMB"])
+	[self _testURL:url];
 }
 
 - (void) testSFTP
 {
-	[self _testURL:[[self class] testURLForProtocol:@"SFTP"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"SFTP"])
+	[self _testURL:url];
 }
 
 - (void) testFTP
 {
-	[self _testURL:[[self class] testURLForProtocol:@"FTP"]]; //FIXME: FTP fails deleting non-existent files or directories (issue #4)
+	NSURL*						url;
+	
+	//FIXME: FTP fails deleting non-existent files or directories (issue #4)
+	for(url in [self _testURLsForProtocol:@"FTP"])
+	[self _testURL:url];
 }
 
 - (void) testFTPS
 {
-	//FIXME: [self _testURL:[[self class] testURLForProtocol:@"FTPS"]];
+	NSURL*						url;
+	
+	//FIXME: FTP fails deleting non-existent files or directories (issue #4)
+	for(url in [self _testURLsForProtocol:@"FTPS"])
+	[self _testURL:url];
 }
 
 - (void) testIDisk
 {
-	[self _testURL:[[self class] testURLForProtocol:@"iDisk"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"iDisk"])
+	[self _testURL:url];
 }
 
 - (void) testWebDAV
 {
-	[self _testURL:[[self class] testURLForProtocol:@"WebDAV"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"WebDAV"])
+	[self _testURL:url];
 }
 
 - (void) testSecuredWebDAV
 {
-	[self _testURL:[[self class] testURLForProtocol:@"SecureWebDAV"]];
+	NSURL*						url;
+	
+	for(url in [self _testURLsForProtocol:@"SecureWebDAV"])
+	[self _testURL:url];
 }
 
 - (void) _testAmazonS3:(BOOL)secure
 {
-	NSURL*						url = [[self class] testURLForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")];
 	NSString*					imagePath = @"Resources/Image.jpg";
 	AmazonS3TransferController*	controller;
+	NSURL*						url;
 	
-	[self _testURL:url];
-	
-	controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
-	AssertNotNil([controller allBuckets], nil);
-	[controller release];
-	
-	controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:@"polkit-unit-testing"];
-	AssertTrue([controller createBucket], nil);
-	AssertTrue([controller createBucket], nil);
-	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
-	AssertFalse([controller deleteBucket], nil);
-	AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
-	AssertTrue([controller deleteBucket], nil);
-	AssertFalse([controller deleteBucket], nil);
-	[controller release];
+	for(url in [self _testURLsForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")]) {
+		[self _testURL:url];
+		
+		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
+		AssertNotNil([controller allBuckets], nil);
+		[controller release];
+		
+		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:@"polkit-unit-testing"];
+		AssertTrue([controller createBucket], nil);
+		AssertTrue([controller createBucket], nil);
+		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
+		AssertFalse([controller deleteBucket], nil);
+		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+		AssertTrue([controller deleteBucket], nil);
+		AssertFalse([controller deleteBucket], nil);
+		[controller release];
+	}
 }
 
 - (void) testAmazonS3
