@@ -78,15 +78,31 @@
 	[controller setDelegate:self];
 	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
+	if([controller respondsToSelector:@selector(deleteFileAtPath:)])
 	AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
-	AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
-	AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
+		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+		if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
+		AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);
+		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
+		AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+	}
 	
-	AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
-	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
-	AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder/Temp.jpg"], nil);
-	AssertTrue([controller deleteFileAtPath:@"Folder/Temp.jpg"], nil);
-	AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
+		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
+		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
+		if([controller respondsToSelector:@selector(movePath:toPath:)]) {
+			AssertTrue([controller movePath:@"Test.jpg" toPath:@"Folder/Temp.jpg"], nil);
+			if([controller respondsToSelector:@selector(deleteFileAtPath:)])
+			AssertTrue([controller deleteFileAtPath:@"Folder/Temp.jpg"], nil);
+			if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
+			AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);
+			else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
+			AssertTrue([controller deleteDirectoryAtPath:@"Folder"], nil);
+		}
+		else if([controller respondsToSelector:@selector(deleteFileAtPath:)])
+		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
+	}
 	
 	AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
 	AssertTrue([controller downloadFileFromPath:@"Test.jpg" toPath:filePath], nil);
