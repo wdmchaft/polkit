@@ -23,6 +23,7 @@
 #import <IOKit/network/IOEthernetController.h>
 #import <IOKit/ps/IOPowerSources.h>
 #import <IOKit/ps/IOPSKeys.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 
 #import "SystemInfo.h"
 
@@ -70,7 +71,7 @@ static NSString* _GetPrimaryMACAddress()
 
 @implementation SystemInfo
 
-@synthesize machineModelType=_modelType, machineModelName=_modelName, primaryMACAddress=_macAddress;
+@synthesize computerName=_computerName, machineModelType=_modelType, machineModelName=_modelName, primaryMACAddress=_macAddress;
 @synthesize systemBuildVersion=_buildVersion, systemProductVersion=_productVersion;
 @synthesize cpuType=_cpuType, cpuCount=_cpuCount, cpuFrequency=_cpuSpeed, busFrequency=_busSpeed, physicalMemory=_memorySize, supports64Bit=_has64Bit;
 
@@ -93,6 +94,10 @@ static NSString* _GetPrimaryMACAddress()
 	uint64_t				value64;
 	
 	if((self = [super init])) {
+		_computerName = (NSString*)SCDynamicStoreCopyComputerName(NULL, NULL);
+		if(_computerName == nil)
+		[NSException raise:NSInternalInconsistencyException format:@"Unable to retrieve computer name"];
+		
 		length = sizeof(buffer);
 		if(sysctlbyname("hw.model", &buffer, &length, NULL, 0) == 0) {
 			_modelType = [[NSString alloc] initWithBytes:buffer length:strlen(buffer) encoding:NSASCIIStringEncoding];

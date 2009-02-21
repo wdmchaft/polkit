@@ -21,6 +21,7 @@
 @interface SystemInfo : NSObject
 {
 @private
+	NSString*					_computerName;
 	NSString*					_modelType;
 	NSString*					_modelName;
 	NSString*					_macAddress;
@@ -35,6 +36,7 @@
 }
 + (SystemInfo*) sharedSystemInfo;
 
+@property(nonatomic, readonly) NSString* computerName;
 @property(nonatomic, readonly) NSString* machineModelType; //E.g. "iMac6,1"
 @property(nonatomic, readonly) NSString* machineModelName; //E.g. "iMac"
 @property(nonatomic, readonly) NSString* primaryMACAddress; //E.g. "00:00:00:00:00:00"
