@@ -1491,14 +1491,8 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	
 	data->nodeID = [[dictionary objectForKey:@"nodeID"] unsignedIntValue];
 	data->revision = [[dictionary objectForKey:@"revision"] unsignedIntValue];
-	if([[dictionary objectForKey:@"isDirectory"] boolValue]) {
-		data->newDate = NAN;
-		data->modDate = NAN;
-		data->dataSize = 0;
-		data->resourceSize = 0;
-	}
-	else {
-		data->newDate = [[dictionary objectForKey:@"fileCreationDate"] doubleValue];
+	if([dictionary objectForKey:(version <= 2 ? @"fileSize" : @"dataSize")]) {
+		data->newDate = [[dictionary objectForKey:@"fileCreationDate"] doubleValue]; //NOTE: This is missing in v1 or v2
 		data->modDate = [[dictionary objectForKey:@"fileModificationDate"] doubleValue];
 		if(version <= 2) {
 			data->dataSize = [[dictionary objectForKey:@"fileSize"] unsignedLongLongValue];
@@ -1508,6 +1502,12 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 			data->dataSize = [[dictionary objectForKey:@"dataSize"] unsignedLongLongValue];
 			data->resourceSize = [[dictionary objectForKey:@"resourceSize"] unsignedIntValue];
 		}
+	}
+	else {
+		data->newDate = NAN;
+		data->modDate = NAN;
+		data->dataSize = 0;
+		data->resourceSize = 0;
 	}
 	data->mode = [[dictionary objectForKey:@"mode"] unsignedShortValue];
 	data->flags = [[dictionary objectForKey:@"userFlags"] unsignedShortValue];
