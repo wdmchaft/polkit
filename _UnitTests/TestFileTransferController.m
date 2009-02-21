@@ -75,6 +75,7 @@
 	
 	if(!url)
 	goto Exit;
+	[self logMessage:@"<%@>", [url URLByDeletingPassword]];
 	
 	controller = [FileTransferController fileTransferControllerWithURL:url];
 	AssertNotNil(controller, nil);
