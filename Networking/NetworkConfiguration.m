@@ -61,6 +61,8 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void) dealloc
 {
+	[self setDelegate:nil];
+	
 	if(_dynamicStore)
 	CFRelease(_dynamicStore);
 	

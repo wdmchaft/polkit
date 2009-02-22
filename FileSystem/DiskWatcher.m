@@ -140,6 +140,8 @@ static NSString* _DiskIdentifierFromPath(DASessionRef session, NSString* path)
 
 - (void) dealloc
 {
+	[self setDelegate:nil];
+	
 	if(_runLoop)
 	CFRelease(_runLoop);
 	[_identifier release];

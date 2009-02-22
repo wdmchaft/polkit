@@ -32,7 +32,7 @@
 
 static inline NSError* _MakeCURLError(CURLcode code, const char* message, id transcript)
 {
-	return [NSError errorWithDomain:@"curl" code:code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, transcript, @"Transcript", nil]];
+	return [NSError errorWithDomain:@"curl" code:code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:message], NSLocalizedDescriptionKey, transcript, @"Last Server Message", nil]];
 }
 
 @implementation FTPTransferController
