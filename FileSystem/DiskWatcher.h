@@ -28,9 +28,7 @@
 {
 @private
 	NSString*					_identifier;
-	CFRunLoopRef				_runLoop;
 	id<DiskWatcherDelegate>		_delegate;
-	void*						_session;
 }
 + (NSString*) diskIdentifierForPath:(NSString*)path;
 + (NSString*) diskIdentifierForVolume:(NSString*)name;

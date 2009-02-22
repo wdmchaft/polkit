@@ -18,17 +18,12 @@
 
 #import <Foundation/Foundation.h>
 
-@class NetworkConfiguration;
-
-@protocol NetworkConfigurationDelegate <NSObject>
-- (void) networkConfigurationDidChange:(NetworkConfiguration*)configuration;
-@end
+extern NSString* NetworkConfigurationDidChangeNotification;
 
 @interface NetworkConfiguration : NSObject
 {
 @private
 	void*								_dynamicStore;
-	id<NetworkConfigurationDelegate>	_delegate;
 	CFRunLoopSourceRef					_runLoopSource;
 }
 + (NetworkConfiguration*) sharedNetworkConfiguration;
@@ -39,6 +34,4 @@
 @property(nonatomic, readonly) NSArray* networkAddresses;
 @property(nonatomic, readonly) NSString* airportNetworkName;
 @property(nonatomic, readonly) NSData* airportNetworkSSID;
-
-@property(nonatomic, assign) id<NetworkConfigurationDelegate> delegate;
 @end

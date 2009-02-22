@@ -20,18 +20,18 @@
 
 #import "NetworkConfiguration.h"
 
-@implementation NetworkConfiguration
-
-@synthesize delegate=_delegate;
+NSString* NetworkConfigurationDidChangeNotification = @"NetworkConfigurationDidChangeNotification";
 
 static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKeys, void* info)
 {
 	NSAutoreleasePool*					localPool = [NSAutoreleasePool new];
 	
-	[((NetworkConfiguration*)info)->_delegate networkConfigurationDidChange:info];
+	[[NSNotificationCenter defaultCenter] postNotificationName:NetworkConfigurationDidChangeNotification object:(id)info];
 	
 	[localPool release];
 }
+
+@implementation NetworkConfiguration
 
 + (NetworkConfiguration*) sharedNetworkConfiguration
 {
@@ -54,6 +54,16 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 			[self release];
 			return nil;
 		}
+		
+		if(SCDynamicStoreSetNotificationKeys(_dynamicStore, NULL, (CFArrayRef)[NSArray arrayWithObject:@".*/Network/.*"])) {
+			_runLoopSource = SCDynamicStoreCreateRunLoopSource(kCFAllocatorDefault, _dynamicStore, 0);
+			if(_runLoopSource)
+			CFRunLoopAddSource(CFRunLoopGetMain(), _runLoopSource, kCFRunLoopCommonModes);
+			else
+			NSLog(@"%s: SCDynamicStoreCreateRunLoopSource() failed with error \"%s\"", __FUNCTION__, SCErrorString(SCError()));
+		}
+		else
+		NSLog(@"%s: SCDynamicStoreSetNotificationKeys() failed with error \"%s\"", __FUNCTION__, SCErrorString(SCError()));
 	}
 	
 	return self;
@@ -61,37 +71,15 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void) dealloc
 {
-	[self setDelegate:nil];
-	
+	if(_runLoopSource) {
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), _runLoopSource, kCFRunLoopCommonModes);
+		CFRelease(_runLoopSource);
+		SCDynamicStoreSetNotificationKeys(_dynamicStore, NULL, NULL);
+	}
 	if(_dynamicStore)
 	CFRelease(_dynamicStore);
 	
 	[super dealloc];
-}
-
-- (void) setDelegate:(id<NetworkConfigurationDelegate>)delegate
-{
-	if(delegate != _delegate) {
-		_delegate = delegate;
-		
-		if(_delegate && !_runLoopSource) {
-			if(SCDynamicStoreSetNotificationKeys(_dynamicStore, NULL, (CFArrayRef)[NSArray arrayWithObject:@".*/Network/.*"])) {
-				_runLoopSource = SCDynamicStoreCreateRunLoopSource(kCFAllocatorDefault, _dynamicStore, 0);
-				if(_runLoopSource)
-				CFRunLoopAddSource(CFRunLoopGetCurrent(), _runLoopSource, kCFRunLoopCommonModes);
-				else
-				NSLog(@"%s: SCDynamicStoreCreateRunLoopSource() failed with error \"%s\"", __FUNCTION__, SCErrorString(SCError()));
-			}
-			else
-			NSLog(@"%s: SCDynamicStoreSetNotificationKeys() failed with error \"%s\"", __FUNCTION__, SCErrorString(SCError()));
-		}
-		else if(!_delegate && _runLoopSource) {
-			CFRunLoopRemoveSource(CFRunLoopGetCurrent(), _runLoopSource, kCFRunLoopCommonModes);
-			CFRelease(_runLoopSource);
-			_runLoopSource = NULL;
-			SCDynamicStoreSetNotificationKeys(_dynamicStore, NULL, NULL);
-		}
-	}
 }
 
 - (NSString*) locationName

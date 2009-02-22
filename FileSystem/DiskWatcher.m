@@ -22,9 +22,8 @@
 
 #import "DiskWatcher.h"
 
-@implementation DiskWatcher
-
-@synthesize diskIdentifier=_identifier, delegate=_delegate;
+static NSMutableSet*		_clients = nil;
+static DASessionRef			_session = NULL;
 
 static inline void _AppendToData(NSMutableData* data, id value)
 {
@@ -98,6 +97,64 @@ static NSString* _DiskIdentifierFromPath(DASessionRef session, NSString* path)
 	return string;
 }
 
+@implementation DiskWatcher
+
+@synthesize diskIdentifier=_identifier, delegate=_delegate;
+
++ (void) initialize
+{
+	if(_clients == nil)
+	_clients = [NSMutableSet new];
+}
+
+static void _DiskCallback(DADiskRef disk, void* context)
+{
+	NSAutoreleasePool*			pool = [NSAutoreleasePool new];
+	CFDictionaryRef				description;
+	DiskWatcher*				watcher;
+	NSString*					identifier;
+	
+	if((description = DADiskCopyDescription(disk))) {
+		identifier = _DiskIdentifierFromDiskDescription((NSDictionary*)description);
+		for(watcher in _clients) {
+			if([identifier isEqualToString:watcher->_identifier])
+			[watcher->_delegate diskWatcherDidUpdateAvailability:watcher];
+		}
+		CFRelease(description);
+	}
+	
+	[pool release];
+}
+
++ (void) _addClient:(DiskWatcher*)watcher
+{
+	if(![_clients containsObject:watcher]) {
+		if(_session == NULL) {
+			_session = DASessionCreate(kCFAllocatorDefault);
+			if(_session) {
+				DARegisterDiskAppearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, NULL);
+				DARegisterDiskDisappearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, NULL);
+				DASessionScheduleWithRunLoop(_session, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+			}
+			else {
+				NSLog(@"%s: DASessionCreate() failed", __FUNCTION__);
+				return;
+			}
+		}
+		[_clients addObject:watcher];
+	}
+}
+
++ (void) _removeClient:(DiskWatcher*)watcher
+{
+	[_clients removeObject:watcher];
+	if(![_clients count] && _session) {
+		DASessionUnscheduleFromRunLoop(_session, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+		DAUnregisterCallback(_session, _DiskCallback, self);
+		CFRelease(_session);
+	}
+}
+
 + (NSString*) diskIdentifierForPath:(NSString*)path
 {
 	NSString*				string = nil;
@@ -130,10 +187,8 @@ static NSString* _DiskIdentifierFromPath(DASessionRef session, NSString* path)
 		return nil;
 	}
 	
-	if((self = [super init])) {
-		_identifier = [identifier copy];
-		_runLoop = (CFRunLoopRef)CFRetain(CFRunLoopGetCurrent());
-	}
+	if((self = [super init]))
+	_identifier = [identifier copy];
 	
 	return self;
 }
@@ -142,45 +197,19 @@ static NSString* _DiskIdentifierFromPath(DASessionRef session, NSString* path)
 {
 	[self setDelegate:nil];
 	
-	if(_runLoop)
-	CFRelease(_runLoop);
 	[_identifier release];
 	
 	[super dealloc];
 }
 
-static void _DiskCallback(DADiskRef disk, void* context)
-{
-	NSAutoreleasePool*			pool = [NSAutoreleasePool new];
-	DiskWatcher*				self = (DiskWatcher*)context;
-	CFDictionaryRef				description;
-	
-	if((description = DADiskCopyDescription(disk))) {
-		if([_DiskIdentifierFromDiskDescription((NSDictionary*)description) isEqualToString:self->_identifier])
-		[self->_delegate diskWatcherDidUpdateAvailability:self];
-		CFRelease(description);
-	}
-	
-	[pool release];
-}
-
 - (void) setDelegate:(id<DiskWatcherDelegate>)delegate
 {
 	if(delegate && !_delegate) {
-		_session = DASessionCreate(kCFAllocatorDefault);
-		if(_session) {
-			DARegisterDiskAppearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, self);
-			DARegisterDiskDisappearedCallback(_session, kDADiskDescriptionMatchVolumeMountable, _DiskCallback, self);
-			DASessionScheduleWithRunLoop(_session, _runLoop, kCFRunLoopCommonModes);
-			_delegate = delegate;
-		}
-		else
-		NSLog(@"%s: DASessionCreate() failed", __FUNCTION__);
+		[DiskWatcher _addClient:self];
+		_delegate = delegate;
 	}
 	else if(!delegate && _delegate) {
-		DASessionUnscheduleFromRunLoop(_session, _runLoop, kCFRunLoopCommonModes);
-		DAUnregisterCallback(_session, _DiskCallback, self);
-		CFRelease(_session);
+		[DiskWatcher _removeClient:self];
 		_delegate = nil;
 	}
 }
