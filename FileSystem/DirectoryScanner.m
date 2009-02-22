@@ -51,8 +51,8 @@ typedef struct {
 	const char*				aclString; //Only non-NULL if "scanMetadata" is YES
 	CFMutableDictionaryRef	extendedAttributes; //Only non-NULL if "scanMetadata" is YES
 	uint64_t				dataSize;
-	double					newDate, //Seconds since 1970 - NAN if directory
-							modDate; //Seconds since 1970 - NAN if directory
+	double					newDate, //Seconds since 1970
+							modDate; //Seconds since 1970
 } DirectoryItemData;
 
 #define IS_DIRECTORY(__DATA__) S_ISDIR((__DATA__)->mode)
@@ -164,25 +164,21 @@ static DirectoryItemData* _CreateDirectoryItemData(const char* fullPath, const s
 	
 	data->mode = stats->st_mode;
 	data->nodeID = stats->st_ino;
-	data->modDate = (S_ISDIR(stats->st_mode) ? NAN : (double)stats->st_mtimespec.tv_sec + (double)stats->st_mtimespec.tv_nsec / 1000000000.0);
+	data->modDate = (double)stats->st_mtimespec.tv_sec + (double)stats->st_mtimespec.tv_nsec / 1000000000.0;
 	data->dataSize = (S_ISDIR(stats->st_mode) ? 0 : stats->st_size);
 	data->revision = revision;
 	data->userInfo = nil;
 	
-	if(S_ISDIR(stats->st_mode))
-	data->newDate = NAN;
+	bzero(&list, sizeof(struct attrlist));
+	list.bitmapcount = ATTR_BIT_MAP_COUNT;
+	list.commonattr = ATTR_CMN_CRTIME;
+	if(getattrlist(fullPath, &list, buffer, sizeof(buffer), FSOPT_NOFOLLOW) == 0)
+	time = (const struct timespec*)&buffer[sizeof(uint32_t)];
 	else {
-		bzero(&list, sizeof(struct attrlist));
-		list.bitmapcount = ATTR_BIT_MAP_COUNT;
-		list.commonattr = ATTR_CMN_CRTIME;
-		if(getattrlist(fullPath, &list, buffer, sizeof(buffer), FSOPT_NOFOLLOW) == 0)
-		time = (const struct timespec*)&buffer[sizeof(uint32_t)];
-		else {
-			NSLog(@"%s: getattrlist() for 'ATTR_CMN_CRTIME' on \"%s\" failed with error \"%s\"", __FUNCTION__, fullPath, strerror(errno));
-			time = &stats->st_ctimespec;
-		}
-		data->newDate = (double)time->tv_sec + (double)time->tv_nsec / 1000000000.0;
+		NSLog(@"%s: getattrlist() for 'ATTR_CMN_CRTIME' on \"%s\" failed with error \"%s\"", __FUNCTION__, fullPath, strerror(errno));
+		time = &stats->st_ctimespec;
 	}
+	data->newDate = (double)time->tv_sec + (double)time->tv_nsec / 1000000000.0;
 	
 	if(S_ISREG(stats->st_mode)) {
 		resourceSize = getxattr(fullPath, XATTR_RESOURCEFORK_NAME, NULL, 0, 0, XATTR_NOFOLLOW);
@@ -381,7 +377,7 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 	if(_nodeID != otherItem->_nodeID)
 	return NO;
 	
-	if((_modificationDate != otherItem->_modificationDate) || (_creationDate != otherItem->_creationDate)) //NOTE: Directories will never pass since NAN != NAN
+	if((_modificationDate != otherItem->_modificationDate) || (_creationDate != otherItem->_creationDate))
 	return NO;
 	
 	if(flag) {
@@ -790,7 +786,7 @@ static inline BOOL _ItemContentsWasModified(DirectoryItemData* oldData, Director
 
 static inline BOOL _ItemMetadataHasChanged(DirectoryItemData* oldData, DirectoryItemData* newData)
 {
-	if(!IS_DIRECTORY(newData) && (round(newData->newDate * 1000.0) != round(oldData->newDate * 1000.0))) //NOTE: Use a 1ms tolerance
+	if(round(newData->newDate * 1000.0) != round(oldData->newDate * 1000.0)) //NOTE: Use a 1ms tolerance
 	return YES;
 	
 	if(((newData->mode & ALLPERMS) != (oldData->mode & ALLPERMS)) || (newData->flags != oldData->flags) || (newData->uid != oldData->uid) || (newData->gid != oldData->gid))
@@ -1377,9 +1373,9 @@ static NSDictionary* _CreateDictionaryFromDirectoryItemData(DirectoryItemData* d
 	
 	[dictionary setObject:[NSNumber numberWithUnsignedInt:data->nodeID] forKey:@"nodeID"];
 	[dictionary setObject:[NSNumber numberWithUnsignedInt:data->revision] forKey:@"revision"];
+	[dictionary setObject:[NSNumber numberWithDouble:data->newDate] forKey:@"creationDate"];
+	[dictionary setObject:[NSNumber numberWithDouble:data->modDate] forKey:@"modificationDate"];
 	if(!IS_DIRECTORY(data)) {
-		[dictionary setObject:[NSNumber numberWithDouble:data->newDate] forKey:@"fileCreationDate"];
-		[dictionary setObject:[NSNumber numberWithDouble:data->modDate] forKey:@"fileModificationDate"];
 		[dictionary setObject:[NSNumber numberWithUnsignedLongLong:data->dataSize] forKey:@"dataSize"];
 		if(data->resourceSize)
 		[dictionary setObject:[NSNumber numberWithUnsignedInt:data->resourceSize] forKey:@"resourceSize"];
@@ -1491,23 +1487,25 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	
 	data->nodeID = [[dictionary objectForKey:@"nodeID"] unsignedIntValue];
 	data->revision = [[dictionary objectForKey:@"revision"] unsignedIntValue];
-	if([dictionary objectForKey:(version <= 2 ? @"fileSize" : @"dataSize")]) {
-		data->newDate = [[dictionary objectForKey:@"fileCreationDate"] doubleValue]; //NOTE: This is missing in v1 or v2
-		data->modDate = [[dictionary objectForKey:@"fileModificationDate"] doubleValue];
-		if(version <= 2) {
+	if(version <= 2) {
+		if([dictionary objectForKey:@"fileSize"]) {
+			data->newDate = NAN;
+			data->modDate = [[dictionary objectForKey:@"fileModificationDate"] doubleValue];
 			data->dataSize = [[dictionary objectForKey:@"fileSize"] unsignedLongLongValue];
 			data->resourceSize = 0;
 		}
 		else {
-			data->dataSize = [[dictionary objectForKey:@"dataSize"] unsignedLongLongValue];
-			data->resourceSize = [[dictionary objectForKey:@"resourceSize"] unsignedIntValue];
+			data->newDate = NAN;
+			data->modDate = NAN;
+			data->dataSize = 0;
+			data->resourceSize = 0;
 		}
 	}
 	else {
-		data->newDate = NAN;
-		data->modDate = NAN;
-		data->dataSize = 0;
-		data->resourceSize = 0;
+		data->newDate = [[dictionary objectForKey:@"creationDate"] doubleValue];
+		data->modDate = [[dictionary objectForKey:@"modificationDate"] doubleValue];
+		data->dataSize = [[dictionary objectForKey:@"dataSize"] unsignedLongLongValue];
+		data->resourceSize = [[dictionary objectForKey:@"resourceSize"] unsignedIntValue];
 	}
 	data->mode = [[dictionary objectForKey:@"mode"] unsignedShortValue];
 	data->flags = [[dictionary objectForKey:@"userFlags"] unsignedShortValue];

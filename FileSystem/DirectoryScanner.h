@@ -57,8 +57,8 @@ typedef NSUInteger DirectoryScannerOptions;
 @property(nonatomic, readonly, getter=isSymbolicLink) BOOL symbolicLink;
 @property(nonatomic, readonly) NSUInteger revision;
 
-@property(nonatomic, readonly) NSTimeInterval creationDate; //Seconds since 1 January 2001, GMT or NAN for a directory
-@property(nonatomic, readonly) NSTimeInterval modificationDate; //Seconds since 1 January 2001, GMT or NAN for a directory
+@property(nonatomic, readonly) NSTimeInterval creationDate; //Seconds since 1 January 2001, GMT
+@property(nonatomic, readonly) NSTimeInterval modificationDate; //Seconds since 1 January 2001, GMT
 @property(nonatomic, readonly) unsigned long long dataSize; //Aways 0 for a directory
 @property(nonatomic, readonly) unsigned int resourceSize; //Aways 0 for a directory
 @property(nonatomic, readonly) unsigned int userID; //Always 0 if "scanMetadata" is NO
