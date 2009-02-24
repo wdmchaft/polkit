@@ -66,45 +66,45 @@ typedef struct {
 	NSString*					password = [url passwordByReplacingPercentEscapes];
 	
 	if([[url scheme] isEqualToString:@"file"])
-	return [[[LocalTransferController alloc] initWithURL:url] autorelease];
+	return [[(LocalTransferController*)[NSClassFromString(@"LocalTransferController") alloc] initWithURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"afp"])
-	return [[[AFPTransferController alloc] initWithURL:url] autorelease];
+	return [[(AFPTransferController*)[NSClassFromString(@"AFPTransferController") alloc] initWithURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"smb"])
-	return [[[SMBTransferController alloc] initWithURL:url] autorelease];
+	return [[(SMBTransferController*)[NSClassFromString(@"SMBTransferController") alloc] initWithURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"http"]) {
 		if([[url host] isEqualToString:kFileTransferHost_iDisk]) {
 			if(user && password)
-			return [[[WebDAVTransferController alloc] initWithIDiskForUser:user password:password basePath:[url path]] autorelease];
+			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithIDiskForUser:user password:password basePath:[url path]] autorelease];
 			else if(user)
-			return [[[WebDAVTransferController alloc] initWithIDiskForUser:user basePath:[url path]] autorelease];
+			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithIDiskForUser:user basePath:[url path]] autorelease];
 			else
-			return [[[WebDAVTransferController alloc] initWithIDiskForLocalUser:[url path]] autorelease];
+			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithIDiskForLocalUser:[url path]] autorelease];
 		}
 		else {
 			if([[url host] hasSuffix:kFileTransferHost_AmazonS3])
-			return [[[AmazonS3TransferController alloc] initWithURL:url] autorelease];
+			return [[(AmazonS3TransferController*)[NSClassFromString(@"AmazonS3TransferController") alloc] initWithURL:url] autorelease];
 			else
-			return [[[WebDAVTransferController alloc] initWithURL:url] autorelease];
+			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithURL:url] autorelease];
 		}
 	}
 	
 	if([[url scheme] isEqualToString:@"https"]) {
 		if([[url host] hasSuffix:kFileTransferHost_AmazonS3])
-		return [[[SecureAmazonS3TransferController alloc] initWithURL:url] autorelease];
+		return [[(SecureAmazonS3TransferController*)[NSClassFromString(@"SecureAmazonS3TransferController") alloc] initWithURL:url] autorelease];
 		else
-		return [[[SecureWebDAVTransferController alloc] initWithURL:url] autorelease];
+		return [[(SecureWebDAVTransferController*)[NSClassFromString(@"SecureWebDAVTransferController") alloc] initWithURL:url] autorelease];
 	}
 	
 	if([[url scheme] isEqualToString:@"ftp"])
-	return [[[FTPTransferController alloc] initWithURL:url] autorelease];
+	return [[(FTPTransferController*)[NSClassFromString(@"FTPTransferController") alloc] initWithURL:url] autorelease];
 	if([[url scheme] isEqualToString:@"ftps"])
-	return [[[FTPSTransferController alloc] initWithURL:url] autorelease];
+	return [[(FTPSTransferController*)[NSClassFromString(@"FTPSTransferController") alloc] initWithURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"ssh"])
-	return [[[SFTPTransferController alloc] initWithURL:url] autorelease];
+	return [[(SFTPTransferController*)[NSClassFromString(@"SFTPTransferController") alloc] initWithURL:url] autorelease];
 	
 	return nil;
 }
