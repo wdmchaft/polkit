@@ -66,7 +66,7 @@ static BOOL					_abortOnFailure = NO;
 
 int main(int argc, const char* argv[])
 {
-	NSUInteger				successes = 0,
+	unsigned				successes = 0,
 							failures = 0;
 	unsigned int			count1,
 							i1,
