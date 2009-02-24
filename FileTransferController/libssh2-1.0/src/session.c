@@ -133,6 +133,8 @@ libssh2_banner_receive(LIBSSH2_SESSION * session)
             }
 #endif /* WIN32 */
             if (errno == EAGAIN) {
+                session->socket_block_directions =
+                    LIBSSH2_SESSION_BLOCK_INBOUND;
                 session->banner_TxRx_total_send = banner_len;
                 return PACKET_EAGAIN;
             }
@@ -235,6 +237,8 @@ libssh2_banner_send(LIBSSH2_SESSION * session)
     if (ret != (banner_len - session->banner_TxRx_total_send)) {
         if ((ret > 0) || ((ret == -1) && (errno == EAGAIN))) {
             /* the whole packet could not be sent, save the what was */
+            session->socket_block_directions =
+                LIBSSH2_SESSION_BLOCK_OUTBOUND;
             session->banner_TxRx_total_send += ret;
             return PACKET_EAGAIN;
         }
@@ -1189,14 +1193,18 @@ libssh2_poll_channel_read(LIBSSH2_CHANNEL * channel, int extended)
     LIBSSH2_SESSION *session = channel->session;
     LIBSSH2_PACKET *packet = session->packets.head;
 
-    while (packet) {
-        if (((packet->data[0] == SSH_MSG_CHANNEL_DATA) && (extended == 0) &&
-             (channel->local.id == libssh2_ntohu32(packet->data + 1))) ||
-            ((packet->data[0] == SSH_MSG_CHANNEL_EXTENDED_DATA)
-             && (extended != 0)
-             && (channel->local.id == libssh2_ntohu32(packet->data + 1)))) {
-            /* Found data waiting to be read */
-            return 1;
+    while (packet) 
+	{
+		if ( channel->local.id == libssh2_ntohu32(packet->data + 1)) {
+			if ( extended == 1 &&
+				(packet->data[0] == SSH_MSG_CHANNEL_EXTENDED_DATA 
+				|| packet->data[0] == SSH_MSG_CHANNEL_DATA )) {
+				return 1;
+			} else if ( extended == 0 && 
+				packet->data[0] == SSH_MSG_CHANNEL_DATA) {
+				return 1;
+			}
+			/* else - no data of any type is ready to be read */
         }
         packet = packet->next;
     }
@@ -1478,7 +1486,7 @@ libssh2_poll(LIBSSH2_POLLFD * fds, unsigned int nfds, long timeout)
             struct timeval tv_begin, tv_end;
 
             gettimeofday((struct timeval *) &tv_begin, NULL);
-            sysret = select(maxfd, &rfds, &wfds, NULL, &tv);
+            sysret = select(maxfd+1, &rfds, &wfds, NULL, &tv);
             gettimeofday((struct timeval *) &tv_end, NULL);
 
             timeout_remaining -= (tv_end.tv_sec - tv_begin.tv_sec) * 1000;
@@ -1488,7 +1496,7 @@ libssh2_poll(LIBSSH2_POLLFD * fds, unsigned int nfds, long timeout)
         /* If the platform doesn't support gettimeofday,
          * then just make the call non-blocking and walk away
          */
-        sysret = select(maxfd, &rfds, &wfds, NULL, &tv);
+        sysret = select(maxfd+1, &rfds, &wfds, NULL, &tv);
         timeout_remaining = 0;
 #endif
 
@@ -1530,6 +1538,17 @@ libssh2_poll(LIBSSH2_POLLFD * fds, unsigned int nfds, long timeout)
     } while ((timeout_remaining > 0) && !active_fds);
 
     return active_fds;
+}
+
+/* {{{ libssh2_session_block_direction
+ * Get blocked direction when a function returns LIBSSH2_ERROR_EAGAIN
+ * Returns LIBSSH2_SOCKET_BLOCK_INBOUND if recv() blocked
+ * or LIBSSH2_SOCKET_BLOCK_OUTBOUND if send() blocked
+ */
+LIBSSH2_API int
+libssh2_session_block_directions(LIBSSH2_SESSION *session)
+{
+    return session->socket_block_directions;
 }
 
 /* }}} */

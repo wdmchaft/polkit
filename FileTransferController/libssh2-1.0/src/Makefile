@@ -34,9 +34,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = i386-apple-darwin9.4.0
-host_triplet = i386-apple-darwin9.4.0
-#am__append_1 = libgcrypt.c
+build_triplet = i386-apple-darwin9.6.0
+host_triplet = i386-apple-darwin9.6.0
+#am__append_1 = libgcrypt.c pem.c
 am__append_2 = openssl.c
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -49,8 +49,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/autobuild.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = libssh2_config.h \
-	$(top_builddir)/example/simple/config.h
+CONFIG_HEADER = libssh2_config.h
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -64,13 +63,13 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libssh2_la_LIBADD =
 am__libssh2_la_SOURCES_DIST = channel.c comp.c crypt.c hostkey.c kex.c \
 	mac.c misc.c packet.c publickey.c scp.c session.c sftp.c \
-	userauth.c libssh2_priv.h openssl.h libgcrypt.h pem.c \
-	transport.c libgcrypt.c openssl.c
-#am__objects_1 = libgcrypt.lo
+	userauth.c libssh2_priv.h openssl.h libgcrypt.h transport.c \
+	libgcrypt.c pem.c openssl.c
+#am__objects_1 = libgcrypt.lo pem.lo
 am__objects_2 = openssl.lo
 am_libssh2_la_OBJECTS = channel.lo comp.lo crypt.lo hostkey.lo kex.lo \
 	mac.lo misc.lo packet.lo publickey.lo scp.lo session.lo \
-	sftp.lo userauth.lo pem.lo transport.lo $(am__objects_1) \
+	sftp.lo userauth.lo transport.lo $(am__objects_1) \
 	$(am__objects_2)
 libssh2_la_OBJECTS = $(am_libssh2_la_OBJECTS)
 DEFAULT_INCLUDES = 
@@ -89,19 +88,20 @@ DIST_SOURCES = $(am__libssh2_la_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run aclocal-1.9
 ALLOCA = 
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run tar
+AMTAR = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run autoconf
-AUTOHEADER = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run autoheader
-AUTOMAKE = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run automake-1.9
+AS = as
+AUTOCONF = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run autoconf
+AUTOHEADER = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run autoheader
+AUTOMAKE = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run automake-1.9
 AWK = awk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS =  -DLIBSSH2_DARWIN -I/usr/include -I/usr/include
+CFLAGS =  -DLIBSSH2_DARWIN
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
@@ -111,6 +111,8 @@ CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DLLTOOL = dlltool
+DSYMUTIL = dsymutil
 ECHO = /bin/echo
 ECHO_C = \c
 ECHO_N = 
@@ -121,25 +123,35 @@ F77 =
 FFLAGS = 
 GREP = /usr/bin/grep
 HAVE_LIBGCRYPT = 
+HAVE_LIBSSL = yes
+HAVE_LIBZ = yes
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-LDFLAGS =  -L/usr/lib -lcrypto -L/usr/lib -lz
+LDFLAGS = 
 LIBGCRYPT = 
 LIBGCRYPT_FALSE = 
 LIBGCRYPT_PREFIX = 
 LIBGCRYPT_TRUE = #
 LIBOBJS = 
 LIBS = 
+LIBSSL = -lssl -lcrypto
+LIBSSL_PREFIX = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIBZ = -lz
+LIBZ_PREFIX = 
 LN_S = ln -s
 LTLIBGCRYPT = 
 LTLIBOBJS = 
+LTLIBSSL = -lssl -lcrypto
+LTLIBZ = -lz
 MAINT = #
 MAINTAINER_MODE_FALSE = 
 MAINTAINER_MODE_TRUE = #
-MAKEINFO = ${SHELL} /Users/pol/Desktop/libssh2-0.18/missing --run makeinfo
+MAKEINFO = ${SHELL} /Users/pol/Downloads/libssh2-1.0/missing --run makeinfo
+NMEDIT = nmedit
+OBJDUMP = objdump
 OBJEXT = o
 PACKAGE = libssh2
 PACKAGE_BUGREPORT = libssh2-devel@lists.sourceforge.net
@@ -148,12 +160,13 @@ PACKAGE_STRING = libssh2 -
 PACKAGE_TARNAME = libssh2
 PACKAGE_VERSION = -
 PATH_SEPARATOR = :
-PKG_CONFIG = /usr/local/bin/pkg-config
 RANLIB = ranlib
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
-SHLIB_SUFFIX_NAME = .dylib
+SSHD = /usr/sbin/sshd
+SSHD_FALSE = #
+SSHD_TRUE = 
 STRIP = strip
 VERSION = -version-info 1:0:0
 ac_ct_CC = gcc
@@ -169,25 +182,25 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = i386-apple-darwin9.4.0
+build = i386-apple-darwin9.6.0
 build_alias = 
 build_cpu = i386
-build_os = darwin9.4.0
+build_os = darwin9.6.0
 build_vendor = apple
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = i386-apple-darwin9.4.0
+host = i386-apple-darwin9.6.0
 host_alias = 
 host_cpu = i386
-host_os = darwin9.4.0
+host_os = darwin9.6.0
 host_vendor = apple
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = /Users/pol/Desktop/libssh2-0.18/install-sh
+install_sh = /Users/pol/Downloads/libssh2-1.0/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -204,11 +217,11 @@ sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
 
-# $Id: Makefile.am,v 1.10 2007/07/17 13:22:55 gknauf Exp $
+# $Id: Makefile.am,v 1.13 2008/11/21 14:34:03 jas4711 Exp $
 AUTOMAKE_OPTIONS = foreign nostdinc
 libssh2_la_SOURCES = channel.c comp.c crypt.c hostkey.c kex.c mac.c \
 	misc.c packet.c publickey.c scp.c session.c sftp.c userauth.c \
-	libssh2_priv.h openssl.h libgcrypt.h pem.c transport.c \
+	libssh2_priv.h openssl.h libgcrypt.h transport.c \
 	$(am__append_1) $(am__append_2)
 EXTRA_DIST = libssh2_config.h.in NMakefile
 lib_LTLIBRARIES = libssh2.la
@@ -216,7 +229,7 @@ lib_LTLIBRARIES = libssh2.la
 # srcdir/include for the shipped headers
 # builddir/src for the generated config header when building out of the source
 # tree
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/src
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
@@ -245,7 +258,9 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src
 # 6.If any interfaces have been removed since the last public release, then
 # set age to 0. (c:r:a=0)
 #
-libssh2_la_LDFLAGS = $(VERSION) -no-undefined $(LTLIBGCRYPT)
+libssh2_la_LDFLAGS = $(VERSION) -no-undefined \
+	$(LTLIBGCRYPT) $(LTLIBSSL) $(LTLIBZ)
+
 all: libssh2_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
