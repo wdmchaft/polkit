@@ -34,10 +34,12 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 #define kUpdateInterval					0.5
 #define kFileBufferSize					(256 * 1024)
+#define kDefaultHTTPError				@"Unsupported HTTP response"
 
 #define MAKE_HTTP_ERROR(__STATUS__, ...) MAKE_ERROR(@"http", __STATUS__, __VA_ARGS__)
 
 @interface HTTPTransferController () <DataStreamSource>
++ (BOOL) hasUploadDataStream;
 @property(nonatomic, readonly) CFHTTPMessageRef responseHeaders;
 @end
 
@@ -53,6 +55,11 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 + (BOOL) hasAtomicUploads
 {
 	return YES;
+}
+
++ (BOOL) hasUploadDataStream
+{
+	return NO;
 }
 
 - (void) invalidate
@@ -173,7 +180,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	}
 	
 	if((result == nil) && error && (*error == nil))
-	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
+	*error = MAKE_HTTP_ERROR(status, kDefaultHTTPError);
 	
 	return result;
 }
@@ -259,7 +266,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	readStream = [self _createReadStreamWithHTTPRequest:request bodyStream:stream];
 	CFRelease(request);
 	
-	success = [[self runReadStream:readStream dataStream:nil userInfo:@"PUT" isFileTransfer:YES] boolValue];
+	success = [[self runReadStream:readStream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"PUT" isFileTransfer:YES] boolValue];
 	
 	if(filePath)
 	[[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
@@ -407,7 +414,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[body release];
 	
 	if((result == nil) && error && (*error == nil))
-	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
+	*error = MAKE_HTTP_ERROR(status, kDefaultHTTPError);
 	
 	return result;
 }
@@ -555,6 +562,11 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 @end
 
 @implementation AmazonS3TransferController
+
++ (BOOL) hasUploadDataStream
+{
+	return YES;
+}
 
 + (BOOL) instancesRespondToSelector:(SEL)aSelector
 {
@@ -737,6 +749,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	NSXMLElement*			element;
 	NSDictionary*			properties;
 	NSString*				path;
+	NSString*				string;
 	
 	if(error)
 	*error = nil;
@@ -789,10 +802,6 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 				}
 			}
 		}
-		else if(body) {
-			if(error)
-			*error = MAKE_HTTP_ERROR(status, @"Invalid response:\n%@", body);
-		}
 	}
 	else if([method isEqualToString:@"DELETE"]) {
 		if(status == 204)
@@ -805,10 +814,24 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	else
 	result = [super processReadResultStream:stream userInfo:info error:error];
 	
-	[body release];
+	if((result == nil) && error && ((*error == nil) || [[*error localizedDescription] isEqualToString:kDefaultHTTPError])) {
+		if([body isKindOfClass:[NSXMLDocument class]]) {
+			elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Message"];
+			string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+			if(string == nil) {
+				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Code"];
+				string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+			}
+		}
+		else
+		string = nil;
+		if(string)
+		*error = MAKE_HTTP_ERROR(status, @"Amazon S3 Error: %@", string);
+		else
+		*error = MAKE_HTTP_ERROR(status, kDefaultHTTPError);
+	}
 	
-	if((result == nil) && error && (*error == nil))
-	*error = MAKE_HTTP_ERROR(status, @"Unsupported HTTP response");
+	[body release];
 	
 	return result;
 }
