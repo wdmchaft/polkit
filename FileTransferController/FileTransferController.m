@@ -17,6 +17,7 @@
 */
 
 #import <openssl/evp.h>
+#import <libkern/OSAtomic.h>
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
@@ -32,6 +33,13 @@ typedef struct {
 	unsigned char*						buffer;
 	NSUInteger							size;
 } DataInfo;
+
+static NSUInteger						_maximumDownloadSpeed = 0,
+										_maximumUploadSpeed = 0;
+static OSSpinLock						_downloadLock = 0,
+										_uploadLock = 0;
+static CFTimeInterval					_downloadTime = 0.0,
+										_uploadTime = 0.0;
 
 @implementation FileTransferController
 
@@ -58,6 +66,26 @@ typedef struct {
 + (BOOL) hasAtomicUploads
 {
 	return NO;
+}
+
++ (NSUInteger) globalMaximumDownloadSpeed
+{
+	return _maximumDownloadSpeed;
+}
+
++ (void) setGlobalMaximumDownloadSpeed:(NSUInteger)speed
+{
+	_maximumDownloadSpeed = speed;
+}
+
++ (NSUInteger) globalMaximumUploadSpeed
+{
+	return _maximumUploadSpeed;
+}
+
++ (void) setGlobalMaximumUploadSpeed:(NSUInteger)speed
+{
+	_maximumUploadSpeed = speed;
 }
 
 + (FileTransferController*) fileTransferControllerWithURL:(NSURL*)url
@@ -309,7 +337,8 @@ typedef struct {
 - (BOOL) openOutputStream:(NSOutputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	if(isFileTransfer) {
+	_fileTransfer = isFileTransfer;
+	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:YES])
 		return NO;
 		_maxSpeed = _maxDownloadSpeed;
@@ -329,15 +358,14 @@ typedef struct {
 
 - (BOOL) writeToOutputStream:(NSOutputStream*)stream bytes:(const void*)bytes maxLength:(NSUInteger)length
 {
+	double						maxSpeed = (_fileTransfer ? _maximumDownloadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	BOOL						success = YES;
 	int							offset = 0,
 								realLength,
 								numBytes;
 	void*						realBytes;
-	
-	if(_maxSpeed)
-	time = CFAbsoluteTimeGetCurrent();
+	CFTimeInterval				dTime;
 	
 	if(_encryptionContext) {
 		if(length + EVP_MAX_BLOCK_LENGTH != _encryptionBufferSize) {
@@ -360,7 +388,21 @@ typedef struct {
 		success = NO;
 	}
 	
-	if(success && (realLength - offset > 0)) {
+	if(success && (realLength > 0)) {
+		if(_maxSpeed)
+		time = CFAbsoluteTimeGetCurrent();
+		else if(maxSpeed) {
+			while(1) {
+				time = CFAbsoluteTimeGetCurrent();
+				OSSpinLockLock(&_downloadLock);
+				dTime = _downloadTime - time;
+				OSSpinLockUnlock(&_downloadLock);
+				if(dTime <= 0.0)
+				break;
+				usleep(dTime * 1000000.0);
+			}
+		}
+		
 		success = NO;
 		while(1) {
 			numBytes = [stream write:((const uint8_t*)realBytes + offset) maxLength:(realLength - offset)]; //NOTE: Writing 0 bytes will close the stream
@@ -375,17 +417,24 @@ typedef struct {
 			NSLog(@"%s wrote only %i bytes out of %i", __FUNCTION__, numBytes, realLength - offset);
 #endif
 		}
+		
+		if(success) {
+			if(_maxSpeed) {
+				dTime = (double)realLength / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
+			}
+			else if(maxSpeed) {
+				dTime = (double)realLength / maxSpeed;
+				OSSpinLockLock(&_downloadLock);
+				_downloadTime = MAX(_downloadTime, time) + dTime;
+				OSSpinLockUnlock(&_downloadLock);
+			}
+		}
 	}
 	
 	if(success)
 	_totalSize += length;
-	
-	if(_maxSpeed && success) {
-		time = CFAbsoluteTimeGetCurrent() - time;
-		time = (double)realLength / _maxSpeed - time;
-		if(time > 0)
-		usleep(time * 1000000.0);
-	}
 	
 	return success;
 }
@@ -450,7 +499,8 @@ typedef struct {
 - (BOOL) openInputStream:(NSInputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	if(isFileTransfer) {
+	_fileTransfer = isFileTransfer;
+	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:NO])
 		return NO;
 		_maxSpeed = _maxUploadSpeed;
@@ -470,13 +520,12 @@ typedef struct {
 
 - (NSInteger) readFromInputStream:(NSInputStream*)stream bytes:(void*)bytes maxLength:(NSUInteger)length
 {
+	double						maxSpeed = (_fileTransfer ? _maximumUploadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	void*						newBytes;
 	int							newLength;
 	NSInteger					result;
-	
-	if(_maxSpeed)
-	time = CFAbsoluteTimeGetCurrent();
+	CFTimeInterval				dTime;
 	
 	if(_encryptionContext) {
 		if(length <= EVP_MAX_BLOCK_LENGTH)
@@ -488,8 +537,37 @@ typedef struct {
 			_encryptionBufferBytes = malloc(_encryptionBufferSize);
 		}
 		
+		if(_maxSpeed)
+		time = CFAbsoluteTimeGetCurrent();
+		else if(maxSpeed) {
+			while(1) {
+				time = CFAbsoluteTimeGetCurrent();
+				OSSpinLockLock(&_uploadLock);
+				dTime = _uploadTime - time;
+				OSSpinLockUnlock(&_uploadLock);
+				if(dTime <= 0.0)
+				break;
+				usleep(dTime * 1000000.0);
+			}
+		}
+		
 		newBytes = _encryptionBufferBytes;
 		result = [stream read:newBytes maxLength:(length - EVP_MAX_BLOCK_LENGTH)];
+		
+		if(result > 0) {
+			if(_maxSpeed) {
+				dTime = (double)result / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
+			}
+			else if(maxSpeed) {
+				dTime = (double)result / maxSpeed;
+				OSSpinLockLock(&_uploadLock);
+				_uploadTime = MAX(_uploadTime, time) + dTime;
+				OSSpinLockUnlock(&_uploadLock);
+			}
+		}
+		
 		if(result > 0) {
 			if(_digestContext) {
 				if(EVP_DigestUpdate(_digestContext, newBytes, result) != 1)
@@ -521,7 +599,35 @@ typedef struct {
 		}
 	}
 	else {
+		if(_maxSpeed)
+		time = CFAbsoluteTimeGetCurrent();
+		else if(maxSpeed) {
+			while(1) {
+				time = CFAbsoluteTimeGetCurrent();
+				OSSpinLockLock(&_uploadLock);
+				dTime = _uploadTime - time;
+				OSSpinLockUnlock(&_uploadLock);
+				if(dTime <= 0.0)
+				break;
+				usleep(dTime * 1000000.0);
+			}
+		}
+		
 		result = [stream read:bytes maxLength:length];
+		
+		if(result > 0) {
+			if(_maxSpeed) {
+				dTime = (double)result / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
+			}
+			else if(maxSpeed) {
+				dTime = (double)result / maxSpeed;
+				OSSpinLockLock(&_uploadLock);
+				_uploadTime = MAX(_uploadTime, time) + dTime;
+				OSSpinLockUnlock(&_uploadLock);
+			}
+		}
 		
 		if(_digestContext) {
 			if(result > 0) {
@@ -539,13 +645,6 @@ typedef struct {
 	
 	if(result > 0)
 	_totalSize += result;
-	
-	if(_maxSpeed && (result > 0)) {
-		time = CFAbsoluteTimeGetCurrent() - time;
-		time = (double)result / _maxSpeed - time;
-		if(time > 0)
-		usleep(time * 1000000.0);
-	}
 		
 	return result;
 }

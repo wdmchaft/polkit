@@ -67,10 +67,16 @@
 	NSUInteger							_encryptionBufferSize;
 	NSUInteger							_maxUploadSpeed,
 										_maxDownloadSpeed;
+	BOOL								_fileTransfer;
 	double								_maxSpeed;
 }
 + (FileTransferController*) fileTransferControllerWithURL:(NSURL*)url;
 + (BOOL) hasAtomicUploads; //Means that a file that failed mid-upload won't appear on the server (e.g. WebDAV)
+
++ (NSUInteger) globalMaximumDownloadSpeed;
++ (void) setGlobalMaximumDownloadSpeed:(NSUInteger)speed;
++ (NSUInteger) globalMaximumUploadSpeed;
++ (void) setGlobalMaximumUploadSpeed:(NSUInteger)speed;
 
 - (id) initWithHost:(NSString*)host port:(UInt16)port username:(NSString*)username password:(NSString*)password basePath:(NSString*)basePath; //Pass nil or 0 when not needed
 - (id) initWithURL:(NSURL*)url;
