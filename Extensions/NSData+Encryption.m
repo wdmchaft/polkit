@@ -140,7 +140,7 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 	mem = BIO_push(b64, mem);
 	BIO_write(mem, [self bytes], [self length]);
-	BIO_flush(mem);
+	(void)BIO_flush(mem);
 	base64Length = BIO_get_mem_data(mem, &base64Pointer);
 	string = [[NSString alloc] initWithBytes:base64Pointer length:base64Length encoding:NSASCIIStringEncoding];
 	BIO_free_all(mem);

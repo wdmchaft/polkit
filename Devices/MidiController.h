@@ -30,7 +30,11 @@
 {
 @private
 	NSString*					_name;
+#if __LP64__
+	UInt32						_midiEndPoint;
+#else
 	void*						_midiEndPoint;
+#endif
 	unsigned char				_channel;
 }
 - (id) initWithName:(NSString*)name uniqueID:(UInt32)uniqueID; //uniqueID is ignored if 0

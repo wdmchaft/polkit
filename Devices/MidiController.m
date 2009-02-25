@@ -45,7 +45,7 @@ static CFMutableSetRef				_instanceList;
 	OSStatus				error;
 	NSString*				string;
 	
-	if((CFSetGetCount(_instanceList) == 0) && (_midiClient == NULL)) {
+	if((CFSetGetCount(_instanceList) == 0) && (_midiClient == 0)) {
 		string = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
 		if(string == nil)
 		string = [[NSClassFromString(@"NSProcessInfo") processInfo] processName];
@@ -87,9 +87,9 @@ static CFMutableSetRef				_instanceList;
 	[_name release];
 	
 	CFSetRemoveValue(_instanceList, self);
-	if((CFSetGetCount(_instanceList) == 0) && (_midiClient != NULL)) {
+	if((CFSetGetCount(_instanceList) == 0) && (_midiClient != 0)) {
 		MIDIClientDispose(_midiClient);
-		_midiClient = NULL;
+		_midiClient = 0;
 	}
 	
 	[super dealloc];

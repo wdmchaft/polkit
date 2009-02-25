@@ -353,7 +353,7 @@ static void _DictionaryPollFunction(const void* key, const void* value, void* co
 	IOHIDDeviceInterface**	hidDeviceInterface = (IOHIDDeviceInterface**)context;
 	IOHIDEventStruct		hidEvent;
 	
-	if((*hidDeviceInterface)->getElementValue(hidDeviceInterface, (IOHIDElementCookie)key, &hidEvent) == kIOReturnSuccess) {
+	if((*hidDeviceInterface)->getElementValue(hidDeviceInterface, (IOHIDElementCookie)(long)key, &hidEvent) == kIOReturnSuccess) {
 		info->value = hidEvent.value;
 		
 		if((hidEvent.longValueSize != 0) && (hidEvent.longValue != NULL))
@@ -426,7 +426,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 											element = CFArrayGetValueAtIndex(elements, i);
 											cookie = (IOHIDElementCookie)[[(NSDictionary*)element objectForKey:@kIOHIDElementCookieKey] unsignedLongValue];
 											
-											if(!CFDictionaryContainsKey(_cookies, (const void*)cookie)) {
+											if(!CFDictionaryContainsKey(_cookies, (const void*)(long)cookie)) {
 												data = CFDataCreateMutable(kCFAllocatorDefault, sizeof(ElementInfo));
 												CFDataSetLength(data, sizeof(ElementInfo));
 												info = (ElementInfo*)CFDataGetMutableBytePtr(data);
@@ -447,7 +447,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 												info->min = [[(NSDictionary*)element objectForKey:@kIOHIDElementMinKey] intValue];
 												info->max = [[(NSDictionary*)element objectForKey:@kIOHIDElementMaxKey] intValue];
 												info->isRelative = [[(NSDictionary*)element objectForKey:@kIOHIDElementIsRelativeKey] boolValue];
-												CFDictionarySetValue(_cookies, (const void*)cookie, data);
+												CFDictionarySetValue(_cookies, (const void*)(long)cookie, data);
 												CFRelease(data);
 											
 												(*(IOHIDQueueInterface**)_queueInterface)->addElement((IOHIDQueueInterface**)_queueInterface, cookie, 0);
@@ -547,7 +547,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 	ElementInfo*			info;
 	
 	while((*(IOHIDQueueInterface**)_queueInterface)->getNextEvent((IOHIDQueueInterface**)_queueInterface, &hidEvent, zeroTime, 0) == kIOReturnSuccess) {
-		if((data = CFDictionaryGetValue(_cookies, (const void*)hidEvent.elementCookie))) {
+		if((data = CFDictionaryGetValue(_cookies, (const void*)(long)hidEvent.elementCookie))) {
 			info = (ElementInfo*)CFDataGetBytePtr(data);
 			info->value = hidEvent.value;
 			
