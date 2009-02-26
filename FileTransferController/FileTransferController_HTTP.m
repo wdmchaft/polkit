@@ -534,7 +534,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 - (id) initWithIDiskForUser:(NSString*)username password:(NSString*)password basePath:(NSString*)basePath
 {
 	if(username == nil)
-	username = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
+	username = [[NSUserDefaults standardUserDefaults] stringForKey:@"iToolsMember"];
 	
 	if([username length] && (password == nil))
 	password = [[Keychain sharedKeychain] genericPasswordForService:@"iTools" account:username];
