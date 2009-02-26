@@ -22,6 +22,8 @@
 #define kFileTransferHost_iDisk					@"idisk.mac.com"
 #define kFileTransferHost_AmazonS3				@"s3.amazonaws.com"
 
+#define kAmazonS3DefaultLocation				@""
+#define kAmazonS3EuropeLocation					@"EU"
 #define kAmazonS3TransferControllerAllKeysPath	@"@"
 
 @class FileTransferController;
@@ -188,6 +190,7 @@
 
 - (NSDictionary*) allBuckets; //Requires "bucket" property to be nil - NSDictionary of NSDictionary with NSFile type keys
 - (BOOL) createBucket; //Fails if bucket name is not valid or if it already exists but was created by a different owner
+- (BOOL) createBucketAtLocation:(NSString*)location; //Fails if bucket name is not valid or if it already exists but was created by a different owner
 - (BOOL) deleteBucket; //Fails if bucket is not empty or does not exist
 @end
 

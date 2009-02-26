@@ -123,8 +123,9 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 		CFRelease(proxySettings);
 	}
 	
+	CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanTrue);
+	
 	//kCFStreamSSLCertificates
-	//kCFStreamPropertyHTTPShouldAutoredirect
 	//kCFStreamPropertyHTTPAttemptPersistentConnection
 	
 	return readStream;
@@ -903,14 +904,28 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 
 - (BOOL) createBucket
 {
+	return [self createBucketAtLocation:nil];
+}
+
+- (BOOL) createBucketAtLocation:(NSString*)location
+{
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
+	NSInputStream*			bodyStream;
+	NSString*				xmlString;
 	
 	request = [self _createHTTPRequestWithMethod:@"PUT" path:@""];
 	if(request == NULL)
 	return NO;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	if([location length]) {
+		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration>\n\t<LocationConstraint>%@</LocationConstraint>\n</CreateBucketConfiguration>\n", location];
+		bodyStream = [NSInputStream inputStreamWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
+	}
+	else
+	bodyStream = nil;
+	
+	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:bodyStream];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:nil userInfo:@"PUT" isFileTransfer:NO] boolValue];
