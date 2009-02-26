@@ -152,6 +152,7 @@ static void _DiskCallback(DADiskRef disk, void* context)
 		DASessionUnscheduleFromRunLoop(_session, CFRunLoopGetMain(), kCFRunLoopCommonModes);
 		DAUnregisterCallback(_session, _DiskCallback, self);
 		CFRelease(_session);
+		_session = NULL;
 	}
 }
 
