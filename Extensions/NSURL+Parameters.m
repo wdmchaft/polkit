@@ -25,7 +25,17 @@
 
 @implementation NSURL (Parameters)
 
++ (NSURL*) URLWithScheme:(NSString*)scheme host:(NSString*)host path:(NSString*)path
+{
+	return [self URLWithScheme:scheme user:nil password:nil host:host port:0 path:path query:nil];
+}
+
 + (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path
+{
+	return [self URLWithScheme:scheme user:user password:password host:host port:port path:path query:nil];
+}
+
++ (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path query:(NSString*)query
 {
 	NSMutableString*				string = [NSMutableString string];
 	
@@ -56,6 +66,11 @@
 		if([path characterAtIndex:0] != '/')
 		[string appendString:@"/"];
 		[string appendString:ESCAPE_PATH(path)];
+	}
+	
+	if([query length]) {
+		[string appendString:@"?"];
+		[string appendString:query];
 	}
 	
 	return [[[self class] URLWithString:string] standardizedURL];

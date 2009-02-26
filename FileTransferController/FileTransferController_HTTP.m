@@ -564,6 +564,80 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 
 @implementation AmazonS3TransferController
 
+@synthesize productToken=_productToken, userToken=_userToken;
+
++ (NSDictionary*) activateDesktopProduct:(NSString*)productToken activationKey:(NSString*)activationKey expirationInterval:(NSTimeInterval)expirationInterval error:(NSError**)error
+{
+	NSOutputStream*				stream = [NSOutputStream outputStreamToMemory];
+	NSMutableDictionary*		dictionary = nil;
+	NSString*					string;
+	HTTPTransferController*		transferController;
+	NSData*						data;
+	NSXMLDocument*				document;
+	BOOL						success;
+	NSURL*						url;
+	NSArray*					elements;
+	NSXMLElement*				element;
+	
+	if(error)
+	*error = nil;
+	
+	if(![productToken length] || ![activationKey length])
+	return nil;
+	
+	string = [NSString stringWithFormat:@"https://ls.amazonaws.com/?Action=ActivateDesktopProduct&ActivationKey=%@&ProductToken=%@%@&Version=2008-04-28", activationKey, productToken, (expirationInterval > 0.0 ? [NSString stringWithFormat:@"&TokenExpiration=PT%.0fS", expirationInterval] : @"")]; //NOTE: http://en.wikipedia.org/wiki/ISO_8601#Durations
+	url = [NSURL URLWithString:[string stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	transferController = [[SecureHTTPTransferController alloc] initWithURL:url];
+	success = [transferController downloadFileFromPath:nil toStream:stream];
+	[transferController release];
+	
+	data = [stream propertyForKey:NSStreamDataWrittenToMemoryStreamKey];
+	if([data length]) {
+		document = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
+		if(document) {
+			if(success && (elements = [[document rootElement] elementsForName:@"ActivateDesktopProductResult"])) {
+				if([elements count]) {
+					element = [elements objectAtIndex:0];
+					dictionary = [NSMutableDictionary dictionary];
+					elements = [element elementsForName:@"UserToken"];
+					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_UserToken];
+					elements = [element elementsForName:@"AWSAccessKeyId"];
+					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_AccessKeyID];
+					elements = [element elementsForName:@"SecretAccessKey"];
+					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_SecretAccessKey];
+				}
+				if([dictionary count] != 3) {
+					if(error)
+					*error = MAKE_ERROR(@"s3", -1, (string ? string : @"Incomplete response"));
+					dictionary = nil;
+				}
+			}
+			else if(error) {
+				string = nil;
+				elements = [[document rootElement] elementsForName:@"Error"];
+				if([elements count]) {
+					element = [elements objectAtIndex:0];
+					elements = [element elementsForName:@"Message"];
+					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+					if(string == nil) {
+						elements = [element elementsForName:@"Code"];
+						string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
+					}
+				}
+				*error = MAKE_ERROR(@"s3", -1, (string ? string : @"Invalid response"));
+			}
+			[document release];
+		}
+	}
+	else if(error)
+	*error = MAKE_ERROR(@"s3", -1, @"Failed retrieving activation data");
+
+	return dictionary;
+}
+
 + (BOOL) hasUploadDataStream
 {
 	return YES;
@@ -623,6 +697,14 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	return [self initWithURL:[NSURL URLWithScheme:[[self class] urlScheme] user:accessKeyID password:secretAccessKey host:([bucket length] ? [NSString stringWithFormat:@"%@.%@", bucket, kFileTransferHost_AmazonS3] : kFileTransferHost_AmazonS3) port:0 path:nil]];
 }
 
+- (void) dealloc
+{
+	[_userToken release];
+	[_productToken release];
+	
+	[super dealloc];
+}
+
 /* Override behavior */
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path
 {
@@ -661,6 +743,9 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[date setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	dateString = [date descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Date"), (CFStringRef)dateString);
+	
+	if(_productToken && _userToken)
+	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("x-amz-security-token"), (CFStringRef)[NSString stringWithFormat:@"%@,%@", _productToken, _userToken]);
 	
 	headers = [(id)CFHTTPMessageCopyAllHeaderFields(request) autorelease];
 	buffer = [NSMutableString new];

@@ -25,7 +25,9 @@
 -[NSURL query] returns nil if not defined or the original string otherwise (possibly escaped)
 */
 @interface NSURL (Parameters)
++ (NSURL*) URLWithScheme:(NSString*)scheme host:(NSString*)host path:(NSString*)path;
 + (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path;
++ (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path query:(NSString*)query;
 - (NSString*) passwordByReplacingPercentEscapes;
 - (NSURL*) URLByDeletingPassword;
 - (NSURL*) URLByDeletingUserAndPassword;

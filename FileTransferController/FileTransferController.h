@@ -26,6 +26,10 @@
 #define kAmazonS3EuropeLocation					@"EU"
 #define kAmazonS3TransferControllerAllKeysPath	@"@"
 
+#define kAmazonS3ActivationInfo_UserToken		@"userToken"
+#define kAmazonS3ActivationInfo_AccessKeyID		@"accessKeyID"
+#define kAmazonS3ActivationInfo_SecretAccessKey	@"secretAccessKey"
+
 @class FileTransferController;
 
 @protocol FileTransferController
@@ -185,8 +189,16 @@
 
 /* Only supports downloads, uploads, delete, copy and directory listing, but also creating, deleting and listing buckets - Note that passing kAmazonS3TransferControllerAllKeysPath to -contentsOfDirectoryAtPath: returns all bucket keys */
 @interface AmazonS3TransferController : HTTPTransferController
+{
+@private
+	NSString*							_productToken;
+	NSString*							_userToken;
+}
++ (NSDictionary*) activateDesktopProduct:(NSString*)productToken activationKey:(NSString*)activationKey expirationInterval:(NSTimeInterval)expirationInterval error:(NSError**)error; //Returns kAmazonS3ActivationInfo_XXX keys
 - (id) initWithAccessKeyID:(NSString*)accessKeyID secretAccessKey:(NSString*)secretAccessKey bucket:(NSString*)bucket;
 @property(nonatomic, readonly) NSString* bucket;
+@property(nonatomic, copy) NSString* productToken; //Must start with "{ProductToken}"
+@property(nonatomic, copy) NSString* userToken; //Must start with "{UserToken}"
 
 - (NSDictionary*) allBuckets; //Requires "bucket" property to be nil - NSDictionary of NSDictionary with NSFile type keys
 - (BOOL) createBucket; //Fails if bucket name is not valid or if it already exists but was created by a different owner
