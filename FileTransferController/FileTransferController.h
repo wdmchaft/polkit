@@ -23,9 +23,9 @@
 #define kFileTransferHost_AmazonS3				@"s3.amazonaws.com"
 
 #define kAmazonS3DefaultLocation				@""
+#define kAmazonS3UnitedStatesLocation			@"US"
 #define kAmazonS3EuropeLocation					@"EU"
 #define kAmazonS3TransferControllerAllKeysPath	@"@"
-
 #define kAmazonS3ActivationInfo_UserToken		@"userToken"
 #define kAmazonS3ActivationInfo_AccessKeyID		@"accessKeyID"
 #define kAmazonS3ActivationInfo_SecretAccessKey	@"secretAccessKey"
