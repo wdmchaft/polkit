@@ -250,7 +250,7 @@
 	return NULL;
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
 	OSStatus				error;
 	FSRef					directory;
@@ -259,7 +259,7 @@
 	NSMutableArray*			components;
 	struct statfs			info;
 	
-	if((self = [super initWithURL:url])) {
+	if((self = [super initWithBaseURL:url])) {
 		components = [NSMutableArray arrayWithArray:[[url path] pathComponents]];
 		[components removeObjectAtIndex:0];
 		if([components count] == 0) {

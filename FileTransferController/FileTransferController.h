@@ -22,10 +22,7 @@
 #define kFileTransferHost_iDisk					@"idisk.mac.com"
 #define kFileTransferHost_AmazonS3				@"s3.amazonaws.com"
 
-#define kAmazonS3DefaultLocation				@""
-#define kAmazonS3UnitedStatesLocation			@"US"
-#define kAmazonS3EuropeLocation					@"EU"
-#define kAmazonS3TransferControllerAllKeysPath	@"@"
+#define kAmazonS3BucketLocation_Europe			@"EU"
 #define kAmazonS3ActivationInfo_UserToken		@"userToken"
 #define kAmazonS3ActivationInfo_AccessKeyID		@"accessKeyID"
 #define kAmazonS3ActivationInfo_SecretAccessKey	@"secretAccessKey"
@@ -85,7 +82,7 @@
 + (void) setGlobalMaximumUploadSpeed:(NSUInteger)speed;
 
 - (id) initWithHost:(NSString*)host port:(UInt16)port username:(NSString*)username password:(NSString*)password basePath:(NSString*)basePath; //Pass nil or 0 when not needed
-- (id) initWithURL:(NSURL*)url;
+- (id) initWithBaseURL:(NSURL*)url;
 
 @property(nonatomic, readonly) NSURL* baseURL;
 @property(nonatomic, assign) id<FileTransferControllerDelegate> delegate;
@@ -134,7 +131,7 @@
 }
 @end
 
-/* Supports everything */
+/* Supports everything except -deleteDirectoryAtPath: */
 @interface LocalTransferController : StreamTransferController
 @end
 
@@ -151,11 +148,11 @@
 }
 @end
 
-/* Supports everything */
+/* Supports everything except -deleteDirectoryAtPath: */
 @interface AFPTransferController : RemoteTransferController
 @end
 
-/* Supports everything */
+/* Supports everything except -deleteDirectoryAtPath: */
 @interface SMBTransferController : RemoteTransferController
 @end
 
@@ -173,7 +170,7 @@
 @interface SecureHTTPTransferController : HTTPTransferController
 @end
 
-/* Supports everything */
+/* Supports everything except -deleteDirectoryAtPath: */
 @interface WebDAVTransferController : HTTPTransferController
 @end
 
@@ -187,23 +184,20 @@
 @interface SecureWebDAVTransferController : WebDAVTransferController
 @end
 
-/* Only supports downloads, uploads, delete, copy and directory listing, but also creating, deleting and listing buckets - Note that passing kAmazonS3TransferControllerAllKeysPath to -contentsOfDirectoryAtPath: returns all bucket keys */
+/* Supports everything except -movePath:toPath: and -deleteDirectoryAtPath: (the first path component is the bucket and can be nil to operate on the bucket list itself and paths with depth > 2 are not supported) */
+/* Contrary to the FileTransferController conventions, deleting non-existent directories returns NO instead of YES and creating an already existing directory returns YES instead of NO (unless the owner differs) */
 @interface AmazonS3TransferController : HTTPTransferController
 {
 @private
 	NSString*							_productToken;
 	NSString*							_userToken;
+	NSString*							_newBucketLocation;
 }
 + (NSDictionary*) activateDesktopProduct:(NSString*)productToken activationKey:(NSString*)activationKey expirationInterval:(NSTimeInterval)expirationInterval error:(NSError**)error; //Returns kAmazonS3ActivationInfo_XXX keys
 - (id) initWithAccessKeyID:(NSString*)accessKeyID secretAccessKey:(NSString*)secretAccessKey bucket:(NSString*)bucket;
-@property(nonatomic, readonly) NSString* bucket;
 @property(nonatomic, copy) NSString* productToken; //Must start with "{ProductToken}"
 @property(nonatomic, copy) NSString* userToken; //Must start with "{UserToken}"
-
-- (NSDictionary*) allBuckets; //Requires "bucket" property to be nil - NSDictionary of NSDictionary with NSFile type keys
-- (BOOL) createBucket; //Fails if bucket name is not valid or if it already exists but was created by a different owner
-- (BOOL) createBucketAtLocation:(NSString*)location; //Fails if bucket name is not valid or if it already exists but was created by a different owner
-- (BOOL) deleteBucket; //Fails if bucket is not empty or does not exist
+@property(nonatomic, copy) NSString* newBucketLocation; //One of kAmazonS3BucketLocation_XXX or nil for default
 @end
 
 /* Same as AmazonS3TransferController */
@@ -211,6 +205,7 @@
 @end
 
 /* Supports everything except copy - Always use passive mode */
+/* Contrary to the FileTransferController conventions, deleting non-existent files or directories returns NO instead of YES */
 @interface FTPTransferController : FileTransferController
 {
 @private

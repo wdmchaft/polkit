@@ -91,7 +91,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	return @"ssh";
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
 	const char*					user = [[url user] UTF8String];
 	const char*					password = [[url passwordByReplacingPercentEscapes] UTF8String];
@@ -103,7 +103,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 		return nil;
 	}
 	
-	if((self = [super initWithURL:url])) {
+	if((self = [super initWithBaseURL:url])) {
 		_socket = _CreateSocketConnectedToHost([url host], ([url port] ? [[url port] unsignedShortValue] : kDefaultSSHPort), kCFSocketNoCallBack, NULL, NULL);
 		if(_socket) {
 			_session = libssh2_session_init();

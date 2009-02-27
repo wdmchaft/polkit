@@ -375,20 +375,25 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")]) {
-		[self _testURL:url];
-		
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
-		AssertNotNil([controller allBuckets], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
+		[controller setNewBucketLocation:nil];
+		AssertTrue([controller createDirectoryAtPath:@"polkit-test"], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:@"polkit-test"], nil);
+		AssertTrue([controller deleteDirectoryAtPath:@"polkit-test"], nil);
+		[controller setNewBucketLocation:kAmazonS3BucketLocation_Europe];
+		AssertTrue([controller createDirectoryAtPath:@"polkit-test"], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:@"polkit-test"], nil);
+		AssertTrue([controller deleteDirectoryAtPath:@"polkit-test"], nil);
 		[controller release];
 		
-		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:@"polkit-unit-testing"];
-		AssertTrue([controller createBucket], nil);
-		AssertTrue([controller createBucket], nil);
+		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithBaseURL:url];
+		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
-		AssertFalse([controller deleteBucket], nil);
+		AssertTrue([controller downloadFileFromPathToNull:@"Test.jpg"], nil);
+		AssertTrue([controller copyPath:@"Test.jpg" toPath:@"Test-copy.jpg"], nil);
+		AssertTrue([controller deleteFileAtPath:@"Test-copy.jpg"], nil);
 		AssertTrue([controller deleteFileAtPath:@"Test.jpg"], nil);
-		AssertTrue([controller deleteBucket], nil);
-		AssertFalse([controller deleteBucket], nil);
 		[controller release];
 	}
 }

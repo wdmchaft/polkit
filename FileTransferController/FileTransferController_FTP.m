@@ -50,9 +50,9 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 	return @"ftp";
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
-	if((self = [super initWithURL:url])) {
+	if((self = [super initWithBaseURL:url])) {
 		_handle = curl_easy_init();
 		if(_handle == NULL) {
 			NSLog(@"%s: curl_easy_init() failed", __FUNCTION__);

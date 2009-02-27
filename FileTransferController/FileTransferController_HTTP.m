@@ -564,7 +564,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 
 @implementation AmazonS3TransferController
 
-@synthesize productToken=_productToken, userToken=_userToken;
+@synthesize productToken=_productToken, userToken=_userToken, newBucketLocation=_newBucketLocation;
 
 + (NSDictionary*) activateDesktopProduct:(NSString*)productToken activationKey:(NSString*)activationKey expirationInterval:(NSTimeInterval)expirationInterval error:(NSError**)error
 {
@@ -587,7 +587,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	
 	string = [NSString stringWithFormat:@"https://ls.amazonaws.com/?Action=ActivateDesktopProduct&ActivationKey=%@&ProductToken=%@%@&Version=2008-04-28", activationKey, productToken, (expirationInterval > 0.0 ? [NSString stringWithFormat:@"&TokenExpiration=PT%.0fS", expirationInterval] : @"")]; //NOTE: http://en.wikipedia.org/wiki/ISO_8601#Durations
 	url = [NSURL URLWithString:[string stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-	transferController = [[SecureHTTPTransferController alloc] initWithURL:url];
+	transferController = [[SecureHTTPTransferController alloc] initWithBaseURL:url];
 	success = [transferController downloadFileFromPath:nil toStream:stream];
 	[transferController release];
 	
@@ -643,14 +643,14 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	return YES;
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
-	if(![[url host] hasSuffix:kFileTransferHost_AmazonS3] || [url port] || ![url user] || ![url passwordByReplacingPercentEscapes] || [[url path] length]) {
+	if(![[url host] hasSuffix:kFileTransferHost_AmazonS3] || [url port] || ![url user] || ![url passwordByReplacingPercentEscapes] || (![[url host] isEqualToString:kFileTransferHost_AmazonS3] && [[url path] length])) {
 		[self release];
 		return nil;
 	}
 	
-	return [super initWithURL:url];
+	return [super initWithBaseURL:url];
 }
 
 - (id) initWithAccessKeyID:(NSString*)accessKeyID secretAccessKey:(NSString*)secretAccessKey bucket:(NSString*)bucket
@@ -660,7 +660,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		return nil;
 	}
 	
-	return [self initWithURL:[NSURL URLWithScheme:[[self class] urlScheme] user:accessKeyID password:secretAccessKey host:([bucket length] ? [NSString stringWithFormat:@"%@.%@", bucket, kFileTransferHost_AmazonS3] : kFileTransferHost_AmazonS3) port:0 path:nil]];
+	return [self initWithHost:([bucket length] ? [NSString stringWithFormat:@"%@.%@", bucket, kFileTransferHost_AmazonS3] : kFileTransferHost_AmazonS3) port:0 username:accessKeyID password:secretAccessKey basePath:nil];
 }
 
 - (void) dealloc
@@ -671,32 +671,39 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[super dealloc];
 }
 
-/* Override behavior */
+/* Override completely */
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path
-{
-	if(path && ![path length])
-	path = @"/";
-	
-	return [super absoluteURLForRemotePath:path];
-}
-
-- (NSString*) bucket
 {
 	NSString*				host = [[self baseURL] host];
 	NSRange					range;
 	
-	range = [host rangeOfString:[@"." stringByAppendingString:kFileTransferHost_AmazonS3]];
-	if(range.location != NSNotFound)
-	return [host substringToIndex:range.location];
+	path = [self absolutePathForRemotePath:path];
+	if([host isEqualToString:kFileTransferHost_AmazonS3] && [path length]) {
+		if([path characterAtIndex:0] == '/') {
+			range = [path rangeOfString:@"/" options:0 range:NSMakeRange(1, [path length] - 1)];
+			if(range.location == NSNotFound) {
+				host = [NSString stringWithFormat:@"%@.%@", [path substringFromIndex:1], kFileTransferHost_AmazonS3];
+				path = nil;
+			}
+			else {
+				host = [NSString stringWithFormat:@"%@.%@", [path substringWithRange:NSMakeRange(1, range.location - 1)], kFileTransferHost_AmazonS3];
+				path = [path substringWithRange:NSMakeRange(range.location + 1, [path length] - range.location - 1)];
+			}
+		}
+		else {
+			host = [NSString stringWithFormat:@"%@.%@", path, kFileTransferHost_AmazonS3];
+			path = nil;
+		}
+	}
 	
-	return nil;
+	return [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:host port:0 path:path query:nil];
 }
 
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
 - (CFReadStreamRef) _createReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
 {
 	NSURL*					url = [(id)CFHTTPMessageCopyRequestURL(request) autorelease];
-	NSString*				bucket = [self bucket];
+	NSString*				host = [url host];
 	NSMutableString*		amzHeaders = [NSMutableString string];
 	NSMutableString*		buffer;
 	NSString*				authorization;
@@ -724,7 +731,12 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		[amzHeaders appendFormat:@"%@:%@\n", [header lowercaseString], [headers objectForKey:header]];
 	}
 	[buffer appendString:amzHeaders];
-	[buffer appendFormat:@"%@%@", (bucket ? [@"/" stringByAppendingString:bucket] : @""), [[url path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	if([host isEqualToString:kFileTransferHost_AmazonS3])
+	[buffer appendString:@"/"];
+	else if([[url path] length])
+	[buffer appendFormat:@"/%@%@", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)], [url path]];
+	else
+	[buffer appendFormat:@"/%@/", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)]];
 	authorization = [[[buffer dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[[self baseURL] passwordByReplacingPercentEscapes]] encodeBase64];
 	[buffer release];
 	
@@ -828,22 +840,18 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		}
 	}
 	
-	if([method hasPrefix:@"GET:"]) {
+	if([method isEqualToString:@"GET/"]) {
 		if((status == 200) && [body isKindOfClass:[NSXMLDocument class]]) {
-			if([self bucket]) {
-				type = [method substringFromIndex:4];
-				if([type isEqualToString:kAmazonS3TransferControllerAllKeysPath])
-				type = nil;
-				
+			if([[[body rootElement] name] isEqualToString:@"ListBucketResult"]) {
 				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Contents"];
 				result = [NSMutableDictionary dictionary];
 				for(element in elements) {
-					properties = _DictionaryFromS3Objects(element, type, &path);
+					properties = _DictionaryFromS3Objects(element, nil, &path);
 					if(properties)
 					[result setObject:properties forKey:path];
 				}
 			}
-			else {
+			else if([[[body rootElement] name] isEqualToString:@"ListAllMyBucketsResult"]) {
 				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Buckets"];
 				elements = [(NSXMLElement*)[elements objectAtIndex:0] elementsForName:@"Bucket"];
 				result = [NSMutableDictionary dictionary];
@@ -893,18 +901,14 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	if([remotePath length] && ![remotePath isEqualToString:kAmazonS3TransferControllerAllKeysPath])
-	return nil;
-	
-	//FIXME: Amazon S3 doesn't support directories although you can emulate paths using "/" in keys
-	request = [self _createHTTPRequestWithMethod:@"GET" path:([remotePath length] && ![remotePath isEqualToString:kAmazonS3TransferControllerAllKeysPath] ? [NSString stringWithFormat:@"?prefix=%@/", remotePath] : @"")];
+	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
 	if(request == NULL)
 	return nil;
 	
 	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
-	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:[NSString stringWithFormat:@"GET:%@", (remotePath ? remotePath : @"")] isFileTransfer:NO];
+	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET/" isFileTransfer:NO];
 }
 
 - (BOOL) _deletePath:(NSString*)remotePath
@@ -919,7 +923,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
-	return [[self runReadStream:stream dataStream:nil userInfo:@"DELETE" isFileTransfer:NO] boolValue];
+	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"DELETE" isFileTransfer:NO] boolValue];
 }
 
 - (BOOL) deleteFileAtPath:(NSString*)remotePath
@@ -929,15 +933,24 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 
 - (BOOL) copyPath:(NSString*)fromRemotePath toPath:(NSString*)toRemotePath
 {
+	NSString*				host = [[self baseURL] host];
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
+	
+	if(![fromRemotePath length])
+	return NO;
+	if([fromRemotePath characterAtIndex:0] != '/') {
+		if([host isEqualToString:kFileTransferHost_AmazonS3])
+		return NO;
+		fromRemotePath = [NSString stringWithFormat:@"%@/%@", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)], fromRemotePath];
+	}
 	
 	request = [self _createHTTPRequestWithMethod:@"PUT" path:toRemotePath];
 	if(request == NULL)
 	return NO;
 	
 	fromRemotePath = [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)fromRemotePath, NULL, NULL, kCFStringEncodingUTF8) autorelease];
-	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("x-amz-copy-source"), (CFStringRef)[NSString stringWithFormat:@"/%@/%@", [self bucket], fromRemotePath]);
+	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("x-amz-copy-source"), (CFStringRef)fromRemotePath);
 	
 	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
@@ -945,32 +958,19 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"COPY" isFileTransfer:NO] boolValue];
 }
 
-- (NSDictionary*) allBuckets
-{
-	if([self bucket])
-	return nil;
-	
-	return [self contentsOfDirectoryAtPath:nil];
-}
-
-- (BOOL) createBucket
-{
-	return [self createBucketAtLocation:nil];
-}
-
-- (BOOL) createBucketAtLocation:(NSString*)location
+- (BOOL) createDirectoryAtPath:(NSString*)remotePath
 {
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	NSInputStream*			bodyStream;
 	NSString*				xmlString;
 	
-	request = [self _createHTTPRequestWithMethod:@"PUT" path:@""];
+	request = [self _createHTTPRequestWithMethod:@"PUT" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
-	if([location length]) {
-		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration>\n\t<LocationConstraint>%@</LocationConstraint>\n</CreateBucketConfiguration>\n", location];
+	if(_newBucketLocation) {
+		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration>\n\t<LocationConstraint>%@</LocationConstraint>\n</CreateBucketConfiguration>\n", _newBucketLocation];
 		bodyStream = [NSInputStream inputStreamWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
 	}
 	else
@@ -979,12 +979,12 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:bodyStream];
 	CFRelease(request);
 	
-	return [[self runReadStream:stream dataStream:nil userInfo:@"PUT" isFileTransfer:NO] boolValue];
+	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"PUT" isFileTransfer:NO] boolValue];
 }
 
-- (BOOL) deleteBucket
+- (BOOL) deleteDirectoryAtPath:(NSString*)remotePath
 {
-	return [self _deletePath:@""];
+	return [self _deletePath:remotePath];
 }
 
 @end

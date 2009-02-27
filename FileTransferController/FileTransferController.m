@@ -94,13 +94,13 @@ static CFTimeInterval					_downloadTime = 0.0,
 	NSString*					password = [url passwordByReplacingPercentEscapes];
 	
 	if([[url scheme] isEqualToString:@"file"])
-	return [[(LocalTransferController*)[NSClassFromString(@"LocalTransferController") alloc] initWithURL:url] autorelease];
+	return [[(LocalTransferController*)[NSClassFromString(@"LocalTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"afp"])
-	return [[(AFPTransferController*)[NSClassFromString(@"AFPTransferController") alloc] initWithURL:url] autorelease];
+	return [[(AFPTransferController*)[NSClassFromString(@"AFPTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"smb"])
-	return [[(SMBTransferController*)[NSClassFromString(@"SMBTransferController") alloc] initWithURL:url] autorelease];
+	return [[(SMBTransferController*)[NSClassFromString(@"SMBTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"http"]) {
 		if([[url host] isEqualToString:kFileTransferHost_iDisk]) {
@@ -113,36 +113,36 @@ static CFTimeInterval					_downloadTime = 0.0,
 		}
 		else {
 			if([[url host] hasSuffix:kFileTransferHost_AmazonS3])
-			return [[(AmazonS3TransferController*)[NSClassFromString(@"AmazonS3TransferController") alloc] initWithURL:url] autorelease];
+			return [[(AmazonS3TransferController*)[NSClassFromString(@"AmazonS3TransferController") alloc] initWithBaseURL:url] autorelease];
 			else
-			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithURL:url] autorelease];
+			return [[(WebDAVTransferController*)[NSClassFromString(@"WebDAVTransferController") alloc] initWithBaseURL:url] autorelease];
 		}
 	}
 	
 	if([[url scheme] isEqualToString:@"https"]) {
 		if([[url host] hasSuffix:kFileTransferHost_AmazonS3])
-		return [[(SecureAmazonS3TransferController*)[NSClassFromString(@"SecureAmazonS3TransferController") alloc] initWithURL:url] autorelease];
+		return [[(SecureAmazonS3TransferController*)[NSClassFromString(@"SecureAmazonS3TransferController") alloc] initWithBaseURL:url] autorelease];
 		else
-		return [[(SecureWebDAVTransferController*)[NSClassFromString(@"SecureWebDAVTransferController") alloc] initWithURL:url] autorelease];
+		return [[(SecureWebDAVTransferController*)[NSClassFromString(@"SecureWebDAVTransferController") alloc] initWithBaseURL:url] autorelease];
 	}
 	
 	if([[url scheme] isEqualToString:@"ftp"])
-	return [[(FTPTransferController*)[NSClassFromString(@"FTPTransferController") alloc] initWithURL:url] autorelease];
+	return [[(FTPTransferController*)[NSClassFromString(@"FTPTransferController") alloc] initWithBaseURL:url] autorelease];
 	if([[url scheme] isEqualToString:@"ftps"])
-	return [[(FTPSTransferController*)[NSClassFromString(@"FTPSTransferController") alloc] initWithURL:url] autorelease];
+	return [[(FTPSTransferController*)[NSClassFromString(@"FTPSTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"ssh"])
-	return [[(SFTPTransferController*)[NSClassFromString(@"SFTPTransferController") alloc] initWithURL:url] autorelease];
+	return [[(SFTPTransferController*)[NSClassFromString(@"SFTPTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	return nil;
 }
 
 - (id) init
 {
-	return [self initWithURL:nil];
+	return [self initWithBaseURL:nil];
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
 	if(![[url scheme] isEqualToString:[[self class] urlScheme]]) {
 		[self release];
@@ -157,7 +157,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (id) initWithHost:(NSString*)host port:(UInt16)port username:(NSString*)username password:(NSString*)password basePath:(NSString*)basePath
 {
-	return [self initWithURL:[NSURL URLWithScheme:[[self class] urlScheme] user:username password:password host:host port:port path:basePath]];
+	return [self initWithBaseURL:[NSURL URLWithScheme:[[self class] urlScheme] user:username password:password host:host port:port path:basePath]];
 }
 
 - (void) dealloc
@@ -846,9 +846,9 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return [super allocWithZone:zone];
 }
 
-- (id) initWithURL:(NSURL*)url
+- (id) initWithBaseURL:(NSURL*)url
 {
-	if((self = [super initWithURL:url]))
+	if((self = [super initWithBaseURL:url]))
 	_streamBuffer = malloc(kStreamBufferSize);
 	
 	return self;
