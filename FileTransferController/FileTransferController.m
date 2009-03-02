@@ -349,7 +349,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 - (BOOL) openOutputStream:(NSOutputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	_fileTransfer = isFileTransfer;
+	_fileTransfer = (isFileTransfer && ![self isLocal]);
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:YES])
 		return NO;
@@ -516,7 +516,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 - (BOOL) openInputStream:(NSInputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	_fileTransfer = isFileTransfer;
+	_fileTransfer = (isFileTransfer && ![self isLocal]);
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:NO])
 		return NO;
