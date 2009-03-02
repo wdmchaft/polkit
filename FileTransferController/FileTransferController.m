@@ -349,11 +349,11 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 - (BOOL) openOutputStream:(NSOutputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	_fileTransfer = (isFileTransfer && ![self isLocal]);
+	_fileTransfer = isFileTransfer;
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:YES])
 		return NO;
-		_maxSpeed = _maxDownloadSpeed;
+		_maxSpeed = ([self isLocal] ? 0.0 : _maxDownloadSpeed);
 	}
 	else
 	_maxSpeed = 0.0;
@@ -370,7 +370,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 
 - (BOOL) writeToOutputStream:(NSOutputStream*)stream bytes:(const void*)bytes maxLength:(NSUInteger)length
 {
-	double						maxSpeed = (_fileTransfer ? _maximumDownloadSpeed : 0.0);
+	double						maxSpeed = (_fileTransfer && ![self isLocal] ? _maximumDownloadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	BOOL						success = YES;
 	int							offset = 0,
@@ -516,11 +516,11 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 - (BOOL) openInputStream:(NSInputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
-	_fileTransfer = (isFileTransfer && ![self isLocal]);
+	_fileTransfer = isFileTransfer;
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:NO])
 		return NO;
-		_maxSpeed = _maxUploadSpeed;
+		_maxSpeed = ([self isLocal] ? 0.0 : _maxUploadSpeed);
 	}
 	else
 	_maxSpeed = 0.0;
@@ -537,7 +537,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 
 - (NSInteger) readFromInputStream:(NSInputStream*)stream bytes:(void*)bytes maxLength:(NSUInteger)length
 {
-	double						maxSpeed = (_fileTransfer ? _maximumUploadSpeed : 0.0);
+	double						maxSpeed = (_fileTransfer && ![self isLocal] ? _maximumUploadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	void*						newBytes;
 	int							newLength;
