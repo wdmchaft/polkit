@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -668,7 +668,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E24D287C0E92977600E298A9 /* Debug.xcconfig */;
 			buildSettings = {
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx10.5;
 			};
 			name = Debug;
 		};
@@ -676,7 +676,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E24D287B0E92977600E298A9 /* Release.xcconfig */;
 			buildSettings = {
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};
