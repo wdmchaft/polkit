@@ -981,6 +981,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
+	BOOL					opened = NO;
 	id						result;
 	SInt32					value;
 	
@@ -1013,8 +1014,12 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			switch(CFReadStreamGetStatus(readStream)) {
 				
 				case kCFStreamStatusOpen:
-				[self readStreamClientCallBack:readStream type:kCFStreamEventOpenCompleted];
+				if(opened)
 				[self readStreamClientCallBack:readStream type:kCFStreamEventHasBytesAvailable];
+				else {
+					[self readStreamClientCallBack:readStream type:kCFStreamEventOpenCompleted];
+					opened = YES;
+				}
 				break;
 				
 				case kCFStreamStatusAtEnd:
@@ -1105,6 +1110,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
+	BOOL					opened = NO;
 	id						result;
 	SInt32					value;
 	
@@ -1138,8 +1144,12 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 			switch(CFWriteStreamGetStatus(writeStream)) {
 				
 				case kCFStreamStatusOpen:
-				[self writeStreamClientCallBack:writeStream type:kCFStreamEventOpenCompleted];
+				if(opened)
 				[self writeStreamClientCallBack:writeStream type:kCFStreamEventCanAcceptBytes];
+				else {
+					[self writeStreamClientCallBack:writeStream type:kCFStreamEventOpenCompleted];
+					opened = YES;
+				}
 				break;
 				
 				case kCFStreamStatusAtEnd:
