@@ -24,7 +24,6 @@
 #import "DataStream.h"
 
 #define kFileTransferRunLoopActiveMode	CFSTR("FileTransferActiveMode")
-#define kFileTransferRunLoopWaitMode	CFSTR("FileTransferWaitMode")
 #define kStreamBufferSize				(256 * 1024)
 #define kRunLoopInterval				1.0
 #define kEncryptionCipher				EVP_aes_256_cbc()
@@ -42,16 +41,6 @@ static OSSpinLock						_downloadLock = 0,
 										_uploadLock = 0;
 static CFTimeInterval					_downloadTime = 0.0,
 										_uploadTime = 0.0;
-
-static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
-{
-	NSAutoreleasePool*		localPool = [NSAutoreleasePool new];
-	
-	if([[(FileTransferController*)info delegate] fileTransferControllerShouldAbort:(FileTransferController*)info])
-	CFRunLoopStop(CFRunLoopGetCurrent());
-	
-	[localPool release];
-}
 
 @implementation FileTransferController
 
@@ -411,8 +400,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 				OSSpinLockUnlock(&_downloadLock);
 				if(dTime <= 0.0)
 				break;
-				if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-				success = NO;
+				usleep(dTime * 1000000.0);
 			}
 		}
 		
@@ -436,10 +424,8 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		if(success) {
 			if(_maxSpeed) {
 				dTime = (double)realLength / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
-				if(dTime > 0.0) {
-					if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-					success = NO;
-				}
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
 			}
 			else if(maxSpeed) {
 				dTime = (double)realLength / maxSpeed;
@@ -564,8 +550,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 				OSSpinLockUnlock(&_uploadLock);
 				if(dTime <= 0.0)
 				break;
-				if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-				return -1;
+				usleep(dTime * 1000000.0);
 			}
 		}
 		
@@ -575,10 +560,8 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		if(result > 0) {
 			if(_maxSpeed) {
 				dTime = (double)result / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
-				if(dTime > 0.0) {
-					if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-					result = -1;
-				}
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
 			}
 			else if(maxSpeed) {
 				dTime = (double)result / maxSpeed;
@@ -629,8 +612,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 				OSSpinLockUnlock(&_uploadLock);
 				if(dTime <= 0.0)
 				break;
-				if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-				return -1;
+				usleep(dTime * 1000000.0);
 			}
 		}
 		
@@ -639,10 +621,8 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		if(result > 0) {
 			if(_maxSpeed) {
 				dTime = (double)result / _maxSpeed - (CFAbsoluteTimeGetCurrent() - time);
-				if(dTime > 0.0) {
-					if(CFRunLoopRunInMode(kFileTransferRunLoopWaitMode, dTime, false) == kCFRunLoopRunStopped)
-					result = -1;
-				}
+				if(dTime > 0.0)
+				usleep(dTime * 1000000.0);
 			}
 			else if(maxSpeed) {
 				dTime = (double)result / maxSpeed;
@@ -1000,11 +980,9 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 - (id) runReadStream:(CFReadStreamRef)readStream dataStream:(NSOutputStream*)dataStream userInfo:(id)info isFileTransfer:(BOOL)allowEncryption
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
-	CFStreamClientContext	streamContext = {0, self, NULL, NULL, NULL};
-	CFRunLoopTimerContext	timerContext = {0, self, NULL, NULL, NULL};
+	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	id						result;
 	SInt32					value;
-	CFRunLoopTimerRef		timer;
 	
 	if(dataStream && ![self openOutputStream:dataStream isFileTransfer:allowEncryption]) {
 		CFRelease(readStream);
@@ -1012,7 +990,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	}
 	
 	if([[self class] useAsyncStreams]) {
-		CFReadStreamSetClient(readStream, kCFStreamEventOpenCompleted | kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, _ReadStreamClientCallBack, &streamContext);
+		CFReadStreamSetClient(readStream, kCFStreamEventOpenCompleted | kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, _ReadStreamClientCallBack, &context);
 		CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kFileTransferRunLoopActiveMode);
 	}
 	CFReadStreamOpen(readStream);
@@ -1026,20 +1004,9 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	
 	_result = nil;
 	if([[self class] useAsyncStreams]) {
-		if(delegateHasShouldAbort) {
-			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, 0.0, kRunLoopInterval, 0, 0, _TimerCallBack, &timerContext);
-			if(timer)
-			CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kFileTransferRunLoopWaitMode);
-		}
-		else
-		timer = NULL;
 		do {
 			value = CFRunLoopRunInMode(kFileTransferRunLoopActiveMode, kRunLoopInterval, true);
 		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
-		if(timer) {
-			CFRunLoopTimerInvalidate(timer);
-			CFRelease(timer);
-		}
 	}
 	else {
 		do {
@@ -1137,11 +1104,9 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 - (id) runWriteStream:(CFWriteStreamRef)writeStream dataStream:(NSInputStream*)dataStream userInfo:(id)info isFileTransfer:(BOOL)allowEncryption
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
-	CFStreamClientContext	streamContext = {0, self, NULL, NULL, NULL};
-	CFRunLoopTimerContext	timerContext = {0, self, NULL, NULL, NULL};
+	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	id						result;
 	SInt32					value;
-	CFRunLoopTimerRef		timer;
 	
 	if(dataStream && ![self openInputStream:dataStream  isFileTransfer:allowEncryption]) {
 		CFRelease(writeStream);
@@ -1149,7 +1114,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	}
 	
 	if([[self class] useAsyncStreams]) {
-		CFWriteStreamSetClient(writeStream, kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, _WriteStreamClientCallBack, &streamContext);
+		CFWriteStreamSetClient(writeStream, kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, _WriteStreamClientCallBack, &context);
 		CFWriteStreamScheduleWithRunLoop(writeStream, CFRunLoopGetCurrent(), kFileTransferRunLoopActiveMode);
 	}
 	CFWriteStreamOpen(writeStream);
@@ -1164,20 +1129,9 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	
 	_result = nil;
 	if([[self class] useAsyncStreams]) {
-		if(delegateHasShouldAbort) {
-			timer = CFRunLoopTimerCreate(kCFAllocatorDefault, 0.0, kRunLoopInterval, 0, 0, _TimerCallBack, &timerContext);
-			if(timer)
-			CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kFileTransferRunLoopWaitMode);
-		}
-		else
-		timer = NULL;
 		do {
 			value = CFRunLoopRunInMode(kFileTransferRunLoopActiveMode, kRunLoopInterval, true);
 		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
-		if(timer) {
-			CFRunLoopTimerInvalidate(timer);
-			CFRelease(timer);
-		}
 	}
 	else {
 		do {

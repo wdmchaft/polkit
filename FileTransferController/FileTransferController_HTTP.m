@@ -216,6 +216,10 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if(![userInfo isKindOfClass:[NSInputStream class]])
 	return [(id<DataStreamSource>)super readDataFromStream:userInfo buffer:buffer maxLength:length];
 	
+	//HACK: The StreamTransferController runloop is not necessarily running during the body upload, so we need to check for abort directly
+	if(_hasShouldAbort && [[self delegate] fileTransferControllerShouldAbort:self])
+	return -1;
+	
 	numBytes = [self readFromInputStream:userInfo bytes:buffer maxLength:length];
 	if(numBytes > 0)
 	[self setCurrentLength:([self currentLength] + numBytes)]; //FIXME: We could also use kCFStreamPropertyHTTPRequestBytesWrittenCount
@@ -244,6 +248,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	return NO;
 	
 	//HACK: Force CFReadStreamCreateForStreamedHTTPRequest() to go through our stream methods by using a DataStream wrapper
+	_hasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	stream = [[[DataReadStream alloc] initWithDataSource:self userInfo:stream] autorelease];
 	if(stream == nil)
 	return NO;

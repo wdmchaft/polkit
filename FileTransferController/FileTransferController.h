@@ -161,7 +161,8 @@
 {
 @private
 	CFHTTPMessageRef					_responseHeaders;
-	BOOL								_disableSSLCertificates;
+	BOOL								_disableSSLCertificates,
+										_hasShouldAbort;
 }
 @property(nonatomic, getter=isSSLCertificateValidationDisabled) BOOL SSLCertificateValidationDisabled;
 @end
