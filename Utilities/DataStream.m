@@ -116,21 +116,23 @@
 
 - (NSInteger) read:(uint8_t*)buffer maxLength:(NSUInteger)len
 {
+	NSInteger				numBytes;
+	
 	if(_status == NSStreamStatusOpen) {
-		len = [_source readDataFromStream:_info buffer:buffer maxLength:len];
-		if(len < -1) {
+		numBytes = [_source readDataFromStream:_info buffer:buffer maxLength:len];
+		if(numBytes < -1) {
 			if(_error == nil)
-			_error = [[NSError errorWithDomain:kDataStreamErrorDomain code:len userInfo:nil] retain];
+			_error = [[NSError errorWithDomain:kDataStreamErrorDomain code:numBytes userInfo:nil] retain];
 		}
-		else if(len == 0)
+		else if(numBytes == 0)
 		_status = NSStreamStatusAtEnd;
 	}
 	else if(_status == NSStreamStatusAtEnd)
-	len = 0;
+	numBytes = 0;
 	else
-	len = -1;
+	numBytes = -1;
 	
-	return len;
+	return numBytes;
 }
 
 - (BOOL) getBuffer:(uint8_t**)buffer length:(NSUInteger*)len
@@ -259,21 +261,23 @@
 
 - (NSInteger) write:(const uint8_t*)buffer maxLength:(NSUInteger)len
 {
+	NSInteger				numBytes;
+	
 	if(_status == NSStreamStatusOpen) {
-		len = [_destination writeDataToStream:_info buffer:buffer maxLength:len];
-		if(len < -1) {
+		numBytes = [_destination writeDataToStream:_info buffer:buffer maxLength:len];
+		if(numBytes < -1) {
 			if(_error == nil)
-			_error = [[NSError errorWithDomain:kDataStreamErrorDomain code:len userInfo:nil] retain];
+			_error = [[NSError errorWithDomain:kDataStreamErrorDomain code:numBytes userInfo:nil] retain];
 		}
-		else if(len == 0)
+		else if(numBytes == 0)
 		_status = NSStreamStatusAtEnd;
 	}
 	else if(_status == NSStreamStatusAtEnd)
-	len = 0;
+	numBytes = 0;
 	else
-	len = -1;
+	numBytes = -1;
 	
-	return len;
+	return numBytes;
 }
 
 - (BOOL) hasSpaceAvailable
