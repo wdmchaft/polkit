@@ -160,7 +160,7 @@ int main(int argc, const char* argv[])
 					failures += [test numberOfFailures];
 					[test release];
 				}
-				@catch(NSException* exception) {
+				@catch(id exception) {
 					printf("<IGNORED EXCEPTION> %s\n", [[exception description] UTF8String]);
 				}
 				[localPool release];

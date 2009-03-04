@@ -144,11 +144,11 @@
 	@try {
 		[task launch];
 	}
-	@catch (NSException* localException) {
+	@catch(id exception) {
 		if(status)
 		*status = kDefaultErrorCode;
 		if(error)
-		*error = [NSString stringWithFormat:@"Exception \"%@\" raised when launching tool (%@)", [localException name], [localException reason]];
+		*error = [NSString stringWithFormat:@"Exception raised when launching tool: %@", exception];
 		success = NO;
 	}
 	if(success == NO)
@@ -159,7 +159,7 @@
 			[fileHandle writeData:inData];
 			[fileHandle closeFile];
 		}
-		@catch (NSException* localException) {
+		@catch(id exception) {
 			[task terminate];
 			[task interrupt];
 			if(status)
