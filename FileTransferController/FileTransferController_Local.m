@@ -226,7 +226,7 @@
 	return [self _deletePath:remotePath];
 }
 
-- (BOOL) isLocal
+- (BOOL) isLocalDisk
 {
 	return YES;
 }
@@ -235,7 +235,7 @@
 
 @implementation FileTransferController (LocalTransferController)
 
-- (BOOL) isLocal
+- (BOOL) isLocalDisk
 {
 	return NO;
 }
@@ -324,7 +324,7 @@
 }
 
 /* Override completely */
-- (BOOL) isLocal
+- (BOOL) isLocalDisk
 {
 	return NO;
 }

@@ -44,7 +44,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 @implementation FileTransferController
 
-@synthesize baseURL=_baseURL, delegate=_delegate, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
+@synthesize baseURL=_baseURL, delegate=_delegate, localHost=_localHost, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
 
 + (id) allocWithZone:(NSZone*)zone
 {
@@ -150,8 +150,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 		return nil;
 	}
 	
-	if((self = [super init]))
-	_baseURL = [url copy];
+	if((self = [super init])) {
+		_baseURL = [url copy];
+		_localHost = ([[[NSHost currentHost] names] containsObject:[_baseURL host]] || [[_baseURL host] hasSuffix:@".local"]);
+	}
 	
 	return self;
 }
@@ -342,7 +344,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:YES])
 		return NO;
-		_maxSpeed = ([self isLocal] ? 0.0 : _maxDownloadSpeed);
+		_maxSpeed = ([self isLocalHost] || [self isLocalDisk] ? 0.0 : _maxDownloadSpeed);
 	}
 	else
 	_maxSpeed = 0.0;
@@ -359,7 +361,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (BOOL) writeToOutputStream:(NSOutputStream*)stream bytes:(const void*)bytes maxLength:(NSUInteger)length
 {
-	double						maxSpeed = (_fileTransfer && ![self isLocal] ? _maximumDownloadSpeed : 0.0);
+	double						maxSpeed = (_fileTransfer && ![self isLocalHost] && ![self isLocalDisk] ? _maximumDownloadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	BOOL						success = YES;
 	int							offset = 0,
@@ -506,7 +508,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	if(_fileTransfer) {
 		if(![self _createDigestContext] || ![self _createCypherContext:NO])
 		return NO;
-		_maxSpeed = ([self isLocal] ? 0.0 : _maxUploadSpeed);
+		_maxSpeed = ([self isLocalHost] || [self isLocalDisk] ? 0.0 : _maxUploadSpeed);
 	}
 	else
 	_maxSpeed = 0.0;
@@ -523,7 +525,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (NSInteger) readFromInputStream:(NSInputStream*)stream bytes:(void*)bytes maxLength:(NSUInteger)length
 {
-	double						maxSpeed = (_fileTransfer && ![self isLocal] ? _maximumUploadSpeed : 0.0);
+	double						maxSpeed = (_fileTransfer && ![self isLocalHost] && ![self isLocalDisk] ? _maximumUploadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
 	void*						newBytes;
 	int							newLength;

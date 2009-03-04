@@ -58,6 +58,8 @@
 @private
 	NSURL*								_baseURL;
 	id<FileTransferControllerDelegate>	_delegate;
+	BOOL								_localHost;
+	
 	NSUInteger							_currentLength,
 										_maxLength;
 	BOOL								_digestComputation;
@@ -85,6 +87,7 @@
 - (id) initWithBaseURL:(NSURL*)url;
 
 @property(nonatomic, readonly) NSURL* baseURL;
+@property(nonatomic, readonly, getter=isLocalHost) BOOL localHost; //Actually means localhost or on the local network
 @property(nonatomic, assign) id<FileTransferControllerDelegate> delegate;
 @property(nonatomic, readonly) NSUInteger transferSize; //0 if not defined
 @property(nonatomic, readonly) float transferProgress; //In [0,1] range or NAN if not defined
@@ -136,7 +139,7 @@
 @end
 
 @interface FileTransferController (LocalTransferController)
-@property(nonatomic, readonly, getter=isLocal) BOOL local;
+@property(nonatomic, readonly, getter=isLocalDisk) BOOL localDisk;
 @end
 
 /* Abstract class: do not instantiate directly */
