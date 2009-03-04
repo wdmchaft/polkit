@@ -373,21 +373,26 @@ Exit:
 	NSString*					imagePath = @"Resources/Image.jpg";
 	AmazonS3TransferController*	controller;
 	NSURL*						url;
+	NSString*					name;
 	
 	for(url in [self _testURLsForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")]) {
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
+		[controller setDelegate:self];
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
 		[controller setNewBucketLocation:nil];
-		AssertTrue([controller createDirectoryAtPath:@"polkit-test"], nil);
-		AssertNotNil([controller contentsOfDirectoryAtPath:@"polkit-test"], nil);
-		AssertTrue([controller deleteDirectoryAtPath:@"polkit-test"], nil);
+		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
+		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
+		AssertTrue([controller deleteDirectoryAtPath:name], nil);
 		[controller setNewBucketLocation:kAmazonS3BucketLocation_Europe];
-		AssertTrue([controller createDirectoryAtPath:@"polkit-test"], nil);
-		AssertNotNil([controller contentsOfDirectoryAtPath:@"polkit-test"], nil);
-		AssertTrue([controller deleteDirectoryAtPath:@"polkit-test"], nil);
+		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
+		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
+		AssertTrue([controller deleteDirectoryAtPath:name], nil);
 		[controller release];
 		
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithBaseURL:url];
+		[controller setDelegate:self];
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);
 		AssertTrue([controller downloadFileFromPathToNull:@"Test.jpg"], nil);
