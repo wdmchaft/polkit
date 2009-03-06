@@ -24,6 +24,7 @@
 #import "SVNClient.h"
 #import "LoginItems.h"
 #import "SystemInfo.h"
+#import "WorkerThread.h"
 
 #define kKeychainService @"unit-testing"
 #define kLogin @"polkit"
@@ -198,6 +199,27 @@
 - (void) testSystemInfo
 {
 	AssertNotNil([SystemInfo sharedSystemInfo], nil);
+}
+
+- (void) _thread:(id)argument
+{
+	sleep(2);
+}
+
+- (void) testWorkerThread
+{
+	WorkerThread*		worker;
+	
+	worker = [WorkerThread new];
+	
+	AssertNotNil(worker, nil);
+	AssertFalse([worker isRunning], nil);
+	[worker startWithTarget:self selector:@selector(_thread:) argument:nil];
+	AssertTrue([worker isRunning], nil);
+	[worker waitUntilDone];
+	AssertFalse([worker isRunning], nil);
+	
+	[worker release];
 }
 
 @end
