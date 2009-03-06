@@ -226,20 +226,6 @@
 	return [self _deletePath:remotePath];
 }
 
-- (BOOL) isLocalDisk
-{
-	return YES;
-}
-
-@end
-
-@implementation FileTransferController (LocalTransferController)
-
-- (BOOL) isLocalDisk
-{
-	return NO;
-}
-
 @end
 
 @implementation RemoteTransferController
@@ -321,12 +307,6 @@
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path
 {
 	return [NSURL fileURLWithPath:[_basePath stringByAppendingPathComponent:path]];
-}
-
-/* Override completely */
-- (BOOL) isLocalDisk
-{
-	return NO;
 }
 
 @end

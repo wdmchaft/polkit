@@ -138,10 +138,6 @@
 @interface LocalTransferController : StreamTransferController
 @end
 
-@interface FileTransferController (LocalTransferController)
-@property(nonatomic, readonly, getter=isLocalDisk) BOOL localDisk;
-@end
-
 /* Abstract class: do not instantiate directly */
 @interface RemoteTransferController : LocalTransferController
 {
