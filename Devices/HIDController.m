@@ -200,7 +200,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	pthread_mutex_unlock(&_hidMutex);
 	
 	timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 365 * 24 * 3600, 0.0, 0, 0, _TimerCallBack, NULL);
-	CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes);
+	CFRunLoopAddTimer(_hidRunLoop, timer, kCFRunLoopCommonModes);
 	
 	CFRunLoopRun();
 	
@@ -227,7 +227,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		if(_notificationPort == NULL) {
 			_notificationPort = IONotificationPortCreate(kIOMasterPortDefault);
 			if(_notificationPort) {
-				CFRunLoopAddSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
+				CFRunLoopAddSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
 				
 				error = IOServiceAddMatchingNotification(_notificationPort, kIOMatchedNotification, IOServiceMatching(kIOHIDDeviceKey), _ServiceMatchingCallback, NULL, &_notificationAdd);
 				if(error != kIOReturnSuccess) {
@@ -275,7 +275,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	CFSetRemoveValue(_instanceList, self);
 	if(CFSetGetCount(_instanceList) == 0) {
 		if(_notificationPort != NULL) {
-			CFRunLoopRemoveSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
+			CFRunLoopRemoveSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
 			
 			if(_notificationAdd)
 			IOObjectRelease(_notificationAdd);
@@ -458,7 +458,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 										
 										if((*(IOHIDQueueInterface**)_queueInterface)->createAsyncEventSource((IOHIDQueueInterface**)_queueInterface, &_hidEventSource) == kIOReturnSuccess) {
 											if((*(IOHIDQueueInterface**)_queueInterface)->setEventCallout((IOHIDQueueInterface**)_queueInterface, _QueueCallbackFunction, NULL, self) == kIOReturnSuccess) {
-												CFRunLoopAddSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetCurrent(), _hidEventSource, kCFRunLoopCommonModes);
+												CFRunLoopAddSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), _hidEventSource, kCFRunLoopCommonModes);
 												if((*(IOHIDQueueInterface**)_queueInterface)->start((IOHIDQueueInterface**)_queueInterface) == SEVERITY_SUCCESS)
 												success = YES;
 											}
@@ -509,7 +509,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 	if(_hidEventSource) {
 		(*(IOHIDQueueInterface**)_queueInterface)->stop((IOHIDQueueInterface**)_queueInterface);
 		
-		CFRunLoopRemoveSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetCurrent(), _hidEventSource, kCFRunLoopCommonModes);
+		CFRunLoopRemoveSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), _hidEventSource, kCFRunLoopCommonModes);
 		CFRelease(_hidEventSource);
 		_hidEventSource = NULL;
 	}

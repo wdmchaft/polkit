@@ -72,7 +72,7 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 - (void) dealloc
 {
 	if(_runLoopSource) {
-		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), _runLoopSource, kCFRunLoopCommonModes);
+		CFRunLoopRemoveSource(CFRunLoopGetMain(), _runLoopSource, kCFRunLoopCommonModes);
 		CFRelease(_runLoopSource);
 		SCDynamicStoreSetNotificationKeys(_dynamicStore, NULL, NULL);
 	}

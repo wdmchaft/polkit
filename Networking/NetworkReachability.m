@@ -45,7 +45,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 	}
 	
 	if((self = [super init])) {
-		_runLoop = (CFRunLoopRef)CFRetain(CFRunLoopGetCurrent());
+		_runLoop = (CFRunLoopRef)CFRetain(CFRunLoopGetMain());
 		_reachability = (void*)reachability;
 	}
 	
