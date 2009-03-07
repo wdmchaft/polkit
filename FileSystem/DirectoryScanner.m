@@ -421,20 +421,31 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 	NSMutableArray*				predicates = [NSMutableArray array];
 	NSExpression*				expression;
 	NSString*					string;
+	NSMutableArray*				array;
 	
 	if(![paths count] && ![names count])
 	return nil;
 	
 	if([paths count]) {
 		expression = [NSExpression expressionForVariable:@"PATH"];
-		for(string in paths)
-		[predicates addObject:[NSComparisonPredicate predicateWithLeftExpression:expression rightExpression:[NSExpression expressionForConstantValue:string] modifier:NSDirectPredicateModifier type:NSLikePredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+		for(string in paths) {
+			array = [NSMutableArray new];
+			[array addObject:[NSComparisonPredicate predicateWithLeftExpression:expression rightExpression:[NSExpression expressionForConstantValue:string] modifier:NSDirectPredicateModifier type:NSInPredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+			[array addObject:[NSComparisonPredicate predicateWithLeftExpression:[NSExpression expressionForConstantValue:string] rightExpression:expression modifier:NSDirectPredicateModifier type:NSInPredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+			[predicates addObject:[NSCompoundPredicate andPredicateWithSubpredicates:array]];
+			[array release];
+		}
 	}
 	
 	if([names count]) {
 		expression = [NSExpression expressionForVariable:@"NAME"];
-		for(string in names)
-		[predicates addObject:[NSComparisonPredicate predicateWithLeftExpression:expression rightExpression:[NSExpression expressionForConstantValue:string] modifier:NSDirectPredicateModifier type:NSLikePredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+		for(string in names) {
+			array = [NSMutableArray new];
+			[array addObject:[NSComparisonPredicate predicateWithLeftExpression:expression rightExpression:[NSExpression expressionForConstantValue:string] modifier:NSDirectPredicateModifier type:NSInPredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+			[array addObject:[NSComparisonPredicate predicateWithLeftExpression:[NSExpression expressionForConstantValue:string] rightExpression:expression modifier:NSDirectPredicateModifier type:NSInPredicateOperatorType options:NSCaseInsensitivePredicateOption]];
+			[predicates addObject:[NSCompoundPredicate andPredicateWithSubpredicates:array]];
+			[array release];
+		}
 	}
 	
 	return [NSCompoundPredicate orPredicateWithSubpredicates:predicates];
