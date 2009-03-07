@@ -1015,7 +1015,14 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			time = CFAbsoluteTimeGetCurrent();
 			if(value != kCFRunLoopRunTimedOut)
 			lastTime = time;
-		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (time - lastTime < kStreamForcedTimeOut) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
+			else if(time - lastTime >= kStreamForcedTimeOut) {
+				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while reading to stream")];
+				break;
+			}
+			if(delegateHasShouldAbort && [[self delegate] fileTransferControllerShouldAbort:self])
+			break;
+		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished));
 	}
 	else {
 		do {
@@ -1150,7 +1157,14 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 			time = CFAbsoluteTimeGetCurrent();
 			if(value != kCFRunLoopRunTimedOut)
 			lastTime = time;
-		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (time - lastTime < kStreamForcedTimeOut) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
+			else if(time - lastTime >= kStreamForcedTimeOut) {
+				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while writing to stream")];
+				break;
+			}
+			if(delegateHasShouldAbort && [[self delegate] fileTransferControllerShouldAbort:self])
+			break;
+		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished));
 	}
 	else {
 		do {
