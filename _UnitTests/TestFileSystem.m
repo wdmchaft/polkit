@@ -181,7 +181,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	AssertNotNil(scanner2, nil);
 	
 	[scanner2 setExclusionPredicate:[DirectoryScanner exclusionPredicateWithPaths:[NSArray arrayWithObjects:@"Solid Colors", [@"Abstract" lowercaseString], [@"Plants/Bamboo Grove.jpg" uppercaseString], nil] names:[NSArray arrayWithObjects:@"Flow 1.jpg", [@"Flow 2.jpg" lowercaseString], [@"Mojave.jpg" uppercaseString], nil]]];
-	AssertEqualObjects([scanner2 exclusionPredicate], [NSPredicate predicateWithFormat:@"$PATH LIKE[c] \"Solid Colors\" OR $PATH LIKE[c] \"abstract\" OR $PATH LIKE[c] \"PLANTS/BAMBOO GROVE.JPG\" OR $NAME LIKE[c] \"Flow 1.jpg\" OR $NAME LIKE[c] \"flow 2.jpg\" OR $NAME LIKE[c] \"MOJAVE.JPG\""], nil);
+	AssertEqualObjects([scanner2 exclusionPredicate], [NSPredicate predicateWithFormat:@"($PATH IN[c] \"Solid Colors\" AND \"Solid Colors\" IN[c] $PATH) OR ($PATH IN[c] \"abstract\" AND \"abstract\" IN[c] $PATH) OR ($PATH IN[c] \"PLANTS/BAMBOO GROVE.JPG\" AND \"PLANTS/BAMBOO GROVE.JPG\" IN[c] $PATH) OR ($NAME IN[c] \"Flow 1.jpg\" AND \"Flow 1.jpg\" IN[c] $NAME) OR ($NAME IN[c] \"flow 2.jpg\" AND \"flow 2.jpg\" IN[c] $NAME) OR ($NAME IN[c] \"MOJAVE.JPG\" AND \"MOJAVE.JPG\" IN[c] $NAME)"], nil);
 	
 	AssertNotNil([scanner2 scanRootDirectory], nil);
 	AssertNil([scanner2 directoryItemAtSubpath:@"Abstract"], nil);
