@@ -25,6 +25,7 @@
 
 #define kFileTransferRunLoopActiveMode	CFSTR("FileTransferActiveMode")
 #define kStreamBufferSize				(256 * 1024)
+#define kStreamForcedTimeOut			120.0
 #define kRunLoopInterval				1.0
 #define kEncryptionCipher				EVP_aes_256_cbc()
 #define kEncryptionCipherBlockSize		16
@@ -984,6 +985,8 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	BOOL					opened = NO;
+	CFAbsoluteTime			lastTime = 0.0,
+							time;
 	id						result;
 	SInt32					value;
 	
@@ -1009,7 +1012,10 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	if([[self class] useAsyncStreams]) {
 		do {
 			value = CFRunLoopRunInMode(kFileTransferRunLoopActiveMode, kRunLoopInterval, true);
-		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
+			time = CFAbsoluteTimeGetCurrent();
+			if(value != kCFRunLoopRunTimedOut)
+			lastTime = time;
+		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (time - lastTime < kStreamForcedTimeOut) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
 	}
 	else {
 		do {
@@ -1113,6 +1119,8 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	BOOL					opened = NO;
+	CFAbsoluteTime			lastTime = 0.0,
+							time;
 	id						result;
 	SInt32					value;
 	
@@ -1139,7 +1147,10 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	if([[self class] useAsyncStreams]) {
 		do {
 			value = CFRunLoopRunInMode(kFileTransferRunLoopActiveMode, kRunLoopInterval, true);
-		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
+			time = CFAbsoluteTimeGetCurrent();
+			if(value != kCFRunLoopRunTimedOut)
+			lastTime = time;
+		} while(_activeStream && (value != kCFRunLoopRunStopped) && (value != kCFRunLoopRunFinished) && (time - lastTime < kStreamForcedTimeOut) && (!delegateHasShouldAbort || ![[self delegate] fileTransferControllerShouldAbort:self]));
 	}
 	else {
 		do {
