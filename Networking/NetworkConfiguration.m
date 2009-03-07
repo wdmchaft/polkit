@@ -138,4 +138,33 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 	return [dictionary description];
 }
 
+- (NSDictionary*) allInterfaces
+{
+	NSArray*						list = [(id)SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("Setup:/Network/Service/.*/Interface")) autorelease];
+	NSMutableDictionary*			dictionary = [NSMutableDictionary dictionary];
+	NSString*						key;
+	CFDictionaryRef					info;
+	CFDictionaryRef					subInfo;
+	BOOL							active;
+	
+	for(key in list) {
+		info = SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)key);
+		if(info) {
+			if(CFDictionaryContainsKey(info, kSCPropUserDefinedName) && CFDictionaryContainsKey(info, kSCPropNetInterfaceDeviceName)) {
+				subInfo = SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)[NSString stringWithFormat:@"State:/Network/Interface/%@/Link", CFDictionaryGetValue(info, kSCPropNetInterfaceDeviceName)]);
+				if(subInfo) {
+					active = [[(NSDictionary*)subInfo objectForKey:(id)kSCPropNetLinkActive] boolValue];
+					CFRelease(subInfo);
+				}
+				else
+				active = NO;
+				[dictionary setObject:[NSNumber numberWithBool:active] forKey:(id)CFDictionaryGetValue(info, kSCPropUserDefinedName)];
+			}
+			CFRelease(info);
+		}
+	}
+	
+	return dictionary;
+}
+
 @end

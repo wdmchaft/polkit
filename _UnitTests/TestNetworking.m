@@ -64,6 +64,7 @@
 	AssertNotEquals([[configuration networkAddresses] count], 0, nil);
 	AssertNotNil([configuration airportNetworkName], nil);
 	AssertNotNil([configuration airportNetworkSSID], nil);
+	AssertNotEquals([[configuration allInterfaces] count], 0, nil);
 }
 
 @end

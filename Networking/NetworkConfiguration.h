@@ -34,4 +34,5 @@ extern NSString* NetworkConfigurationDidChangeNotification;
 @property(nonatomic, readonly) NSArray* networkAddresses;
 @property(nonatomic, readonly) NSString* airportNetworkName;
 @property(nonatomic, readonly) NSData* airportNetworkSSID;
+@property(nonatomic, readonly) NSDictionary* allInterfaces; //Keys are user defined names and values are booleans indicating active state
 @end
