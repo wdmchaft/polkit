@@ -211,11 +211,13 @@
 @private
 	void*								_handle;
 	NSStringEncoding					_stringEncoding;
-	BOOL								_attemptTLSOrSSL;
+	BOOL								_keepAlive,
+										_attemptTLSOrSSL;
 	id									_transcript;
 }
 @property(nonatomic) NSStringEncoding stringEncoding; //ISO Latin 1 by default
 @property(nonatomic) BOOL attemptTLSOrSSL; //NO by default
+@property(nonatomic) BOOL keepConnectionAlive; //NO by default
 @end
 
 /* Supports everything except copy - Always use passive mode */

@@ -37,7 +37,7 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 
 @implementation FTPTransferController
 
-@synthesize handle=_handle, stringEncoding=_stringEncoding, attemptTLSOrSSL=_attemptTLSOrSSL;
+@synthesize handle=_handle, stringEncoding=_stringEncoding, keepConnectionAlive=_keepAlive, attemptTLSOrSSL=_attemptTLSOrSSL;
 
 + (void) initialize
 {
@@ -116,6 +116,8 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 	[_transcript release];
 	_transcript = nil;
 	curl_easy_reset(_handle);
+	
+	curl_easy_setopt(_handle, CURLOPT_FORBID_REUSE, (long)(_keepAlive ? 0 : 1));
 	
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
