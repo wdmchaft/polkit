@@ -622,6 +622,8 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 			continue;
 			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '.') && (dirent->d_name[2] == 0))
 			continue;
+			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '_'))
+			continue;
 			
 			nameLength = strlen(dirent->d_name);
 			bcopy(dirent->d_name, &fullPath[fullLength], nameLength + 1);
