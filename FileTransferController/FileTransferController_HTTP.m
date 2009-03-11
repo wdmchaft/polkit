@@ -681,6 +681,15 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 {
 	NSString*				host = [[self baseURL] host];
 	NSRange					range;
+	NSString*				query;
+	
+	range = [path rangeOfString:@"?"];
+	if(range.location != NSNotFound) {
+		query = [path substringFromIndex:(range.location + range.length)];
+		path = [path substringToIndex:range.location];
+	}
+	else
+	query = nil;
 	
 	path = [self absolutePathForRemotePath:path];
 	if([host isEqualToString:kFileTransferHost_AmazonS3] && [path length]) {
@@ -701,7 +710,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		}
 	}
 	
-	return [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:host port:0 path:path query:nil];
+	return [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:host port:0 path:path query:query];
 }
 
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
@@ -742,6 +751,8 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[buffer appendFormat:@"/%@%@", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)], [url path]];
 	else
 	[buffer appendFormat:@"/%@/", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)]];
+	if([[url query] length])
+	[buffer appendFormat:@"?%@", [url query]];
 	authorization = [[[buffer dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[[self baseURL] passwordByReplacingPercentEscapes]] encodeBase64];
 	[buffer release];
 	
@@ -868,6 +879,10 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 			}
 		}
 	}
+	else if([method isEqualToString:@"GET?"]) {
+		if((status == 200) && [body isKindOfClass:[NSXMLDocument class]] && [[[body rootElement] name] isEqualToString:@"LocationConstraint"])
+		result = [[body rootElement] stringValue];
+	}
 	else if([method isEqualToString:@"DELETE"]) {
 		if(status == 204)
 		result = [NSNumber numberWithBool:YES];
@@ -974,7 +989,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	if(request == NULL)
 	return NO;
 	
-	if(_newBucketLocation) {
+	if([_newBucketLocation length]) {
 		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration>\n\t<LocationConstraint>%@</LocationConstraint>\n</CreateBucketConfiguration>\n", _newBucketLocation];
 		bodyStream = [NSInputStream inputStreamWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
 	}
@@ -990,6 +1005,32 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 - (BOOL) deleteDirectoryAtPath:(NSString*)remotePath
 {
 	return [self _deletePath:remotePath];
+}
+
+- (NSString*) locationForPath:(NSString*)remotePath
+{
+	NSString*				host = [[self baseURL] host];
+	NSRange					range;
+	CFHTTPMessageRef		request;
+	CFReadStreamRef			stream;
+	
+	if([host length] > [kFileTransferHost_AmazonS3 length])
+	remotePath = @"?location";
+	else {
+		range = [remotePath rangeOfString:@"/"];
+		if(range.location != NSNotFound)
+		remotePath = [remotePath substringToIndex:range.location];
+		remotePath = [remotePath stringByAppendingString:@"?location"];
+	}
+	
+	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
+	if(request == NULL)
+	return nil;
+	
+	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	CFRelease(request);
+	
+	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET?" isFileTransfer:NO];
 }
 
 @end

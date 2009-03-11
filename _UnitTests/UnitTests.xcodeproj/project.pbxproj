@@ -538,7 +538,7 @@
 		E24D28460E9295B000E298A9 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = E24D28490E9295B000E298A9 /* Build configuration list for PBXProject "UnitTests" */;
-			compatibilityVersion = "Xcode 3.0";
+			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 0;
 			mainGroup = E24D28440E9295B000E298A9;
 			productRefGroup = E24D285D0E9295D300E298A9 /* Products */;

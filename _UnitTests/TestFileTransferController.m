@@ -382,11 +382,13 @@ Exit:
 		[controller setNewBucketLocation:nil];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertEqualObjects([controller locationForPath:name], @"", nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
 		AssertTrue([controller deleteDirectoryAtPath:name], nil);
 		[controller setNewBucketLocation:kAmazonS3BucketLocation_Europe];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertEqualObjects([controller locationForPath:name], kAmazonS3BucketLocation_Europe, nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
 		AssertTrue([controller deleteDirectoryAtPath:name], nil);
 		[controller release];
