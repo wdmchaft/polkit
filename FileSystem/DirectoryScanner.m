@@ -622,7 +622,9 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 			continue;
 			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '.') && (dirent->d_name[2] == 0))
 			continue;
-			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '_'))
+			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '_')) //NOTE: Ignore AppleDouble system files
+			continue;
+			if((dirent->d_name[0] == '.') && !strncmp(dirent->d_name, ".afpDeleted", 11)) //NOTE: Ignore "open-delete" files on AFP servers
 			continue;
 			
 			nameLength = strlen(dirent->d_name);
