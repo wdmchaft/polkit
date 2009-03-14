@@ -88,6 +88,7 @@ Metadata is owner & group, permissions, user settable flags, ACLs and extended a
 	NSUInteger				_revision;
 	BOOL					_scanMetadata,
 							_sortPaths,
+							_reportHidden,
 							_excludeHidden,
 							_excludeDSStore;
 	NSPredicate*			_exclusionPredicate;
@@ -106,6 +107,8 @@ Metadata is owner & group, permissions, user settable flags, ACLs and extended a
 @property(nonatomic, readonly) NSUInteger revision; //0 if undefined
 
 @property(nonatomic) BOOL sortPaths; //Sort returned paths the same way the Finder does - NO by default
+@property(nonatomic) BOOL reportExcludedHiddenItems; //Put excluded hidden items into the excluded paths list - NO by default
+
 @property(nonatomic) BOOL excludeHiddenItems; //Items invisible in the GUI e.g. with names starting with "." - NO by default
 @property(nonatomic) BOOL excludeDSStoreFiles; //Finder's ".DS_Store" files - NO by default
 @property(nonatomic, copy) NSPredicate* exclusionPredicate; //Substitution variables are $NAME, $PATH, $TYPE (0=directory, 1=file, 2=symlink), $FILE_SIZE, $DATE_CREATED and $DATE_MODIFIED - nil by default

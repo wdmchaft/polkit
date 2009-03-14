@@ -414,7 +414,7 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 
 @implementation DirectoryScanner
 
-@synthesize rootDirectory=_rootDirectory, scanningMetadata=_scanMetadata, sortPaths=_sortPaths, excludeHiddenItems=_excludeHidden, excludeDSStoreFiles=_excludeDSStore, exclusionPredicate=_exclusionPredicate, revision=_revision, _directories;
+@synthesize rootDirectory=_rootDirectory, scanningMetadata=_scanMetadata, sortPaths=_sortPaths, reportExcludedHiddenItems=_reportHidden, excludeHiddenItems=_excludeHidden, excludeDSStoreFiles=_excludeDSStore, exclusionPredicate=_exclusionPredicate, revision=_revision, _directories;
 
 + (NSPredicate*) exclusionPredicateWithPaths:(NSArray*)paths names:(NSArray*)names
 {
@@ -622,22 +622,34 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 			continue;
 			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '.') && (dirent->d_name[2] == 0))
 			continue;
-			if((dirent->d_name[0] == '.') && (dirent->d_name[1] == '_')) //NOTE: Ignore AppleDouble system files
-			continue;
-			if((dirent->d_name[0] == '.') && !strncmp(dirent->d_name, ".afpDeleted", 11)) //NOTE: Ignore "open-delete" files on AFP servers
-			continue;
 			
 			nameLength = strlen(dirent->d_name);
 			bcopy(dirent->d_name, &fullPath[fullLength], nameLength + 1);
 			
-			if(_excludeHidden && (dirent->d_name[0] == '.')) {
-				ADD_PATH_TO_ARRAY(excludedPaths, &fullPath[rootLength + 1]);
-				continue;
-			}
-			
-			if(_excludeDSStore && (strcmp(dirent->d_name, ".DS_Store") == 0)) {
-				ADD_PATH_TO_ARRAY(excludedPaths, &fullPath[rootLength + 1]);
-				continue;
+			if(dirent->d_name[0] == '.') {
+				do {
+					if(dirent->d_name[1] == '_') { //NOTE: Ignore AppleDouble system files
+						dirent->d_name[0] = 0;
+						break;
+					}
+					if(strncmp(dirent->d_name, ".afpDeleted", 11) == 0) { //NOTE: Ignore "open-delete" files on AFP servers
+						dirent->d_name[0] = 0;
+						break;
+					}
+					if(_excludeHidden) {
+						dirent->d_name[0] = 0;
+						break;
+					}
+					if(_excludeDSStore && (strcmp(dirent->d_name, ".DS_Store") == 0)) {
+						dirent->d_name[0] = 0;
+						break;
+					}
+				} while(0);
+				if(dirent->d_name[0] == 0) {
+					if(_reportHidden)
+					ADD_PATH_TO_ARRAY(excludedPaths, &fullPath[rootLength + 1]);
+					continue;
+				}
 			}
 			
 			if(lstat(fullPath, &stats) == 0) {
