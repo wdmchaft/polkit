@@ -247,8 +247,9 @@
 	
 	if((self = [super initWithBaseURL:url])) {
 		components = [NSMutableArray arrayWithArray:[[url path] pathComponents]];
+		if([components count])
 		[components removeObjectAtIndex:0];
-		if([components count] == 0) {
+		if(![components count]) {
 			[self release];
 			return nil;
 		}
