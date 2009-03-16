@@ -79,7 +79,9 @@
 	
 	controller = [FileTransferController fileTransferControllerWithURL:url];
 	AssertNotNil(controller, nil);
-	if([controller isKindOfClass:[HTTPTransferController class]])
+	if([controller isKindOfClass:[FTPTransferController class]])
+	[(FTPTransferController*)controller setKeepConnectionAlive:YES];
+	else if([controller isKindOfClass:[HTTPTransferController class]])
 	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:YES];
 	[controller setDelegate:self];
 	
@@ -137,6 +139,15 @@
 		[controller setDelegate:nil];
 		AssertFalse([controller createDirectoryAtPath:@"Folder"], nil);
 		[controller setDelegate:self];
+		
+		if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)])
+		AssertNotNil([controller contentsOfDirectoryAtPath:@"Folder"], nil);
+		AssertTrue([controller createDirectoryAtPath:@"Folder/Directory"], nil);
+		if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)])
+		AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder/Directory"], nil);
+		else if([controller respondsToSelector:@selector(deleteDirectoryAtPath:)])
+		AssertTrue([controller deleteDirectoryAtPath:@"Folder/Directory"], nil);
+		
 		if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)]) {
 			BOOL isSubset = [[NSSet setWithObjects:@"Test.jpg", @"Folder", nil] isSubsetOfSet:[NSSet setWithArray:[[controller contentsOfDirectoryAtPath:nil] allKeys]]];
 			AssertTrue(isSubset, nil);
@@ -157,6 +168,7 @@
 			if([controller respondsToSelector:@selector(deleteFileAtPath:)])
 			AssertTrue([controller deleteFileAtPath:@"Folder/~Test.jpg"], nil);
 		}
+		
 		if([controller respondsToSelector:@selector(deleteDirectoryRecursivelyAtPath:)]) {
 			AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);
 			AssertTrue([controller deleteDirectoryRecursivelyAtPath:@"Folder"], nil);

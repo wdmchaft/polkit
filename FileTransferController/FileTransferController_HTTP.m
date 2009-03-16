@@ -692,21 +692,15 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	query = nil;
 	
 	path = [self absolutePathForRemotePath:path];
-	if([host isEqualToString:kFileTransferHost_AmazonS3] && [path length]) {
-		if([path characterAtIndex:0] == '/') {
-			range = [path rangeOfString:@"/" options:0 range:NSMakeRange(1, [path length] - 1)];
-			if(range.location == NSNotFound) {
-				host = [NSString stringWithFormat:@"%@.%@", [path substringFromIndex:1], kFileTransferHost_AmazonS3];
-				path = nil;
-			}
-			else {
-				host = [NSString stringWithFormat:@"%@.%@", [path substringWithRange:NSMakeRange(1, range.location - 1)], kFileTransferHost_AmazonS3];
-				path = [path substringWithRange:NSMakeRange(range.location + 1, [path length] - range.location - 1)];
-			}
+	if([host isEqualToString:kFileTransferHost_AmazonS3] && ![path isEqualToString:@"/"]) {
+		range = [path rangeOfString:@"/" options:0 range:NSMakeRange(1, [path length] - 1)];
+		if(range.location == NSNotFound) {
+			host = [NSString stringWithFormat:@"%@.%@", [path substringFromIndex:1], kFileTransferHost_AmazonS3];
+			path = nil;
 		}
 		else {
-			host = [NSString stringWithFormat:@"%@.%@", path, kFileTransferHost_AmazonS3];
-			path = nil;
+			host = [NSString stringWithFormat:@"%@.%@", [path substringWithRange:NSMakeRange(1, range.location - 1)], kFileTransferHost_AmazonS3];
+			path = [path substringWithRange:NSMakeRange(range.location + 1, [path length] - range.location - 1)];
 		}
 	}
 	

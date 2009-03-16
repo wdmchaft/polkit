@@ -235,6 +235,13 @@ static CFTimeInterval					_downloadTime = 0.0,
 		path = basePath;
 	}
 	
+	if([path length]) {
+		if([path characterAtIndex:0] != '/')
+		path = [@"/" stringByAppendingString:path];
+	}
+	else
+	path = @"/";
+	
 	return path;
 }
 
