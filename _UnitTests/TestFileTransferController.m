@@ -21,6 +21,8 @@
 #import "Keychain.h"
 #import "NSURL+Parameters.h"
 
+#define kTimeOut				30.0
+
 @interface UnitTests_FileTransferController : UnitTest <FileTransferControllerDelegate>
 @end
 
@@ -84,6 +86,7 @@
 	else if([controller isKindOfClass:[HTTPTransferController class]])
 	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:YES];
 	[controller setDelegate:self];
+	[controller setTimeOut:kTimeOut];
 	
 	if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)] && ![controller contentsOfDirectoryAtPath:nil]) {
 		[self logMessage:@"WARNING: \"%@\" is not reachable", [url URLByDeletingPassword]];
@@ -390,19 +393,30 @@ Exit:
 	for(url in [self _testURLsForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")]) {
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
 		[controller setDelegate:self];
+		[controller setTimeOut:kTimeOut];
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
+		
 		[controller setNewBucketLocation:nil];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
 		AssertEqualObjects([controller locationForPath:name], @"", nil);
+		AssertTrue([controller uploadFileFromPath:imagePath toPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
+		AssertTrue([controller downloadFileFromPathToNull:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
+		AssertTrue([controller deleteFileAtPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
 		AssertTrue([controller deleteDirectoryAtPath:name], nil);
+		
 		[controller setNewBucketLocation:kAmazonS3BucketLocation_Europe];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
 		AssertEqualObjects([controller locationForPath:name], kAmazonS3BucketLocation_Europe, nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
+		AssertTrue([controller uploadFileFromPath:imagePath toPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
+		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
+		AssertTrue([controller downloadFileFromPathToNull:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
+		AssertTrue([controller deleteFileAtPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
 		AssertTrue([controller deleteDirectoryAtPath:name], nil);
+		
 		[controller release];
 		
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithBaseURL:url];

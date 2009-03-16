@@ -1043,7 +1043,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			lastTime = time;
 			else if((timeout > 0.0) && (time - lastTime >= timeout)) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while reading to stream")];
+				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while reading from stream")];
 				break;
 			}
 			if(delegateHasShouldAbort && [[self delegate] fileTransferControllerShouldAbort:self])

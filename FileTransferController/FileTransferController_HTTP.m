@@ -45,7 +45,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 @implementation HTTPTransferController
 
-@synthesize SSLCertificateValidationDisabled=_disableSSLCertificates, responseHeaders=_responseHeaders;
+@synthesize SSLCertificateValidationDisabled=_disableSSLCertificates, keepConnectionAlive=_keepAlive, responseHeaders=_responseHeaders;
 
 + (NSString*) urlScheme;
 {
@@ -91,7 +91,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	}
 	
 	CFHTTPMessageSetHeaderFieldValue(message, CFSTR("User-Agent"), (CFStringRef)NSStringFromClass([self class]));
-	CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Connection"), CFSTR("close"));
 	
 	return message;
 }
@@ -108,13 +107,17 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	
 	if(stream)
 	readStream = CFReadStreamCreateForStreamedHTTPRequest(kCFAllocatorDefault, request, (CFReadStreamRef)stream);
-	else
-	readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, request);
+	else {
+		readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, request);
+		CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanTrue);
+	}
+	
+	CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPAttemptPersistentConnection, (_keepAlive ? kCFBooleanTrue : kCFBooleanFalse));
 	
 	if([[[self class] urlScheme] isEqualToString:@"https"] && _disableSSLCertificates) {
 		sslSettings = CFDictionaryCreateMutable(kCFAllocatorDefault, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 		CFDictionarySetValue(sslSettings, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
-		CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, sslSettings);
+		CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, sslSettings); //kCFStreamSSLCertificates
 		CFRelease(sslSettings);
 	}
 	
@@ -122,11 +125,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 		CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPProxy, (proxySettings));
 		CFRelease(proxySettings);
 	}
-	
-	CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanTrue);
-	
-	//kCFStreamSSLCertificates
-	//kCFStreamPropertyHTTPAttemptPersistentConnection
 	
 	return readStream;
 }
@@ -239,7 +237,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 {
 	NSString*				type = nil;
 	BOOL					success = NO;
-	NSString*				filePath = nil;
 	NSString*				UTI;
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			readStream;
@@ -273,9 +270,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	CFRelease(request);
 	
 	success = [[self runReadStream:readStream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"PUT" isFileTransfer:YES] boolValue];
-	
-	if(filePath)
-	[[NSFileManager defaultManager] removeItemAtPath:filePath error:NULL];
 	
 	return success;
 }
@@ -976,21 +970,21 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 {
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
-	NSInputStream*			bodyStream;
 	NSString*				xmlString;
+	NSData*					xmlData;
 	
 	request = [self _createHTTPRequestWithMethod:@"PUT" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
 	if([_newBucketLocation length]) {
-		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration>\n\t<LocationConstraint>%@</LocationConstraint>\n</CreateBucketConfiguration>\n", _newBucketLocation];
-		bodyStream = [NSInputStream inputStreamWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
+		xmlString = [NSString stringWithFormat:@"<CreateBucketConfiguration><LocationConstraint>%@</LocationConstraint></CreateBucketConfiguration>", _newBucketLocation];
+		xmlData = [xmlString dataUsingEncoding:NSUTF8StringEncoding];
+		CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%i", [xmlData length]]);
+		CFHTTPMessageSetBody(request, (CFDataRef)xmlData);
 	}
-	else
-	bodyStream = nil;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:bodyStream];
+	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"PUT" isFileTransfer:NO] boolValue];
