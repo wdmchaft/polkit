@@ -60,6 +60,7 @@
 	id<FileTransferControllerDelegate>	_delegate;
 	BOOL								_localHost;
 	
+	void*								_reachability;
 	NSUInteger							_currentLength,
 										_maxLength;
 	BOOL								_digestComputation;
@@ -70,6 +71,7 @@
 	void*								_encryptionContext;
 	void*								_encryptionBufferBytes;
 	NSUInteger							_encryptionBufferSize;
+	NSTimeInterval						_timeOut;
 	NSUInteger							_maxUploadSpeed,
 										_maxDownloadSpeed;
 	BOOL								_fileTransfer;
@@ -98,12 +100,15 @@
 @property(nonatomic) BOOL digestComputation; //Enables on-the-fly MD5 digest computation for file uploads / downloads
 @property(nonatomic, copy) NSString* encryptionPassword; //Enables on-the-fly AES-256 encryption / decryption for file uploads / downloads if not nil (use 'openssl aes-256-cbc -d -k PASSWORD -nosalt -in IN_FILE -out OUT_FILE' to decrypt an uploaded file)
 
-@property(nonatomic) NSUInteger maximumDownloadSpeed; //In bytes per second
-@property(nonatomic) NSUInteger maximumUploadSpeed; //In bytes per second
+@property(nonatomic) NSTimeInterval timeOut; //In seconds - 0 means default
+@property(nonatomic) NSUInteger maximumDownloadSpeed; //In bytes per second - 0 means unlimited
+@property(nonatomic) NSUInteger maximumUploadSpeed; //In bytes per second - 0 means unlimited
 
 - (NSString*) absolutePathForRemotePath:(NSString*)path;
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path; //Returned URL does not contain user or password
 - (NSURL*) fullAbsoluteURLForRemotePath:(NSString*)path;
+
+- (BOOL) checkReachability;
 @end
 
 @interface FileTransferController (Extensions)

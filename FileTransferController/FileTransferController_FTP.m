@@ -108,6 +108,7 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 
 - (void) _reset
 {
+	NSTimeInterval			timeOut = [self timeOut];
 	CFDictionaryRef			proxySettings;
 	const char*				host;
 	long					port;
@@ -118,6 +119,11 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 	curl_easy_reset(_handle);
 	
 	curl_easy_setopt(_handle, CURLOPT_FORBID_REUSE, (long)(_keepAlive ? 0 : 1));
+	if(timeOut > 0.0)
+	curl_easy_setopt(_handle, CURLOPT_TIMEOUT, (long)ceil(timeOut));
+	curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
+	curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, _DebugCallback);
+	curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, self);
 	
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
@@ -132,10 +138,6 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 		}
 		CFRelease(proxySettings);
 	}
-	
-	curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
-	curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, _DebugCallback);
-	curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, self);
 	
 	if(_attemptTLSOrSSL) {
 		curl_easy_setopt(_handle, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);

@@ -18,6 +18,7 @@
 
 #import <openssl/evp.h>
 #import <libkern/OSAtomic.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
@@ -25,7 +26,6 @@
 
 #define kFileTransferRunLoopActiveMode	CFSTR("FileTransferActiveMode")
 #define kStreamBufferSize				(256 * 1024)
-#define kStreamForcedTimeOut			120.0
 #define kRunLoopInterval				1.0
 #define kEncryptionCipher				EVP_aes_256_cbc()
 #define kEncryptionCipherBlockSize		16
@@ -43,9 +43,11 @@ static OSSpinLock						_downloadLock = 0,
 static CFTimeInterval					_downloadTime = 0.0,
 										_uploadTime = 0.0;
 
+#define IS_REACHABLE(__FLAGS__) (((__FLAGS__) & kSCNetworkFlagsReachable) && !((__FLAGS__) & kSCNetworkFlagsConnectionRequired))
+
 @implementation FileTransferController
 
-@synthesize baseURL=_baseURL, delegate=_delegate, localHost=_localHost, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
+@synthesize baseURL=_baseURL, delegate=_delegate, localHost=_localHost, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, timeOut=_timeOut, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
 
 + (id) allocWithZone:(NSZone*)zone
 {
@@ -166,6 +168,9 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (void) dealloc
 {
+	if(_reachability)
+	CFRelease(_reachability);
+	
 	[self invalidate];
 	
 	[_encryptionPassword release];
@@ -253,6 +258,19 @@ static CFTimeInterval					_downloadTime = 0.0,
 - (NSURL*) fullAbsoluteURLForRemotePath:(NSString*)path
 {
 	return [NSURL URLWithScheme:[_baseURL scheme] user:[_baseURL user] password:[_baseURL passwordByReplacingPercentEscapes] host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path] query:[_baseURL query]];
+}
+
+- (BOOL) checkReachability
+{
+	SCNetworkConnectionFlags	flags;
+	
+	if(_reachability == NULL) {
+		_reachability = (void*)SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [[_baseURL host] UTF8String]);
+		if(_reachability == NULL)
+		return NO;
+	}
+	
+	return (SCNetworkReachabilityGetFlags(_reachability, &flags) && IS_REACHABLE(flags) ? YES : NO);
 }
 
 - (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
@@ -992,7 +1010,8 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	BOOL					opened = NO;
-	CFAbsoluteTime			lastTime = 0.0,
+	CFAbsoluteTime			timeout = [self timeOut],
+							lastTime = 0.0,
 							time;
 	id						result;
 	SInt32					value;
@@ -1022,7 +1041,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 			time = CFAbsoluteTimeGetCurrent();
 			if(value != kCFRunLoopRunTimedOut)
 			lastTime = time;
-			else if(time - lastTime >= kStreamForcedTimeOut) {
+			else if((timeout > 0.0) && (time - lastTime >= timeout)) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
 				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while reading to stream")];
 				break;
@@ -1133,7 +1152,8 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
 	CFStreamClientContext	context = {0, self, NULL, NULL, NULL};
 	BOOL					opened = NO;
-	CFAbsoluteTime			lastTime = 0.0,
+	CFAbsoluteTime			timeout = [self timeOut],
+							lastTime = 0.0,
 							time;
 	id						result;
 	SInt32					value;
@@ -1164,7 +1184,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 			time = CFAbsoluteTimeGetCurrent();
 			if(value != kCFRunLoopRunTimedOut)
 			lastTime = time;
-			else if(time - lastTime >= kStreamForcedTimeOut) {
+			else if((timeout > 0.0) && (time - lastTime >= timeout)) {
 				if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
 				[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"Timeout while writing to stream")];
 				break;
