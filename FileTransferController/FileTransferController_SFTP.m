@@ -41,6 +41,7 @@ static inline NSError* _MakeLibSSH2Error(LIBSSH2_SESSION* session, LIBSSH2_SFTP*
 
 static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFOptionFlags callBackTypes, CFSocketCallBack callback, const CFSocketContext* context)
 {
+	int							on = 1;
 	struct sockaddr_in			ipAddress;
 	CFHostRef					host;
 	CFStreamError				error;
@@ -78,7 +79,11 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	signature.address = (CFDataRef)[NSData dataWithBytes:&ipAddress length:ipAddress.sin_len];
 	
 	socket = CFSocketCreateConnectedToSocketSignature(kCFAllocatorDefault, &signature, callBackTypes, callback, context, kSocketConnectionTimeOut);
-	if(socket == NULL)
+	if(socket) {
+		if(setsockopt(CFSocketGetNative(socket), SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on)) != 0)
+		NSLog(@"%s: setsockopt() failed with error \"%s\"", __FUNCTION__, strerror(errno));
+	}
+	else
 	NSLog(@"%s: CFSocketCreateConnectedToSocketSignature() failed", __FUNCTION__);
 	
 	return socket;
