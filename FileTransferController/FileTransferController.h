@@ -149,6 +149,7 @@
 @private
 	FSVolumeRefNum						_volumeRefNum;
 	NSString*							_basePath;
+	int									_fd;
 }
 @end
 

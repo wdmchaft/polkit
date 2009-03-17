@@ -230,12 +230,6 @@
 
 @implementation RemoteTransferController
 
-+ (const char*) fileSystemName
-{
-	[self doesNotRecognizeSelector:_cmd];
-	return NULL;
-}
-
 - (id) initWithBaseURL:(NSURL*)url
 {
 	OSStatus				error;
@@ -243,7 +237,8 @@
 	NSURL*					volumeURL;
 	NSString*				path;
 	NSMutableArray*			components;
-	struct statfs			info;
+	NSArray*				volumes;
+	const char*				filePath;
 	
 	if((self = [super initWithBaseURL:url])) {
 		components = [NSMutableArray arrayWithArray:[[url path] pathComponents]];
@@ -256,33 +251,41 @@
 		volumeURL = [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:[url host] port:0 path:[components objectAtIndex:0]];
 		[components removeObjectAtIndex:0];
 		
-		path = [@"/Volumes" stringByAppendingPathComponent:[volumeURL path]];
-		if((statfs([path UTF8String], &info) == 0) && (strcmp(info.f_fstypename, [[self class] fileSystemName]) == 0))
-		_basePath = ([components count] ? [[path stringByAppendingPathComponent:[NSString pathWithComponents:components]] copy] : [path copy]);
+		volumes = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL];
+		
+		error = FSMountServerVolumeSync((CFURLRef)volumeURL, NULL, (CFStringRef)[url user], (CFStringRef)[url passwordByReplacingPercentEscapes], &_volumeRefNum, 0);
+		if(error != noErr)
+		NSLog(@"%s: FSMountServerVolumeSync() failed with error %i", __FUNCTION__, error);
 		else {
-			error = FSMountServerVolumeSync((CFURLRef)volumeURL, NULL, (CFStringRef)[url user], (CFStringRef)[url passwordByReplacingPercentEscapes], &_volumeRefNum, 0);
+			error = FSGetVolumeInfo(_volumeRefNum, 0, NULL, kFSVolInfoNone, NULL, NULL, &directory);
 			if(error != noErr)
-			NSLog(@"%s: FSMountServerVolumeSync() failed with error %i", __FUNCTION__, error);
+			NSLog(@"%s: FSGetVolumeInfo() failed with error %i", __FUNCTION__, error);
 			else {
-				error = FSGetVolumeInfo(_volumeRefNum, 0, NULL, kFSVolInfoNone, NULL, NULL, &directory);
-				if(error != noErr)
-				NSLog(@"%s: FSGetVolumeInfo() failed with error %i", __FUNCTION__, error);
+				path = [[(id)CFURLCreateFromFSRef(kCFAllocatorDefault, &directory) autorelease] path];
+				if(path == nil) {
+					NSLog(@"%s: CFURLCreateFromFSRef() failed", __FUNCTION__);
+					error = -1;
+				}
 				else {
-					path = [[(id)CFURLCreateFromFSRef(kCFAllocatorDefault, &directory) autorelease] path];
-					if(path == nil) {
-						NSLog(@"%s: CFURLCreateFromFSRef() failed", __FUNCTION__);
-						error = -1;
-					}
-					else
 					_basePath = ([components count] ? [[path stringByAppendingPathComponent:[NSString pathWithComponents:components]] copy] : [path copy]);
+					if([volumes containsObject:[path lastPathComponent]])
+					_volumeRefNum = 0; //HACK: Don't unmount volume as it was already present
 				}
 			}
-			
-			if(error != noErr) {
-				[self release];
-				return nil;
-			}
 		}
+		if(error != noErr) {
+			[self release];
+			return nil;
+		}
+		
+		filePath = [[_basePath stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]] UTF8String];
+		_fd = open(filePath, O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		if(_fd > 0) {
+			if(unlink(filePath) != 0)
+			NSLog(@"%s: unlink(%s) failed with error \"%s\"", __FUNCTION__, filePath, strerror(errno));
+		}
+		else
+		NSLog(@"%s: open(%s) failed with error \"%s\"", __FUNCTION__, filePath, strerror(errno));
 	}
 	
 	return self;
@@ -294,6 +297,9 @@
 	OSStatus				error;
 	
 	[_basePath release];
+	
+	if(_fd)
+	close(_fd);
 	
 	if(_volumeRefNum) {
 		error = FSUnmountVolumeSync(_volumeRefNum, 0, &dissenter);
@@ -319,11 +325,6 @@
 	return @"afp";
 }
 
-+ (const char*) fileSystemName
-{
-	return "afpfs";
-}
-
 @end
 
 @implementation SMBTransferController
@@ -331,11 +332,6 @@
 + (NSString*) urlScheme
 {
 	return @"smb";
-}
-
-+ (const char*) fileSystemName
-{
-	return "smbfs";
 }
 
 @end
