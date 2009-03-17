@@ -171,6 +171,7 @@
 }
 @property(nonatomic, getter=isSSLCertificateValidationDisabled) BOOL SSLCertificateValidationDisabled;
 @property(nonatomic) BOOL keepConnectionAlive; //NO by default
+- (NSURL*) finalURLForPath:(NSString*)remotePath;
 @end
 
 /* Same as HTTPTransferController */

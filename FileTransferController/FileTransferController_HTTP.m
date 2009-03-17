@@ -72,9 +72,8 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	[super invalidate];
 }
 
-- (CFHTTPMessageRef) _createHTTPRequestWithMethod:(NSString*)method path:(NSString*)path
+- (CFHTTPMessageRef) _createHTTPRequestWithMethod:(NSString*)method url:(NSURL*)url
 {
-	NSURL*					url = [self absoluteURLForRemotePath:path];
 	NSString*				user = [[self baseURL] user];
 	NSString*				password = [[self baseURL] passwordByReplacingPercentEscapes];
 	CFHTTPMessageRef		message;
@@ -93,6 +92,11 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	CFHTTPMessageSetHeaderFieldValue(message, CFSTR("User-Agent"), (CFStringRef)NSStringFromClass([self class]));
 	
 	return message;
+}
+
+- (CFHTTPMessageRef) _createHTTPRequestWithMethod:(NSString*)method path:(NSString*)path
+{
+	return [self _createHTTPRequestWithMethod:method url:[self absoluteURLForRemotePath:path]];
 }
 
 - (CFReadStreamRef) _createReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(NSInputStream*)stream
@@ -160,6 +164,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	NSInteger				status = (_responseHeaders ? CFHTTPMessageGetResponseStatusCode(_responseHeaders) : -1);
 	NSString*				method = info;
 	id						result = nil;
+	NSString*				location;
 	
 	if(error)
 	*error = nil;
@@ -169,7 +174,15 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	NSLog(@"%@ [HTTP Response]\n%@\n%@", self, [(id)(_responseHeaders ? CFHTTPMessageCopyResponseStatusLine(_responseHeaders) : NULL) autorelease], [(id)(_responseHeaders ? CFHTTPMessageCopyAllHeaderFields(_responseHeaders) : NULL) autorelease]);
 #endif
 	
-	if([method isEqualToString:@"GET"]) {
+	if([method isEqualToString:@"HEAD"]) {
+		if((status == 200) || (status == 404))
+		result = [(id)CFHTTPMessageCopyRequestURL(_responseHeaders) autorelease];
+		else if((status == 301) || (status == 307)) {
+			if((location = [(id)CFHTTPMessageCopyHeaderFieldValue(_responseHeaders, CFSTR("Location")) autorelease]))
+			result = [NSURL URLWithString:location];
+		}
+	}
+	else if([method isEqualToString:@"GET"]) {
 		if(status == 200)
 		result = [NSNumber numberWithBool:YES];
 	}
@@ -236,12 +249,17 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 - (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	NSString*				type = nil;
-	BOOL					success = NO;
 	NSString*				UTI;
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			readStream;
+	NSURL*					finalURL;
 	
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
+	return NO;
+	
+	//HACK: Send a HEAD first to see if we have a redirect on this URL as CFReadStreamCreateForStreamedHTTPRequest() doesn't handle redirects
+	finalURL = [self finalURLForPath:remotePath];
+	if(finalURL == nil)
 	return NO;
 	
 	//HACK: Force CFReadStreamCreateForStreamedHTTPRequest() to go through our stream methods by using a DataStream wrapper
@@ -250,7 +268,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if(stream == nil)
 	return NO;
 	
-	request = [self _createHTTPRequestWithMethod:@"PUT" path:remotePath];
+	request = [self _createHTTPRequestWithMethod:@"PUT" url:finalURL];
 	if(request == NULL)
 	return NO;
 	
@@ -269,9 +287,22 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	readStream = [self _createReadStreamWithHTTPRequest:request bodyStream:stream];
 	CFRelease(request);
 	
-	success = [[self runReadStream:readStream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"PUT" isFileTransfer:YES] boolValue];
+	return [[self runReadStream:readStream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"PUT" isFileTransfer:YES] boolValue];
+}
+
+- (NSURL*) finalURLForPath:(NSString*)remotePath
+{
+	CFHTTPMessageRef		request;
+	CFReadStreamRef			stream;
 	
-	return success;
+	request = [self _createHTTPRequestWithMethod:@"HEAD" path:remotePath];
+	if(request == NULL)
+	return nil;
+	
+	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	CFRelease(request);
+	
+	return [self runReadStream:stream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"HEAD" isFileTransfer:NO];
 }
 
 @end
@@ -713,6 +744,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	NSString*				dateString;
 	NSDictionary*			headers;
 	NSString*				header;
+	NSRange					range;
 	
 	date = [NSCalendarDate calendarDate];
 	[date setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
@@ -735,10 +767,15 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	[buffer appendString:amzHeaders];
 	if([host isEqualToString:kFileTransferHost_AmazonS3])
 	[buffer appendString:@"/"];
-	else if([[url path] length])
-	[buffer appendFormat:@"/%@%@", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)], [url path]];
-	else
-	[buffer appendFormat:@"/%@/", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)]];
+	else {
+		range = [host rangeOfString:@"." options:NSBackwardsSearch range:NSMakeRange(0, [host length] - [@".amazonaws.com" length])];
+		if(range.location == NSNotFound)
+		range.location = [host length]; //NOTE: This is not supposed to ever happen
+		if([[url path] length])
+		[buffer appendFormat:@"/%@%@", [host substringToIndex:range.location], [url path]];
+		else
+		[buffer appendFormat:@"/%@/", [host substringToIndex:range.location]];
+	}
 	if([[url query] length])
 	[buffer appendFormat:@"?%@", [url query]];
 	authorization = [[[buffer dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[[self baseURL] passwordByReplacingPercentEscapes]] encodeBase64];

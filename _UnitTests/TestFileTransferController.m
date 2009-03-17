@@ -399,6 +399,7 @@ Exit:
 		[controller setNewBucketLocation:nil];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertNotNil([controller finalURLForPath:name], nil);
 		AssertEqualObjects([controller locationForPath:name], @"", nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
@@ -409,6 +410,7 @@ Exit:
 		[controller setNewBucketLocation:kAmazonS3BucketLocation_Europe];
 		name = [NSString stringWithFormat:@"polkit-%.0f", CFAbsoluteTimeGetCurrent()];
 		AssertTrue([controller createDirectoryAtPath:name], nil);
+		AssertNotNil([controller finalURLForPath:name], nil);
 		AssertEqualObjects([controller locationForPath:name], kAmazonS3BucketLocation_Europe, nil);
 		AssertNotNil([controller contentsOfDirectoryAtPath:name], nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:[name stringByAppendingPathComponent:@"Test.jpg"]], nil);
