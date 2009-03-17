@@ -176,7 +176,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 - (BOOL) _downloadFileFromPath:(NSString*)remotePath toStream:(NSOutputStream*)stream
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	BOOL					success = NO;
 	NSUInteger				length = 0;
 	NSTimeInterval			timeOut = [self timeOut];
@@ -264,7 +264,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 - (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream
 {
 	BOOL					delegateHasShouldAbort = [[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)];
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	NSUInteger				length = 0;
 	BOOL					success = NO;
 	NSTimeInterval			timeOut = [self timeOut];
@@ -347,7 +347,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 
 - (NSDictionary*) contentsOfDirectoryAtPath:(NSString*)remotePath
 {
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	NSMutableDictionary*	listing = [NSMutableDictionary dictionary];
 	char					buffer[kNameBufferSize];
 	LIBSSH2_SFTP_HANDLE*	handle;
@@ -401,7 +401,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 
 - (BOOL) createDirectoryAtPath:(NSString*)remotePath
 {
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	
 	[self _setTimeOut:[self timeOut]];
 	
@@ -422,8 +422,8 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 
 - (BOOL) movePath:(NSString*)fromRemotePath toPath:(NSString*)toRemotePath
 {
-	const char*				fromPath = [[[[self baseURL] path] stringByAppendingPathComponent:[fromRemotePath stringByStandardizingPath]] UTF8String];
-	const char*				toPath = [[[[self baseURL] path] stringByAppendingPathComponent:[toRemotePath stringByStandardizingPath]] UTF8String];
+	const char*				fromPath = [[self absolutePathForRemotePath:fromRemotePath] UTF8String];
+	const char*				toPath = [[self absolutePathForRemotePath:toRemotePath] UTF8String];
 	
 	[self _setTimeOut:[self timeOut]];
 	
@@ -444,7 +444,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 
 - (BOOL) deleteFileAtPath:(NSString*)remotePath
 {
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	LIBSSH2_SFTP_ATTRIBUTES	attributes;
 	
 	[self _setTimeOut:[self timeOut]];
@@ -466,7 +466,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 
 - (BOOL) deleteDirectoryAtPath:(NSString*)remotePath
 {
-	const char*				serverPath = [[[[self baseURL] path] stringByAppendingPathComponent:[remotePath stringByStandardizingPath]] UTF8String];
+	const char*				serverPath = [[self absolutePathForRemotePath:remotePath] UTF8String];
 	LIBSSH2_SFTP_ATTRIBUTES	attributes;
 	
 	[self _setTimeOut:[self timeOut]];
