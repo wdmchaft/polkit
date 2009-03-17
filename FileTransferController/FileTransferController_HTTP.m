@@ -1042,6 +1042,8 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	if([host length] > [kFileTransferHost_AmazonS3 length])
 	remotePath = @"?location";
 	else {
+		if([remotePath hasPrefix:@"/"])
+		remotePath = [remotePath substringFromIndex:1];
 		range = [remotePath rangeOfString:@"/"];
 		if(range.location != NSNotFound)
 		remotePath = [remotePath substringToIndex:range.location];
