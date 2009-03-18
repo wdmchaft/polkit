@@ -124,6 +124,7 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 	curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
 	curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, _DebugCallback);
 	curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, self);
+	curl_easy_setopt(_handle, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V4); //HACK: Work around an issue with Bonjour hostnames that resolve to IPv6 and passive connections can't be established
 	
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
