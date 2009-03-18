@@ -485,7 +485,12 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
+	if([fromRemotePath hasPrefix:@"/"])
+	fromRemotePath = [fromRemotePath substringFromIndex:1];
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", fromRemotePath] cStringUsingEncoding:_stringEncoding]);
+	
+	if([toRemotePath hasPrefix:@"/"])
+	toRemotePath = [toRemotePath substringFromIndex:1];
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", toRemotePath] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
@@ -501,6 +506,8 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 #else	
 	struct curl_slist*		headerList = NULL;
 	
+	if([remotePath hasPrefix:@"/"])
+	remotePath = [remotePath substringFromIndex:1];
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performQuote:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
@@ -511,6 +518,8 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
+	if([remotePath hasPrefix:@"/"])
+	remotePath = [remotePath substringFromIndex:1];
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
@@ -520,6 +529,8 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
+	if([remotePath hasPrefix:@"/"])
+	remotePath = [remotePath substringFromIndex:1];
 	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
 	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
