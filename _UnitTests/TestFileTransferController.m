@@ -65,7 +65,7 @@
 	[self logMessage:@"[Error %i] %@\n%@", [error code], [error localizedDescription], [error userInfo]];
 }
 
-- (void) _testURL:(NSURL*)url
+- (void) _testURL:(NSURL*)url flag:(BOOL)flag
 {
 	NSAutoreleasePool*			pool = [NSAutoreleasePool new];
 	NSString*					filePath = [[@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]] stringByAppendingPathExtension:@"jpg"];
@@ -81,10 +81,10 @@
 	
 	controller = [FileTransferController fileTransferControllerWithURL:url];
 	AssertNotNil(controller, nil);
-	if([controller isKindOfClass:[FTPTransferController class]])
-	[(FTPTransferController*)controller setKeepConnectionAlive:YES];
+	if([controller isKindOfClass:[FTPTransferController class]] || [controller isKindOfClass:[FTPSTransferController class]])
+	[(FTPTransferController*)controller setKeepConnectionAlive:flag];
 	else if([controller isKindOfClass:[HTTPTransferController class]])
-	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:YES];
+	[(HTTPTransferController*)controller setSSLCertificateValidationDisabled:flag];
 	[controller setDelegate:self];
 	[controller setTimeOut:kTimeOut];
 	
@@ -139,9 +139,11 @@
 	}
 	if([controller respondsToSelector:@selector(createDirectoryAtPath:)]) {
 		AssertTrue([controller createDirectoryAtPath:@"Folder"], nil);
-		[controller setDelegate:nil];
-		AssertFalse([controller createDirectoryAtPath:@"Folder"], nil);
-		[controller setDelegate:self];
+		if(![controller isKindOfClass:[FTPTransferController class]] && ![controller isKindOfClass:[FTPSTransferController class]]) {
+			[controller setDelegate:nil];
+			AssertFalse([controller createDirectoryAtPath:@"Folder"], nil);
+			[controller setDelegate:self];
+		}
 		
 		if([controller respondsToSelector:@selector(contentsOfDirectoryAtPath:)])
 		AssertNotNil([controller contentsOfDirectoryAtPath:@"Folder"], nil);
@@ -313,7 +315,7 @@ Exit:
 	NSError*					error;
 	
 	AssertTrue([[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:&error], [error localizedDescription]);
-	[self _testURL:[NSURL fileURLWithPath:path]];
+	[self _testURL:[NSURL fileURLWithPath:path] flag:NO];
 	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
 }
 
@@ -322,7 +324,7 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"AFP"])
-	[self _testURL:url];
+	[self _testURL:url flag:NO];
 }
 
 - (void) testSMB
@@ -330,7 +332,7 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"SMB"])
-	[self _testURL:url];
+	[self _testURL:url flag:NO];
 }
 
 - (void) testSFTP
@@ -338,25 +340,27 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"SFTP"])
-	[self _testURL:url];
+	[self _testURL:url flag:NO];
 }
 
 - (void) testFTP
 {
 	NSURL*						url;
 	
-	//FIXME: FTP fails deleting non-existent files or directories (issue #4)
-	for(url in [self _testURLsForProtocol:@"FTP"])
-	[self _testURL:url];
+	for(url in [self _testURLsForProtocol:@"FTP"]) {
+		[self _testURL:url flag:NO];
+		[self _testURL:url flag:YES];
+	}
 }
 
 - (void) testFTPS
 {
 	NSURL*						url;
 	
-	//FIXME: FTP fails deleting non-existent files or directories (issue #4)
-	for(url in [self _testURLsForProtocol:@"FTPS"])
-	[self _testURL:url];
+	for(url in [self _testURLsForProtocol:@"FTPS"]) {
+		[self _testURL:url flag:NO];
+		[self _testURL:url flag:YES];
+	}
 }
 
 - (void) testIDisk
@@ -364,7 +368,7 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"iDisk"])
-	[self _testURL:url];
+	[self _testURL:url flag:NO];
 }
 
 - (void) testWebDAV
@@ -372,7 +376,7 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"WebDAV"])
-	[self _testURL:url];
+	[self _testURL:url flag:NO];
 }
 
 - (void) testSecuredWebDAV
@@ -380,7 +384,7 @@ Exit:
 	NSURL*						url;
 	
 	for(url in [self _testURLsForProtocol:@"SecureWebDAV"])
-	[self _testURL:url];
+	[self _testURL:url flag:YES];
 }
 
 - (void) _testAmazonS3:(BOOL)secure

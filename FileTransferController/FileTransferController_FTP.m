@@ -119,12 +119,13 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 	curl_easy_reset(_handle);
 	
 	curl_easy_setopt(_handle, CURLOPT_FORBID_REUSE, (long)(_keepAlive ? 0 : 1));
+	curl_easy_setopt(_handle, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V4); //HACK: Work around an issue with Bonjour hostnames that resolve to IPv6 and passive connections can't be established
 	if(timeOut > 0.0)
 	curl_easy_setopt(_handle, CURLOPT_TIMEOUT, (long)ceil(timeOut));
+	
 	curl_easy_setopt(_handle, CURLOPT_VERBOSE, (long)1);
 	curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, _DebugCallback);
 	curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, self);
-	curl_easy_setopt(_handle, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V4); //HACK: Work around an issue with Bonjour hostnames that resolve to IPv6 and passive connections can't be established
 	
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		if([[(NSDictionary*)proxySettings objectForKey:(id)kSCPropNetProxiesFTPEnable] boolValue]) {
@@ -427,7 +428,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 #endif
 
 /* This method takes ownership of the header list */
-- (BOOL) _performQuote:(struct curl_slist*)headerList forOption:(CURLoption)option withURL:(NSURL*)url
+- (BOOL) _performQuote:(struct curl_slist*)headerList url:(NSURL*)url
 {
 	BOOL					success = NO;
 	CURLcode				result;
@@ -454,7 +455,10 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 #else
 	curl_easy_setopt(_handle, CURLOPT_NOPROGRESS, (long)1);
 #endif
-	curl_easy_setopt(_handle, option, headerList);
+	if(headerList)
+	curl_easy_setopt(_handle, CURLOPT_POSTQUOTE, headerList);
+	else
+	curl_easy_setopt(_handle, CURLOPT_FTP_CREATE_MISSING_DIRS, (long)1);
 	
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
@@ -470,6 +474,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 		[[self delegate] fileTransferControllerDidFail:self withError:_MakeCURLError(result, buffer, _transcript)];
 	}
 	
+	if(headerList)
 	curl_slist_free_all(headerList);
 	fclose(file);
 	
@@ -480,37 +485,44 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", [self absolutePathForRemotePath:fromRemotePath]] cStringUsingEncoding:_stringEncoding]);
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", [self absolutePathForRemotePath:toRemotePath]] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNFR %@", fromRemotePath] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RNTO %@", toRemotePath] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performQuote:headerList forOption:CURLOPT_QUOTE withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
+	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 - (BOOL) createDirectoryAtPath:(NSString*)remotePath
 {
+#if 1 //FIXME: Work around CURL bug that closes the connection when doing CURLOPT_POSTQUOTE inside an empty directory 
+	if(![remotePath hasSuffix:@"/"])
+	remotePath = [remotePath stringByAppendingString:@"/"];
+	
+	return [self _performQuote:NULL url:[self fullAbsoluteURLForRemotePath:remotePath]];
+#else	
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"MKD %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performQuote:headerList forOption:CURLOPT_QUOTE withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
+	return [self _performQuote:headerList withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
+#endif
 }
 
 - (BOOL) deleteFileAtPath:(NSString*)remotePath
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"DELE %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performQuote:headerList forOption:CURLOPT_POSTQUOTE withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
+	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 - (BOOL) deleteDirectoryAtPath:(NSString*)remotePath
 {
 	struct curl_slist*		headerList = NULL;
 	
-	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", [self absolutePathForRemotePath:remotePath]] cStringUsingEncoding:_stringEncoding]);
+	headerList = curl_slist_append(headerList, [[NSString stringWithFormat:@"RMD %@", remotePath] cStringUsingEncoding:_stringEncoding]);
 	
-	return [self _performQuote:headerList forOption:CURLOPT_POSTQUOTE withURL:[self fullAbsoluteURLForRemotePath:@"/"]];
+	return [self _performQuote:headerList url:[self fullAbsoluteURLForRemotePath:@"/"]];
 }
 
 @end

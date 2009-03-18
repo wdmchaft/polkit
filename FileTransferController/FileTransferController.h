@@ -215,7 +215,7 @@
 @end
 
 /* Supports everything except copy - Always use passive mode */
-/* Contrary to the FileTransferController conventions, deleting non-existent files or directories returns NO instead of YES */
+/* Contrary to the FileTransferController conventions, deleting non-existent files or directories returns NO instead of YES, and creating already existing directory return YES instead of NO */
 @interface FTPTransferController : FileTransferController
 {
 @private
