@@ -72,7 +72,7 @@ typedef struct {
 
 @interface DirectoryScanner ()
 @property(nonatomic, readonly, nonatomic) CFMutableDictionaryRef _directories;
-- (BOOL) _scanSubdirectory:(const char*)subPath fromRootDirectory:(const char*)rootDirectory directories:(CFMutableDictionaryRef)directories excludedPaths:(NSMutableArray*)excludedPaths errorPaths:(NSMutableArray*)errorPaths;
+- (NSInteger) _scanSubdirectory:(const char*)subPath fromRootDirectory:(const char*)rootDirectory directories:(CFMutableDictionaryRef)directories excludedPaths:(NSMutableArray*)excludedPaths errorPaths:(NSMutableArray*)errorPaths;
 - (NSDictionary*) _scanRootDirectory:(BOOL)compare bumpRevision:(BOOL)bumpRevision detectMovedItems:(BOOL)detectMovedItems reportAllRemovedItems:(BOOL)reportAllRemovedItems;
 @end
 
@@ -414,7 +414,7 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 
 @implementation DirectoryScanner
 
-@synthesize rootDirectory=_rootDirectory, scanningMetadata=_scanMetadata, sortPaths=_sortPaths, reportExcludedHiddenItems=_reportHidden, excludeHiddenItems=_excludeHidden, excludeDSStoreFiles=_excludeDSStore, exclusionPredicate=_exclusionPredicate, revision=_revision, _directories;
+@synthesize rootDirectory=_rootDirectory, scanningMetadata=_scanMetadata, sortPaths=_sortPaths, reportExcludedHiddenItems=_reportHidden, excludeHiddenItems=_excludeHidden, excludeDSStoreFiles=_excludeDSStore, exclusionPredicate=_exclusionPredicate, revision=_revision, _directories=_directories, delegate=_delegate;
 
 + (NSPredicate*) exclusionPredicateWithPaths:(NSArray*)paths names:(NSArray*)names
 {
@@ -571,11 +571,12 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 	return [items description];
 }
 
-- (BOOL) _scanSubdirectory:(const char*)subPath fromRootDirectory:(const char*)rootDirectory directories:(CFMutableDictionaryRef)directories excludedPaths:(NSMutableArray*)excludedPaths errorPaths:(NSMutableArray*)errorPaths
+- (NSInteger) _scanSubdirectory:(const char*)subPath fromRootDirectory:(const char*)rootDirectory directories:(CFMutableDictionaryRef)directories excludedPaths:(NSMutableArray*)excludedPaths errorPaths:(NSMutableArray*)errorPaths
 {
 	CFDictionaryValueCallBacks	itemValueCallbacks = {0, NULL, _DirectoryItemDataReleaseCallback, NULL, NULL};
-	CFMutableDictionaryRef		dictionary = NULL;
 	NSMutableDictionary*		variables = nil;
+	NSInteger					result = 0;
+	CFMutableDictionaryRef		dictionary;
 	char						buffer[PATH_MAX];
 	char*						fullPath;
 	size_t						rootLength,
@@ -588,6 +589,9 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 	DIR*						dir;
 	CFTypeRef					value;
 	int							type;
+	
+	if(_delegate && [_delegate shouldAbortScanning:self])
+	return -1;
 	
 	rootLength = strlen(rootDirectory);
 	if(subPath[0] != 0) {
@@ -694,7 +698,13 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 				}
 				
 				if(S_ISDIR(stats.st_mode)) {
-					if(![self _scanSubdirectory:&fullPath[rootLength + 1] fromRootDirectory:rootDirectory directories:directories excludedPaths:excludedPaths errorPaths:errorPaths])
+					result = [self _scanSubdirectory:&fullPath[rootLength + 1] fromRootDirectory:rootDirectory directories:directories excludedPaths:excludedPaths errorPaths:errorPaths];
+					if(result < 0) {
+						CFRelease(dictionary);
+						dictionary = NULL;
+						break;
+					}
+					if(result == 0)
 					continue;
 				}
 				else if(_scanMetadata) {
@@ -720,6 +730,7 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 		if(dictionary) {
 			CFDictionarySetValue(directories, subPath, dictionary);
 			CFRelease(dictionary);
+			result = 1;
 		}
 		
 		if(_exclusionPredicate)
@@ -728,12 +739,12 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 		closedir(dir);
 	}
 	
-	if(!dictionary)
+	if(result == 0)
 	ADD_PATH_TO_ARRAY(errorPaths, subPath);
 	
 	free(fullPath);
 	
-	return (dictionary ? YES : NO);
+	return result;
 }
 
 static void _DictionaryApplierFunction_Subprune(const void* key, const void* value, void* context)
@@ -1044,7 +1055,12 @@ static NSMutableDictionary* _CompareDirectories(CFDictionaryRef newDirectories, 
 	
 	newRoot = _CreateDirectoryItemData(dirPath, &stats, _scanMetadata, _revision, _xattrBuffer);
 	newDirectories = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &kCFTypeDictionaryValueCallBacks);
-	[self _scanSubdirectory:"" fromRootDirectory:dirPath directories:newDirectories excludedPaths:excludedPaths errorPaths:errorPaths];
+	if([self _scanSubdirectory:"" fromRootDirectory:dirPath directories:newDirectories excludedPaths:excludedPaths errorPaths:errorPaths] <= 0) {
+		CFRelease(newDirectories);
+		if(newRoot)
+		_DirectoryItemDataReleaseCallback(NULL, newRoot);
+		return nil;
+	}
 	
 	if(compare) {
 		dictionary = _CompareDirectories(newDirectories, _directories, _scanMetadata, detectMovedItems, reportAllRemovedItems, (bumpRevision ? _revision + 1 : _revision), _sortPaths);

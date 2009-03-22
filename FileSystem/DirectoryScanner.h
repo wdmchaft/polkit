@@ -34,6 +34,12 @@ enum {
 };
 typedef NSUInteger DirectoryScannerOptions;
 
+@class DirectoryScanner;
+
+@protocol DirectoryScannerDelegate <NSObject>
+- (BOOL) shouldAbortScanning:(DirectoryScanner*)scanner;
+@end
+
 @interface DirectoryItem : NSObject
 {
 @private
@@ -84,23 +90,25 @@ Metadata is owner & group, permissions, user settable flags, ACLs and extended a
 @interface DirectoryScanner : NSObject <NSFastEnumeration>
 {
 @private
-	NSString*				_rootDirectory;
-	NSUInteger				_revision;
-	BOOL					_scanMetadata,
-							_sortPaths,
-							_reportHidden,
-							_excludeHidden,
-							_excludeDSStore;
-	NSPredicate*			_exclusionPredicate;
-	void*					_root;
-	CFMutableDictionaryRef	_directories;
-	NSMutableDictionary*	_info;
-	char*					_xattrBuffer;
+	NSString*						_rootDirectory;
+	NSUInteger						_revision;
+	BOOL							_scanMetadata,
+									_sortPaths,
+									_reportHidden,
+									_excludeHidden,
+									_excludeDSStore;
+	NSPredicate*					_exclusionPredicate;
+	void*							_root;
+	CFMutableDictionaryRef			_directories;
+	NSMutableDictionary*			_info;
+	char*							_xattrBuffer;
+	id<DirectoryScannerDelegate>	_delegate;
 }
 + (NSPredicate*) exclusionPredicateWithPaths:(NSArray*)paths names:(NSArray*)names;
 + (DirectoryItem*) directoryItemAtPath:(NSString*)path includeMetadata:(BOOL)includeMetadata;
 
 - (id) initWithRootDirectory:(NSString*)rootDirectory scanMetadata:(BOOL)scanMetadata;
+@property(nonatomic, assign) id<DirectoryScannerDelegate> delegate;
 
 @property(nonatomic, copy) NSString* rootDirectory; //You should rescan after changing this
 @property(nonatomic, readonly, getter=isScanningMetadata) BOOL scanningMetadata;
