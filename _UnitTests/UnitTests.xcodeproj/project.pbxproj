@@ -89,6 +89,7 @@
 		E225A81E0F44E98300023F66 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D28BE0E9298FF00E298A9 /* Foundation.framework */; };
 		E225A8210F44E98C00023F66 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
 		E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = E225AB930F61C8C800999E7D /* WorkerThread.m */; };
+		E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */ = {isa = PBXBuildFile; fileRef = E2A82D880F798BA400A4B20C /* StreamCoding.m */; };
 		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
 /* End PBXBuildFile section */
 
@@ -222,6 +223,8 @@
 		E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+LockedItems.m"; sourceTree = "<group>"; };
 		E286099A0F28F47D0032DF7D /* DataStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataStream.m; sourceTree = "<group>"; };
 		E286099B0F28F47D0032DF7D /* DataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataStream.h; sourceTree = "<group>"; };
+		E2A82D870F798BA400A4B20C /* StreamCoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamCoding.h; sourceTree = "<group>"; };
+		E2A82D880F798BA400A4B20C /* StreamCoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamCoding.m; sourceTree = "<group>"; };
 		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
 		E2D5896B0F3D82C4005575BD /* UnitTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTesting.h; sourceTree = "<group>"; };
 		E2D5896C0F3D82C4005575BD /* UnitTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTesting.m; sourceTree = "<group>"; };
@@ -320,6 +323,8 @@
 				2394F5820F2FF2C10046622E /* LoginItems.m */,
 				E24D2A350E92F29200E298A9 /* MD5.h */,
 				E24D2A340E92F29200E298A9 /* MD5.m */,
+				E2A82D870F798BA400A4B20C /* StreamCoding.h */,
+				E2A82D880F798BA400A4B20C /* StreamCoding.m */,
 				E24D2A390E92F29200E298A9 /* SVNClient.h */,
 				E24D2A380E92F29200E298A9 /* SVNClient.m */,
 				23CB96930F3CD5020072DD9D /* SystemInfo.h */,
@@ -608,6 +613,7 @@
 				E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */,
 				E225A36C0F449ADD00023F66 /* NetworkConfiguration.m in Sources */,
 				E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */,
+				E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
