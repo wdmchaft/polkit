@@ -144,6 +144,9 @@ Metadata is owner & group, permissions, user settable flags, ACLs and extended a
 - (id) initWithPropertyList:(id)plist;
 @property(nonatomic, readonly) id propertyList;
 
+- (NSData*) serializedData;
+- (id) initWithSerializedData:(NSData*)data;
+
 - (BOOL) writeToFile:(NSString*)path;
 - (id) initWithFile:(NSString*)path;
 @end

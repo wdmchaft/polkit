@@ -87,7 +87,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
 }
 
-- (void) testScanner1
+- (void) _testScanner:(BOOL)flag
 {
 	NSString*				path = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	NSArray*				expectedContent;
@@ -95,6 +95,7 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	DirectoryScanner*		scanner;
 	NSDictionary*			dictionary;
 	DirectoryItem*			info;
+	NSData*					serializedData;
 	DirectoryScanner*		serializedScanner;
 	
 	expectedContent = [[[NSFileManager defaultManager] subpathsAtPath:kDirectoryPath] sortedArrayUsingFunction:_SortFunction context:NULL];
@@ -135,9 +136,17 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	[scanner setUserInfo:@"PolKit" forKey:@"pol-online"];
 	AssertEqualObjects([scanner userInfoForKey:@"pol-online"], @"PolKit", nil);
 	
-	AssertTrue([scanner writeToFile:path], nil);
+	if(flag) {
+		serializedData = [scanner serializedData];
+		AssertNotNil(serializedData, nil);
+		serializedScanner = [[DirectoryScanner alloc] initWithSerializedData:serializedData];
+	}
+	else {
+		AssertTrue([scanner writeToFile:path], nil);
+		serializedScanner = [[DirectoryScanner alloc] initWithFile:path];
+		[[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
+	}
 	
-	serializedScanner = [[DirectoryScanner alloc] initWithFile:path];
 	AssertNotNil(serializedScanner, nil);
 	AssertEquals([serializedScanner revision], (NSUInteger)1, nil);
 	content = [NSMutableArray new];
@@ -159,6 +168,11 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	AssertNil([scanner userInfoForKey:@"pol-online"], nil);
 	
 	[scanner release];
+}
+
+- (void) testScanner1
+{
+	[self _testScanner:NO];
 }
 
 - (void) testScanner2
@@ -316,6 +330,11 @@ static NSComparisonResult _SortFunction(NSString* path1, NSString* path2, void* 
 	acl_free(aclText);
 	AssertEquals(chflags([file UTF8String], 0), (int)0, nil);
 	AssertTrue([manager removeItemAtPath:scratchPath error:&error], [error localizedDescription]);
+}
+
+- (void) testScanner5
+{
+	[self _testScanner:YES];
 }
 
 - (void) diskWatcherDidUpdateAvailability:(DiskWatcher*)watcher

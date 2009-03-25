@@ -24,9 +24,14 @@
 #import "DirectoryScanner.h"
 #import "NSData+GZip.h"
 
+#define kDataVersion						1
+#define kDataMinVersion						1
+#define kDataMaxVersion						kDataVersion
+
 #define kPropertyListVersion				3
 #define kPropertyListMinVersion				1
 #define kPropertyListMaxVersion				kPropertyListVersion
+
 #define kExtendedAttributesBufferSize		(128 * (XATTR_MAXNAMELEN + 1))
 
 enum {
@@ -1636,16 +1641,6 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	return self;
 }
 
-- (void) encodeWithCoder:(NSCoder*)aCoder
-{
-	[aCoder encodeObject:[self propertyList]];
-}
-
-- (id) initWithCoder:(NSCoder*)aDecoder
-{
-	return [self initWithPropertyList:[aDecoder decodeObject]];
-}
-
 - (BOOL) writeToFile:(NSString*)path
 {
 	NSAutoreleasePool*	localPool = [NSAutoreleasePool new];
@@ -1682,6 +1677,236 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	[data release];
 	
 	return self;
+}
+
+static void _DictionaryApplierFunction_ArchiveExtendedAttributes(const void* key, const void* value, void* context)
+{
+	NSCoder*					coder = (NSCoder*)context;
+	
+	[coder encodeBytes:key length:(strlen(key) + 1)];
+	[coder encodeBytes:value length:(sizeof(unsigned int) + *((unsigned int*)value))];
+}
+
+static void _ArchiveDirectoryItemData(DirectoryItemData* data, NSCoder* coder)
+{
+	unsigned int				count;
+#if __BIG_ENDIAN__
+	DirectoryItemData			swapData;
+#endif
+	
+#if __BIG_ENDIAN__
+	swapData.mode = CFSwapInt16(data->mode);
+	swapData.flags = CFSwapInt16(data->flags);
+	swapData.uid = CFSwapInt32(data->uid);
+	swapData.gid = CFSwapInt32(data->gid);
+	swapData.nodeID = CFSwapInt32(data->nodeID);
+	swapData.revision = CFSwapInt32(data->revision);
+	swapData.resourceSize = CFSwapInt32(data->resourceSize);
+	swapData.userInfo = data->userInfo;
+	swapData.aclString = data->aclString;
+	swapData.extendedAttributes = data->extendedAttributes;
+	swapData.dataSize = CFSwapInt64(data->dataSize);
+	*((uint64_t*)&swapData.newDate) = CFSwapInt64(*((uint64_t*)&data->newDate));
+	*((uint64_t*)&swapData.modDate) = CFSwapInt64(*((uint64_t*)&data->modDate));
+	[coder encodeBytes:&swapData length:sizeof(DirectoryItemData)];
+#else
+	[coder encodeBytes:data length:sizeof(DirectoryItemData)];
+#endif
+	
+	if(data->userInfo)
+	[coder encodeObject:data->userInfo];
+	if(data->aclString)
+	[coder encodeBytes:data->aclString length:(strlen(data->aclString) + 1)];
+	if(data->extendedAttributes) {
+		count = CFDictionaryGetCount(data->extendedAttributes);
+		[coder encodeValueOfObjCType:@encode(unsigned int) at:&count];
+		CFDictionaryApplyFunction(data->extendedAttributes, _DictionaryApplierFunction_ArchiveExtendedAttributes, coder);
+	}
+}
+
+static void _DictionaryApplierFunction_ArchiveLeaf(const void* key, const void* value, void* context)
+{
+	NSCoder*					coder = (NSCoder*)context;
+	
+	[coder encodeBytes:key length:(strlen(key) + 1)];
+	
+	_ArchiveDirectoryItemData((DirectoryItemData*)value, coder);
+}
+
+static void _DictionaryApplierFunction_ArchiveTrunk(const void* key, const void* value, void* context)
+{
+	NSCoder*					coder = (NSCoder*)context;
+	CFDictionaryRef				entries = (CFDictionaryRef)value;
+	unsigned int				count;
+	
+	[coder encodeBytes:key length:(strlen(key) + 1)];
+	
+	count = CFDictionaryGetCount(entries);
+	[coder encodeValueOfObjCType:@encode(unsigned int) at:&count];
+	CFDictionaryApplyFunction(entries, _DictionaryApplierFunction_ArchiveLeaf, coder);
+}
+
+- (void) encodeWithCoder:(NSCoder*)aCoder
+{
+	NSMutableDictionary*		info = [NSMutableDictionary dictionary];
+	NSString*					key;
+	NSArchiver*					archiver;
+	NSMutableData*				data;
+	unsigned int				count;
+	
+	for(key in _info) {
+		if([key length] && ([key characterAtIndex:0] != '.'))
+		[info setObject:[_info objectForKey:key] forKey:key];
+	}
+	
+	[aCoder encodeInteger:kDataVersion forKey:@"version"];
+	[aCoder encodeObject:[self rootDirectory] forKey:@"rootPath"];
+	[aCoder encodeInteger:_revision forKey:@"revision"];
+	[aCoder encodeBool:_scanMetadata forKey:@"scanMetadata"];
+	[aCoder encodeBool:_sortPaths forKey:@"sortPaths"];
+	[aCoder encodeBool:_excludeHidden forKey:@"excludeHiddenItems"];
+	[aCoder encodeBool:_excludeDSStore forKey:@"excludeDSStoreFiles"];
+	[aCoder encodeObject:info forKey:@"userInfo"];
+	[aCoder encodeObject:[self exclusionPredicate] forKey:@"exclusionPredicate"];
+	
+	if(_root) {
+		data = [NSMutableData new];
+		archiver = [[NSArchiver alloc] initForWritingWithMutableData:data];
+		_ArchiveDirectoryItemData(_root, archiver);
+		[archiver release];
+		[aCoder encodeObject:data forKey:@"root"];
+		[data release];
+	}
+	
+	data = [[NSMutableData alloc] initWithCapacity:(1024 * 1024)];
+	archiver = [[NSArchiver alloc] initForWritingWithMutableData:data];
+	count = CFDictionaryGetCount(_directories);
+	[archiver encodeValueOfObjCType:@encode(unsigned int) at:&count];
+	CFDictionaryApplyFunction(_directories, _DictionaryApplierFunction_ArchiveTrunk, archiver);
+	[archiver release];
+	[aCoder encodeObject:data forKey:@"directories"];
+	[data release];
+}
+
+static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger version)
+{
+	NSUInteger					length;
+	const DirectoryItemData*	item;
+	DirectoryItemData*			data;
+	unsigned int				count,
+								i;
+	const void*					key;
+	const void*					value;
+	void*						buffer;
+	
+	data = malloc(sizeof(DirectoryItemData));
+	item = (const DirectoryItemData*)[coder decodeBytesWithReturnedLength:&length];
+#if __BIG_ENDIAN__
+	data->mode = CFSwapInt16(item->mode);
+	data->flags = CFSwapInt16(item->flags);
+	data->uid = CFSwapInt32(item->uid);
+	data->gid = CFSwapInt32(item->gid);
+	data->nodeID = CFSwapInt32(item->nodeID);
+	data->revision = CFSwapInt32(item->revision);
+	data->resourceSize = CFSwapInt32(item->resourceSize);
+	data->userInfo = item->userInfo;
+	data->aclString = item->aclString;
+	data->extendedAttributes = item->extendedAttributes;
+	data->dataSize = CFSwapInt64(item->dataSize);
+	*((uint64_t*)&data->newDate) = CFSwapInt64(*((uint64_t*)&item->newDate));
+	*((uint64_t*)&data->modDate) = CFSwapInt64(*((uint64_t*)&item->modDate));
+#else
+	bcopy(item, data, sizeof(DirectoryItemData));
+#endif
+	
+	if(data->userInfo)
+	data->userInfo = [[coder decodeObject] retain];
+	if(data->aclString)
+	data->aclString = _CopyCString([coder decodeBytesWithReturnedLength:&length]);
+	if(data->extendedAttributes) {
+		data->extendedAttributes = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &_XATTRValueCallbacks);
+		[coder decodeValueOfObjCType:@encode(unsigned int) at:&count];
+		for(i = 0; i < count; ++i) {
+			key = [coder decodeBytesWithReturnedLength:&length];
+			value = [coder decodeBytesWithReturnedLength:&length];
+			buffer = malloc(length);
+			bcopy(value, buffer, length);
+			CFDictionarySetValue(data->extendedAttributes, key, buffer);
+		}
+	}
+	
+	return data;
+}
+
+- (id) initWithCoder:(NSCoder*)aDecoder
+{
+	CFDictionaryValueCallBacks	itemValueCallbacks = {0, NULL, _DirectoryItemDataReleaseCallback, NULL, NULL};
+	CFMutableDictionaryRef		dictionary;
+	NSUInteger					version;
+	NSData*						data;
+	NSUnarchiver*				unarchiver;
+	const void*					key1;
+	const void*					key2;
+	unsigned int				count1,
+								i1,
+								count2,
+								i2;
+	NSUInteger					length;
+	DirectoryItemData*			item;
+	
+	version = [aDecoder decodeIntegerForKey:@"version"];
+	if((version < kDataMinVersion) || (version > kDataMaxVersion)) {
+		[self release];
+		return nil;
+	}
+	
+	if((self = [self initWithRootDirectory:[aDecoder decodeObjectForKey:@"rootPath"] scanMetadata:[aDecoder decodeBoolForKey:@"scanMetadata"]])) {
+		_revision = [aDecoder decodeIntegerForKey:@"revision"];
+		_sortPaths = [aDecoder decodeBoolForKey:@"sortPaths"];
+		[self setExclusionPredicate:[aDecoder decodeObjectForKey:@"exclusionPredicate"]];
+		_excludeHidden = [aDecoder decodeBoolForKey:@"excludeHiddenItems"];
+		_excludeDSStore = [aDecoder decodeBoolForKey:@"excludeDSStoreFiles"]; 
+		[_info addEntriesFromDictionary:[aDecoder decodeObjectForKey:@"userInfo"]];
+		
+		if((data = [aDecoder decodeObjectForKey:@"root"])) {
+			unarchiver = [[NSUnarchiver alloc] initForReadingWithData:data];
+			_root = _UnarchiveDirectoryItemData(unarchiver, version);
+			[unarchiver release];
+		}
+		else
+		_root = NULL;
+		
+		data = [aDecoder decodeObjectForKey:@"directories"];
+		unarchiver = [[NSUnarchiver alloc] initForReadingWithData:data];
+		[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count1];
+		for(i1 = 0; i1 < count1; ++i1) {
+			dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &itemValueCallbacks);
+			key1 = [unarchiver decodeBytesWithReturnedLength:&length];
+			[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count2];
+			for(i2 = 0; i2 < count2; ++i2) {
+				key2 = [unarchiver decodeBytesWithReturnedLength:&length];
+				item = _UnarchiveDirectoryItemData(unarchiver, version);
+				CFDictionarySetValue(dictionary, key2, item);
+			}
+			CFDictionarySetValue(_directories, key1, dictionary);
+			CFRelease(dictionary);
+		}
+		[unarchiver release];
+	}
+	
+	return self;
+}
+
+- (NSData*) serializedData
+{
+	return [NSKeyedArchiver archivedDataWithRootObject:self];
+}
+
+- (id) initWithSerializedData:(NSData*)data
+{
+	[self release];
+	
+	return [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
 }
 
 @end
