@@ -1899,14 +1899,30 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 
 - (NSData*) serializedData
 {
-	return [NSKeyedArchiver archivedDataWithRootObject:self];
+	NSData*					data;
+	NSAutoreleasePool*		localPool;
+	
+	localPool = [NSAutoreleasePool new];
+	data = [[[NSKeyedArchiver archivedDataWithRootObject:self] compressGZip] retain];
+	[localPool release];
+	
+	return [data autorelease];
 }
 
 - (id) initWithSerializedData:(NSData*)data
 {
+	NSAutoreleasePool*		localPool;
+	
 	[self release];
 	
-	return [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
+	localPool = [NSAutoreleasePool new];
+	if((data = [data decompressGZip]))
+	self = [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
+	else
+	self = nil;
+	[localPool release];
+	
+	return self;
 }
 
 @end
