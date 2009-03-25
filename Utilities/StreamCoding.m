@@ -23,12 +23,10 @@
 
 @interface StreamEncoder ()
 - (id) initWithStream:(NSOutputStream*)stream version:(NSUInteger)version;
-- (void) writeBytes:(const void*)buffer length:(NSInteger)length;
 @end
 
 @interface StreamDecoder ()
 - (id) initWithStream:(NSInputStream*)stream;
-- (void) readBytes:(void*)buffer length:(NSInteger)length;
 @end
 
 @implementation StreamEncoder
@@ -102,7 +100,7 @@
 	[super dealloc];
 }
 
-- (void) writeBytes:(const void*)buffer length:(NSInteger)length
+- (void) encodeBytes:(const void*)buffer length:(NSInteger)length
 {
 	if(length && ([_stream write:buffer maxLength:length] != length))
 	[NSException raise:NSInternalInconsistencyException format:@"%s: Failed writing to stream (status = %i): %@", __FUNCTION__, [_stream streamStatus], [_stream streamError]];
@@ -124,12 +122,12 @@
 		if(data == nil)
 		[NSException raise:NSInternalInconsistencyException format:@"%s: Failed converting string to UTF8: %@", __FUNCTION__, string];
 		length = NSSwapHostIntToLittle([data length]);
-		[self writeBytes:&length length:sizeof(UInt32)];
-		[self writeBytes:[data bytes] length:[data length]];
+		[self encodeBytes:&length length:sizeof(UInt32)];
+		[self encodeBytes:[data bytes] length:[data length]];
 	}
 	else {
 		length = 0xFFFFFFFF;
-		[self writeBytes:&length length:sizeof(UInt32)];
+		[self encodeBytes:&length length:sizeof(UInt32)];
 	}
 }
 
@@ -137,14 +135,14 @@
 {
 	UInt32			length = NSSwapHostIntToLittle([data length]);
 	
-	[self writeBytes:&length length:sizeof(UInt32)];
-	[self writeBytes:[data bytes] length:[data length]];
+	[self encodeBytes:&length length:sizeof(UInt32)];
+	[self encodeBytes:[data bytes] length:[data length]];
 }
 
 - (void) encodeUInt32:(UInt32)value
 {
 	value = NSSwapHostIntToLittle(value);
-	[self writeBytes:&value length:sizeof(UInt32)];
+	[self encodeBytes:&value length:sizeof(UInt32)];
 }
 
 @end
@@ -216,7 +214,7 @@
 	[super dealloc];
 }
 
-- (void) readBytes:(void*)buffer length:(NSInteger)length
+- (void) decodeBytes:(void*)buffer length:(NSInteger)length
 {
 	if(length && ([_stream read:buffer maxLength:length] != length))
 	[NSException raise:NSInternalInconsistencyException format:@"%s: Failed reading from stream (status = %i): %@", __FUNCTION__, [_stream streamStatus], [_stream streamError]];
@@ -244,14 +242,14 @@
 	NSMutableData*	data;
 	NSString*		string;
 	
-	[self readBytes:&length length:sizeof(UInt32)];
+	[self decodeBytes:&length length:sizeof(UInt32)];
 	if(length == 0xFFFFFFFF)
 	return nil;
 	
 	data = [[NSMutableData alloc] initWithLength:NSSwapLittleIntToHost(length)];
 	if(data == nil)
 	[NSException raise:NSInternalInconsistencyException format:@"%s: Failed allocating memory: %i bytes", __FUNCTION__, NSSwapLittleIntToHost(length)];
-	[self readBytes:[data mutableBytes] length:[data length]];
+	[self decodeBytes:[data mutableBytes] length:[data length]];
 	string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 	[data release];
 	if(string == nil)
@@ -265,12 +263,12 @@
 	UInt32			length;
 	NSMutableData*	data;
 	
-	[self readBytes:&length length:sizeof(UInt32)];
+	[self decodeBytes:&length length:sizeof(UInt32)];
 	data = [NSMutableData dataWithLength:NSSwapLittleIntToHost(length)];
 	if(data == nil)
 	[NSException raise:NSInternalInconsistencyException format:@"%s: Failed allocating memory: %i bytes", __FUNCTION__, NSSwapLittleIntToHost(length)];
 	
-	[self readBytes:[data mutableBytes] length:[data length]];
+	[self decodeBytes:[data mutableBytes] length:[data length]];
 	
 	return data;
 }
@@ -279,7 +277,7 @@
 {
 	UInt32			value;
 	
-	[self readBytes:&value length:sizeof(UInt32)];
+	[self decodeBytes:&value length:sizeof(UInt32)];
 	
 	return NSSwapLittleIntToHost(value);
 }

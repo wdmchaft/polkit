@@ -36,6 +36,7 @@
 
 @property(nonatomic, readonly) NSUInteger version;
 
+- (void) encodeBytes:(const void*)buffer length:(NSInteger)length;
 - (void) encodeObject:(id<StreamCoding>)object;
 - (void) encodeString:(NSString*)string;
 - (void) encodeData:(NSData*)data;
@@ -53,6 +54,7 @@
 
 @property(nonatomic, readonly) NSUInteger version;
 
+- (void) decodeBytes:(void*)buffer length:(NSInteger)length;
 - (id) decodeObject;
 - (NSString*) decodeString;
 - (NSData*) decodeData;
