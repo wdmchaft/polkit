@@ -41,6 +41,7 @@
 - (NSDictionary*) contentsOfDirectoryAtPath:(NSString*)remotePath
 {
 	NSURL*					url = [self absoluteURLForRemotePath:remotePath];
+	NSString*				basePath = [url path];
 	NSFileManager*			manager = [NSFileManager defaultManager];
 	NSMutableDictionary*	dictionary;
 	NSError*				error;
@@ -52,7 +53,7 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	array = [manager contentsOfDirectoryAtPath:[url path] error:&error];
+	array = [manager contentsOfDirectoryAtPath:basePath error:&error];
 	if(array == nil) {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
 		[[self delegate] fileTransferControllerDidFail:self withError:error];
@@ -61,7 +62,7 @@
 	
 	dictionary = [NSMutableDictionary dictionary];
 	for(path in array) {
-		info = [manager attributesOfItemAtPath:[[url path] stringByAppendingPathComponent:path] error:&error];
+		info = [manager attributesOfItemAtPath:[basePath stringByAppendingPathComponent:path] error:&error];
 		if(info == nil) {
 			NSLog(@"%s: %@", __FUNCTION__, error);
 			continue; //FIXME: Is this the best behavior?

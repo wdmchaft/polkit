@@ -51,11 +51,11 @@ typedef struct {
 	uint32_t				gid; //Only non-zero if "scanMetadata" is YES
 	uint32_t				nodeID;
 	uint32_t				revision;
-	uint32_t				resourceSize;
+	uint32_t				resourceSize; //Always zero for anything but regular files with a resource fork
 	NSData*					userInfo;
 	const char*				aclString; //Only non-NULL if "scanMetadata" is YES
 	CFMutableDictionaryRef	extendedAttributes; //Only non-NULL if "scanMetadata" is YES
-	uint64_t				dataSize;
+	uint64_t				dataSize; //Always zero for directories
 	double					newDate, //Seconds since 1970
 							modDate; //Seconds since 1970
 } DirectoryItemData;
@@ -1774,7 +1774,7 @@ static void _DictionaryApplierFunction_ArchiveTrunk(const void* key, const void*
 		archiver = [[NSArchiver alloc] initForWritingWithMutableData:data];
 		_ArchiveDirectoryItemData(_root, archiver);
 		[archiver release];
-		[aCoder encodeObject:data forKey:@"root"];
+		[aCoder encodeBytes:[data mutableBytes] length:[data length] forKey:@"rootData"];
 		[data release];
 	}
 	
@@ -1784,7 +1784,7 @@ static void _DictionaryApplierFunction_ArchiveTrunk(const void* key, const void*
 	[archiver encodeValueOfObjCType:@encode(unsigned int) at:&count];
 	CFDictionaryApplyFunction(_directories, _DictionaryApplierFunction_ArchiveTrunk, archiver);
 	[archiver release];
-	[aCoder encodeObject:data forKey:@"directories"];
+	[aCoder encodeBytes:[data mutableBytes] length:[data length] forKey:@"directoryData"];
 	[data release];
 }
 
@@ -1853,6 +1853,7 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 								i2;
 	NSUInteger					length;
 	DirectoryItemData*			item;
+	const void*					bytes;
 	
 	version = [aDecoder decodeIntegerForKey:@"version"];
 	if((version < kDataMinVersion) || (version > kDataMaxVersion)) {
@@ -1868,30 +1869,35 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 		_excludeDSStore = [aDecoder decodeBoolForKey:@"excludeDSStoreFiles"]; 
 		[_info addEntriesFromDictionary:[aDecoder decodeObjectForKey:@"userInfo"]];
 		
-		if((data = [aDecoder decodeObjectForKey:@"root"])) {
+		bytes = [aDecoder decodeBytesForKey:@"rootData" returnedLength:&length];
+		if(bytes) {
+			data = [[NSData alloc] initWithBytesNoCopy:(void*)bytes length:length freeWhenDone:NO];
 			unarchiver = [[NSUnarchiver alloc] initForReadingWithData:data];
 			_root = _UnarchiveDirectoryItemData(unarchiver, version);
 			[unarchiver release];
+			[data release];
 		}
-		else
-		_root = NULL;
 		
-		data = [aDecoder decodeObjectForKey:@"directories"];
-		unarchiver = [[NSUnarchiver alloc] initForReadingWithData:data];
-		[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count1];
-		for(i1 = 0; i1 < count1; ++i1) {
-			dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &itemValueCallbacks);
-			key1 = [unarchiver decodeBytesWithReturnedLength:&length];
-			[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count2];
-			for(i2 = 0; i2 < count2; ++i2) {
-				key2 = [unarchiver decodeBytesWithReturnedLength:&length];
-				item = _UnarchiveDirectoryItemData(unarchiver, version);
-				CFDictionarySetValue(dictionary, key2, item);
+		bytes = [aDecoder decodeBytesForKey:@"directoryData" returnedLength:&length];
+		if(bytes) {
+			data = [[NSData alloc] initWithBytesNoCopy:(void*)bytes length:length freeWhenDone:NO];
+			unarchiver = [[NSUnarchiver alloc] initForReadingWithData:data];
+			[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count1];
+			for(i1 = 0; i1 < count1; ++i1) {
+				dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &itemValueCallbacks);
+				key1 = [unarchiver decodeBytesWithReturnedLength:&length];
+				[unarchiver decodeValueOfObjCType:@encode(unsigned int) at:&count2];
+				for(i2 = 0; i2 < count2; ++i2) {
+					key2 = [unarchiver decodeBytesWithReturnedLength:&length];
+					item = _UnarchiveDirectoryItemData(unarchiver, version);
+					CFDictionarySetValue(dictionary, key2, item);
+				}
+				CFDictionarySetValue(_directories, key1, dictionary);
+				CFRelease(dictionary);
 			}
-			CFDictionarySetValue(_directories, key1, dictionary);
-			CFRelease(dictionary);
+			[unarchiver release];
+			[data release];
 		}
-		[unarchiver release];
 	}
 	
 	return self;
