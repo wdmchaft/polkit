@@ -1778,14 +1778,16 @@ static void _DictionaryApplierFunction_ArchiveTrunk(const void* key, const void*
 		[data release];
 	}
 	
-	data = [[NSMutableData alloc] initWithCapacity:(1024 * 1024)];
-	archiver = [[NSArchiver alloc] initForWritingWithMutableData:data];
-	count = CFDictionaryGetCount(_directories);
-	[archiver encodeValueOfObjCType:@encode(unsigned int) at:&count];
-	CFDictionaryApplyFunction(_directories, _DictionaryApplierFunction_ArchiveTrunk, archiver);
-	[archiver release];
-	[aCoder encodeBytes:[data mutableBytes] length:[data length] forKey:@"directoryData"];
-	[data release];
+	if(CFDictionaryGetCount(_directories)) {
+		data = [[NSMutableData alloc] initWithCapacity:(1024 * 1024)];
+		archiver = [[NSArchiver alloc] initForWritingWithMutableData:data];
+		count = CFDictionaryGetCount(_directories);
+		[archiver encodeValueOfObjCType:@encode(unsigned int) at:&count];
+		CFDictionaryApplyFunction(_directories, _DictionaryApplierFunction_ArchiveTrunk, archiver);
+		[archiver release];
+		[aCoder encodeBytes:[data mutableBytes] length:[data length] forKey:@"directoryData"];
+		[data release];
+	}
 }
 
 static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger version)
