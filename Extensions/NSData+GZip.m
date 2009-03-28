@@ -29,6 +29,9 @@
 	uLong			length = compressBound([self length]);
 	NSMutableData*	data = [NSMutableData dataWithLength:(sizeof(unsigned int) + length)];
 	
+	if(data == nil)
+	return nil;
+	
 	if(compress2((unsigned char*)[data mutableBytes] + sizeof(unsigned int), &length, [self bytes], [self length], Z_BEST_COMPRESSION) != Z_OK)
 	return nil;
 	
@@ -40,8 +43,11 @@
 
 - (NSData*) decompressGZip
 {
-	uLong			length = NSSwapBigIntToHost(*((unsigned int*)[self bytes]));
-	NSMutableData*	data = [NSMutableData dataWithLength:length];
+	uLong			length = ([self length] >= sizeof(unsigned int) ? NSSwapBigIntToHost(*((unsigned int*)[self bytes])) : 0xFFFFFFFF);
+	NSMutableData*	data = (length < 0x40000000 ? [NSMutableData dataWithLength:length] : nil); //HACK: Prevent allocating more than 1 Gb
+	
+	if(data == nil)
+	return nil;
 	
 	if(uncompress([data mutableBytes], &length, (unsigned char*)[self bytes] + sizeof(unsigned int), [self length] - sizeof(unsigned int)) != Z_OK)
 	return nil;
