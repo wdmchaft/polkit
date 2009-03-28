@@ -208,6 +208,7 @@
 @property(nonatomic, copy) NSString* userToken; //Must start with "{UserToken}"
 @property(nonatomic, copy) NSString* newBucketLocation; //One of kAmazonS3BucketLocation_XXX or nil for default
 - (NSString*) locationForPath:(NSString*)remotePath; //Return nil on error or empty string for default location
+- (NSDictionary*) bucketKeysForPath:(NSString*)remotePath withPrefix:(NSString*)prefix marker:(NSString*)marker delimiter:(NSString*)delimiter maxKeys:(NSUInteger)max isTruncated:(BOOL*)truncated;
 @end
 
 /* Same as AmazonS3TransferController */

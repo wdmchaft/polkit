@@ -736,6 +736,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 - (CFReadStreamRef) _createReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
 {
 	NSURL*					url = [(id)CFHTTPMessageCopyRequestURL(request) autorelease];
+	NSString*				query = [url query];
 	NSString*				host = [url host];
 	NSMutableString*		amzHeaders = [NSMutableString string];
 	NSMutableString*		buffer;
@@ -776,8 +777,8 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		else
 		[buffer appendFormat:@"/%@/", [host substringToIndex:range.location]];
 	}
-	if([[url query] length])
-	[buffer appendFormat:@"?%@", [url query]];
+	if([query isEqualToString:@"location"] || [query isEqualToString:@"logging"] || [query isEqualToString:@"torrent"])
+	[buffer appendFormat:@"?%@", query];
 	authorization = [[[buffer dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[[self baseURL] passwordByReplacingPercentEscapes]] encodeBase64];
 	[buffer release];
 	
@@ -855,6 +856,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	NSDictionary*			properties;
 	NSString*				path;
 	NSString*				string;
+	NSMutableDictionary*	dictionary;
 	
 	if(error)
 	*error = nil;
@@ -891,6 +893,15 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 					if(properties)
 					[result setObject:properties forKey:path];
 				}
+				dictionary = [NSMutableDictionary new];
+				for(element in [[body rootElement] children]) {
+					if(![element name] || [[element name] isEqualToString:@"Contents"])
+					continue;
+					[dictionary setValue:[element stringValue] forKey:[element name]];
+				}
+				[result setObject:dictionary forKey:[NSNull null]];
+				[dictionary release];
+				
 			}
 			else if([[[body rootElement] name] isEqualToString:@"ListAllMyBucketsResult"]) {
 				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Buckets"];
@@ -941,10 +952,35 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	return result;
 }
 
-- (NSDictionary*) contentsOfDirectoryAtPath:(NSString*)remotePath
+- (NSDictionary*) bucketKeysForPath:(NSString*)remotePath withPrefix:(NSString*)prefix marker:(NSString*)marker delimiter:(NSString*)delimiter maxKeys:(NSUInteger)max isTruncated:(BOOL*)truncated
 {
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
+	NSMutableString*		query;
+	NSDictionary*			result;
+	NSDictionary*			info;
+	
+	if([prefix length] || [marker length] || [delimiter length] || max) {
+		query = [NSMutableString string];
+		if([prefix length])
+		[query appendFormat:@"prefix=%@", prefix];
+		if([marker length]) {
+			if([query length])
+			[query appendString:@"&"];
+			[query appendFormat:@"marker=%@", marker];
+		}
+		if([delimiter length]) {
+			if([query length])
+			[query appendString:@"&"];
+			[query appendFormat:@"delimiter=%@", delimiter];
+		}
+		if(max) {
+			if([query length])
+			[query appendString:@"&"];
+			[query appendFormat:@"max-keys=%lu", max];
+		}
+		remotePath = (remotePath ? [remotePath stringByAppendingFormat:@"?%@", query] : [NSString stringWithFormat:@"?%@", query]);
+	}
 	
 	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
 	if(request == NULL)
@@ -953,7 +989,45 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
-	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET/" isFileTransfer:NO];
+	result = [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET/" isFileTransfer:NO];
+	if(result == nil)
+	return nil;
+	
+	if((info = [result objectForKey:[NSNull null]])) {
+		if(truncated)
+		*truncated = ([info objectForKey:@"IsTruncated"] && ([[info objectForKey:@"IsTruncated"] caseInsensitiveCompare:@"true"] == NSOrderedSame));
+		result = [NSMutableDictionary dictionaryWithDictionary:result];
+		[(NSMutableDictionary*)result removeObjectForKey:[NSNull null]];
+	}
+	else if(truncated)
+	*truncated = NO;
+	
+	return result;
+}
+
+- (NSDictionary*) contentsOfDirectoryAtPath:(NSString*)remotePath
+{
+	NSMutableDictionary*	allResults = [NSMutableDictionary dictionary];
+	NSString*				marker = nil;
+	NSAutoreleasePool*		localPool;
+	BOOL					isTruncated;
+	NSDictionary*			result;
+	
+	do {
+		localPool = [NSAutoreleasePool new];
+		result = [self bucketKeysForPath:remotePath withPrefix:nil marker:marker delimiter:nil maxKeys:0 isTruncated:&isTruncated];
+		if(isTruncated)
+		marker = [[[[result allKeys] sortedArrayUsingSelector:@selector(compare:)] lastObject] retain];
+		else
+		marker = nil;
+		[allResults addEntriesFromDictionary:result];
+		[localPool release];
+		[marker autorelease];
+		if(result == nil)
+		return nil;
+	} while(marker);
+	
+	return allResults;
 }
 
 - (BOOL) _deletePath:(NSString*)remotePath

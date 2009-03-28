@@ -19,8 +19,8 @@
 #import "NSURL+Parameters.h"
 
 /* See http://www.faqs.org/rfcs/rfc1738.html */
-#define ESCAPE_PATH(_STRING_) [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, NULL, kCFStringEncodingUTF8) autorelease]
 #define ESCAPE_USER_PASSWORD(_STRING_) [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, CFSTR(":@/?"), kCFStringEncodingUTF8) autorelease]
+#define ESCAPE_STRING(_STRING_) [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, NULL, kCFStringEncodingUTF8) autorelease]
 #define UNESCAPE_STRING(_STRING_) [(id)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)_STRING_, CFSTR(""), kCFStringEncodingUTF8) autorelease]
 
 @implementation NSURL (Parameters)
@@ -65,12 +65,12 @@
 	if([path length]) {
 		if([path characterAtIndex:0] != '/')
 		[string appendString:@"/"];
-		[string appendString:ESCAPE_PATH(path)];
+		[string appendString:ESCAPE_STRING(path)];
 	}
 	
 	if([query length]) {
 		[string appendString:@"?"];
-		[string appendString:query];
+		[string appendString:ESCAPE_STRING(query)];
 	}
 	
 	return [[[self class] URLWithString:string] standardizedURL];
@@ -79,6 +79,13 @@
 - (NSString*) passwordByReplacingPercentEscapes
 {
 	NSString*						string = [self password];
+	
+	return ([string length] ? UNESCAPE_STRING(string) : nil);
+}
+
+- (NSString*) queryByReplacingPercentEscapes
+{
+	NSString*						string = [self query];
 	
 	return ([string length] ? UNESCAPE_STRING(string) : nil);
 }

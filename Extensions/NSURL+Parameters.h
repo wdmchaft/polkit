@@ -29,6 +29,7 @@
 + (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path;
 + (NSURL*) URLWithScheme:(NSString*)scheme user:(NSString*)user password:(NSString*)password host:(NSString*)host port:(UInt16)port path:(NSString*)path query:(NSString*)query;
 - (NSString*) passwordByReplacingPercentEscapes;
+- (NSString*) queryByReplacingPercentEscapes;
 - (NSURL*) URLByDeletingPassword;
 - (NSURL*) URLByDeletingUserAndPassword;
 @end
