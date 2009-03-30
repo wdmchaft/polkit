@@ -35,15 +35,18 @@
 								_productID,
 								_primaryUsagePage,
 								_primaryUsage;
-	BOOL						_exclusive;
+	BOOL						_exclusive,
+								_enabled;
 	id<HIDControllerDelegate>	_delegate;
+	
 	void*						_hidDeviceInterface;
 	void*						_queueInterface;
 	CFRunLoopSourceRef			_hidEventSource;
 	NSMutableDictionary*		_info;
 	CFMutableDictionaryRef		_cookies;
+	BOOL						_terminated;
 }
-+ (BOOL) useDelegateThread; //NO by default
++ (BOOL) useHIDThread; //NO by default
 + (NSDictionary*) allDevices;
 
 - (id) initWithDevicePath:(NSString*)path exclusive:(BOOL)exclusive;
@@ -58,10 +61,16 @@
 - (void) setDelegate:(id<HIDControllerDelegate>)delegate;
 - (id<HIDControllerDelegate>) delegate;
 
+- (void) setEnabled:(BOOL)flag;
+- (BOOL) isEnabled; //NO by default
+
 - (BOOL) isConnected;
 
 /* Valid only when connected */
 - (NSDictionary*) info;
 - (NSDictionary*) allElements;
 - (BOOL) fetchElementWithCookie:(unsigned long)cookie value:(SInt32*)value min:(SInt32*)min max:(SInt32*)max;
+
+//For subclasses (called from arbitrary thread if +useHIDThread is YES) - Default implementation calls delegate on main thread
+- (void) didUpdateElementWithCookie:(unsigned long)cookie value:(SInt32)value min:(SInt32)min max:(SInt32)max info:(NSDictionary*)info;
 @end

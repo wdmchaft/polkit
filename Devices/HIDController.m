@@ -34,7 +34,7 @@ typedef struct {
 } ElementInfo;
 
 @interface HIDController ()
-- (void) _reconnect;
+- (void) _reconnect:(id)arg;
 - (void) _disconnect;
 - (void) _processEvents;
 @end
@@ -44,6 +44,7 @@ static IONotificationPortRef		_notificationPort;
 static io_iterator_t				_notificationAdd;
 static io_iterator_t				_notificationRemove;
 static CFMutableSetRef				_instanceList;
+static pthread_mutex_t				_instanceMutex = PTHREAD_MUTEX_INITIALIZER;
 static NSDictionary*				_usageTables;
 static CFRunLoopRef					_hidRunLoop;
 static pthread_cond_t				_hidCondition = PTHREAD_COND_INITIALIZER;
@@ -52,7 +53,10 @@ static pthread_cond_t				_hidCondition = PTHREAD_COND_INITIALIZER;
 
 static void _SetReconnectFunction(const void* value, void* context)
 {
-	[(HIDController*)value _reconnect];
+	if([[(HIDController*)value class] useHIDThread])
+	[(HIDController*)value performSelectorOnMainThread:@selector(_reconnect:) withObject:nil waitUntilDone:NO];
+	else
+	[(HIDController*)value _reconnect:nil];
 }
 
 static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
@@ -62,7 +66,9 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	while(IOIteratorNext(iterator))
 	;
 	
+	pthread_mutex_lock(&_instanceMutex);
 	CFSetApplyFunction(_instanceList, _SetReconnectFunction, NULL);
+	pthread_mutex_unlock(&_instanceMutex);
 	
 	[pool release];
 }
@@ -76,7 +82,7 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	_instanceList = CFSetCreateMutable(kCFAllocatorDefault, 0, NULL);
 }
 
-+ (BOOL) useDelegateThread
++ (BOOL) useHIDThread
 {
 	return NO;
 }
@@ -216,8 +222,9 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 {
 	kern_return_t				error;
 	
+	pthread_mutex_lock(&_instanceMutex);
 	if(CFSetGetCount(_instanceList) == 0) {
-		if([[self class] useDelegateThread] && (_hidRunLoop == NULL)) {
+		if([[self class] useHIDThread] && (_hidRunLoop == NULL)) {
 			pthread_mutex_lock(&_hidMutex);
 			[NSThread detachNewThreadSelector:@selector(_hidThread:) toTarget:self withObject:nil];
 			pthread_cond_wait(&_hidCondition, &_hidMutex);
@@ -254,6 +261,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		}
 	}
 	CFSetAddValue(_instanceList, self);
+	pthread_mutex_unlock(&_instanceMutex);
 	
 	if((self = [super init])) {
 		_vendorID = vendorID;
@@ -261,8 +269,6 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		_primaryUsagePage = primaryUsagePage;
 		_primaryUsage = primaryUsage;
 		_exclusive = exclusive;
-		
-		[self _reconnect];
 	}
 	
 	return self;
@@ -270,8 +276,10 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 
 - (void) dealloc
 {
-	[self _disconnect];
+	_terminated = YES;
+	[self setEnabled:NO];
 	
+	pthread_mutex_lock(&_instanceMutex);
 	CFSetRemoveValue(_instanceList, self);
 	if(CFSetGetCount(_instanceList) == 0) {
 		if(_notificationPort != NULL) {
@@ -290,6 +298,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 			_hidRunLoop = NULL;
 		}
 	}
+	pthread_mutex_unlock(&_instanceMutex);
 	
 	[super dealloc];
 }
@@ -342,6 +351,23 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	return _delegate;
 }
 
+- (void) setEnabled:(BOOL)flag
+{
+	if(flag != _enabled) {
+		_enabled = flag;
+		
+		if(_enabled)
+		[self _reconnect:nil];
+		else
+		[self _disconnect];
+	}
+}
+
+- (BOOL) isEnabled
+{
+	return _enabled;
+}
+
 - (BOOL) isConnected
 {
 	return (_hidEventSource ? YES : NO);
@@ -373,7 +399,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	[pool release];
 }
 
-- (void) _reconnect
+- (void) _reconnect:(id)arg
 {
 	BOOL					wasConnected = [self isConnected],
 							success = NO;
@@ -392,6 +418,9 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	NSArray*				table;
 	NSString*				string;
 	kern_return_t			error;
+	
+	if(_terminated || !_enabled)
+	return;
 	
 	dictionary = IOServiceMatching(kIOHIDDeviceKey);
 	error = IOServiceGetMatchingServices(kIOMasterPortDefault, dictionary, &iterator);
@@ -539,6 +568,20 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 	[_delegate HIDControllerDidDisconnect:self];
 }
 
+- (void) _didUpdateElement:(NSArray*)arguments
+{
+	if(!_terminated && _enabled)
+	[_delegate HIDController:self didUpdateElementWithCookie:[[arguments objectAtIndex:0] unsignedLongValue] value:[[arguments objectAtIndex:1] intValue] min:[[arguments objectAtIndex:2] intValue] max:[[arguments objectAtIndex:3] intValue] info:([arguments count] > 4 ? [arguments objectAtIndex:4] : nil)];
+}
+
+- (void) didUpdateElementWithCookie:(unsigned long)cookie value:(SInt32)value min:(SInt32)min max:(SInt32)max info:(NSDictionary*)info
+{
+	if([[self class] useHIDThread])
+	[self performSelectorOnMainThread:@selector(_didUpdateElement:) withObject:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:cookie], [NSNumber numberWithInt:value], [NSNumber numberWithInt:min], [NSNumber numberWithInt:max], info, nil] waitUntilDone:NO];
+	else
+	[_delegate HIDController:self didUpdateElementWithCookie:cookie value:value min:min max:max info:info];
+}
+
 - (void) _processEvents
 {
 	AbsoluteTime			zeroTime = {0,0};
@@ -551,7 +594,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 			info = (ElementInfo*)CFDataGetBytePtr(data);
 			info->value = hidEvent.value;
 			
-			[_delegate HIDController:self didUpdateElementWithCookie:(unsigned long)hidEvent.elementCookie value:info->value min:info->min max:info->max info:info->info];
+			[self didUpdateElementWithCookie:(unsigned long)hidEvent.elementCookie value:info->value min:info->min max:info->max info:info->info];
 			
 			//HACK: Some devices like Logitech mice do not post a new event to "reset" relative elements
 			if(info->isRelative)
