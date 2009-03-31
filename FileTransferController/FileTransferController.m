@@ -245,12 +245,12 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path
 {
-	return [NSURL URLWithScheme:[_baseURL scheme] user:nil password:nil host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path] query:[_baseURL query]];
+	return [NSURL URLWithScheme:[_baseURL scheme] user:nil password:nil host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path] query:[_baseURL queryByReplacingPercentEscapes]];
 }
 
 - (NSURL*) fullAbsoluteURLForRemotePath:(NSString*)path
 {
-	return [NSURL URLWithScheme:[_baseURL scheme] user:[_baseURL user] password:[_baseURL passwordByReplacingPercentEscapes] host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path] query:[_baseURL query]];
+	return [NSURL URLWithScheme:[_baseURL scheme] user:[_baseURL user] password:[_baseURL passwordByReplacingPercentEscapes] host:[_baseURL host] port:[[_baseURL port] unsignedShortValue] path:[self absolutePathForRemotePath:path] query:[_baseURL queryByReplacingPercentEscapes]];
 }
 
 - (BOOL) checkReachability
