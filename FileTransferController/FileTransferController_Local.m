@@ -17,9 +17,13 @@
 */
 
 #import <sys/mount.h>
+#import <pthread.h>
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
+
+static CFMutableBagRef		_mountedList = NULL;
+static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 
 @implementation LocalTransferController
 
@@ -282,6 +286,12 @@
 
 @implementation RemoteTransferController
 
++ (void) initialize
+{
+	if(_mountedList == NULL)
+	_mountedList = CFBagCreateMutable(kCFAllocatorDefault, 0, &kCFTypeBagCallBacks);
+}
+
 - (id) initWithBaseURL:(NSURL*)url
 {
 	NSMutableArray*			components;
@@ -302,21 +312,40 @@
 	return self;
 }
 
-- (void) dealloc
+- (void) _unmount
 {
+	NSURL*					url = [self baseURL];
 	pid_t					dissenter;
 	OSStatus				error;
 	
-	if(_fd)
-	close(_fd);
+	if(_fd) {
+		close(_fd);
+		_fd = 0;
+	}
 	
 	if(_volumeRefNum) {
-		error = FSUnmountVolumeSync(_volumeRefNum, 0, &dissenter);
-		if(error != noErr)
-		NSLog(@"%s: FSUnmountVolumeSync() failed with error %i", __FUNCTION__, error);
+		pthread_mutex_lock(&_mountedMutex);
+		if(CFBagContainsValue(_mountedList, url)) {
+			CFBagRemoveValue(_mountedList, url);
+			if(CFBagGetCountOfValue(_mountedList, url) == 0) {
+				error = FSUnmountVolumeSync(_volumeRefNum, 0, &dissenter);
+				if(error != noErr)
+				NSLog(@"%s: FSUnmountVolumeSync() failed with error %i", __FUNCTION__, error);
+			}
+		}
+		pthread_mutex_unlock(&_mountedMutex);
+		_volumeRefNum = 0;
 	}
 	
 	[_basePath release];
+	_basePath = nil;
+}
+
+- (void) dealloc
+{
+	if(_basePath)
+	[self _unmount];
+	
 	[_subPath release];
 	[_sharePoint release];
 	
@@ -326,7 +355,7 @@
 - (BOOL) _automount
 {
 	NSURL*					url = [self baseURL];
-	NSArray*				volumes = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL];
+	NSArray*				volumes;
 	OSStatus				error;
 	FSRef					directory;
 	NSURL*					volumeURL;
@@ -336,15 +365,10 @@
 	if(![[NSFileManager defaultManager] fileExistsAtPath:_basePath]) { //FIXME: Find a more reliable way to know if the volume is still mounted
 		if(_basePath) {
 			NSLog(@"%s: Volume is unavailable", __FUNCTION__);
-			if(_fd) {
-				close(_fd);
-				_fd = 0;
-			}
-			_volumeRefNum = 0;
-			[_basePath release];
-			_basePath = nil;
+			[self _unmount];
 		}
 		
+		volumes = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL];
 		volumeURL = [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:[url host] port:0 path:_sharePoint];
 		error = FSMountServerVolumeSync((CFURLRef)volumeURL, NULL, (CFStringRef)[url user], (CFStringRef)[url passwordByReplacingPercentEscapes], &_volumeRefNum, 0);
 		if(error != noErr)
@@ -361,8 +385,13 @@
 				}
 				else {
 					_basePath = [[path stringByAppendingPathComponent:_subPath] copy];
-					if([volumes containsObject:[path lastPathComponent]])
-					_volumeRefNum = 0; //HACK: Don't unmount volume as it was already present
+					
+					pthread_mutex_lock(&_mountedMutex);
+					if(!CFBagContainsValue(_mountedList, url) && [volumes containsObject:[path lastPathComponent]]) //NOTE: Check if volume was already mounted
+					_volumeRefNum = 0;
+					else
+					CFBagAddValue(_mountedList, url);
+					pthread_mutex_unlock(&_mountedMutex);
 				}
 			}
 		}
