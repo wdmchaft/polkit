@@ -147,6 +147,8 @@
 @interface RemoteTransferController : LocalTransferController
 {
 @private
+	NSString*							_sharePoint;
+	NSString*							_subPath;
 	FSVolumeRefNum						_volumeRefNum;
 	NSString*							_basePath;
 	int									_fd;

@@ -65,15 +65,14 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 	return self;
 }
 
-- (void) invalidate
+- (void) dealloc
 {
-	[_transcript release];
-	_transcript = nil;
+	if(_handle)
+	curl_easy_cleanup(_handle);
 	
-	if(_handle) {
-		curl_easy_cleanup(_handle);
-		_handle = NULL;
-	}
+	[_transcript release];
+	
+	[super dealloc];
 }
 
 static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t size, void* userptr)

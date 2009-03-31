@@ -171,8 +171,6 @@ static CFTimeInterval					_downloadTime = 0.0,
 	if(_reachability)
 	CFRelease(_reachability);
 	
-	[self invalidate];
-	
 	[_encryptionPassword release];
 	[_baseURL release];
 	
@@ -218,11 +216,6 @@ static CFTimeInterval					_downloadTime = 0.0,
 	data = [NSData dataWithBytes:_digestBuffer length:16];
 	
 	return data;
-}
-
-- (void) invalidate
-{
-	[self doesNotRecognizeSelector:_cmd];
 }
 
 - (NSString*) absolutePathForRemotePath:(NSString*)path

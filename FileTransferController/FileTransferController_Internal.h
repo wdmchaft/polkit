@@ -30,7 +30,6 @@
 
 + (BOOL) useAsyncStreams;
 + (NSString*) urlScheme;
-- (void) invalidate;
 
 - (BOOL) openInputStream:(NSInputStream*)stream isFileTransfer:(BOOL)isFileTransfer;
 - (NSInteger) readFromInputStream:(NSInputStream*)stream bytes:(void*)bytes maxLength:(NSUInteger)length;
@@ -47,7 +46,9 @@
 
 - (void) readStreamClientCallBack:(CFReadStreamRef)stream type:(CFStreamEventType)type;
 - (id) runReadStream:(CFReadStreamRef)readStream dataStream:(NSOutputStream*)dataStream userInfo:(id)info isFileTransfer:(BOOL)allowEncryption;
-- (id) processReadResultStream:(NSOutputStream*)stream userInfo:(id)info error:(NSError**)error;
 - (void) writeStreamClientCallBack:(CFWriteStreamRef)stream type:(CFStreamEventType)type;
 - (id) runWriteStream:(CFWriteStreamRef)writeStream dataStream:(NSInputStream*)dataStream userInfo:(id)info isFileTransfer:(BOOL)allowEncryption;
+
+- (id) processReadResultStream:(NSOutputStream*)stream userInfo:(id)info error:(NSError**)error;
+- (void) invalidate;
 @end

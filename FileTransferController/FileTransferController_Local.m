@@ -53,28 +53,35 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	array = [manager contentsOfDirectoryAtPath:basePath error:&error];
-	if(array == nil) {
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
-		return nil;
-	}
-	
-	dictionary = [NSMutableDictionary dictionary];
-	for(path in array) {
-		info = [manager attributesOfItemAtPath:[basePath stringByAppendingPathComponent:path] error:&error];
-		if(info == nil) {
-			NSLog(@"%s: %@", __FUNCTION__, error);
-			continue; //FIXME: Is this the best behavior?
+	if(url) {
+		array = [manager contentsOfDirectoryAtPath:basePath error:&error];
+		if(array == nil) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return nil;
 		}
 		
-		entry = [NSMutableDictionary new];
-		[entry setValue:[info objectForKey:NSFileType] forKey:NSFileType];
-		[entry setValue:[info objectForKey:NSFileCreationDate] forKey:NSFileCreationDate];
-		[entry setValue:[info objectForKey:NSFileModificationDate] forKey:NSFileModificationDate];
-		[entry setValue:[info objectForKey:NSFileSize] forKey:NSFileSize];
-		[dictionary setObject:entry forKey:path];
-		[entry release];
+		dictionary = [NSMutableDictionary dictionary];
+		for(path in array) {
+			info = [manager attributesOfItemAtPath:[basePath stringByAppendingPathComponent:path] error:&error];
+			if(info == nil) {
+				NSLog(@"%s: %@", __FUNCTION__, error);
+				continue; //FIXME: Is this the best behavior?
+			}
+			
+			entry = [NSMutableDictionary new];
+			[entry setValue:[info objectForKey:NSFileType] forKey:NSFileType];
+			[entry setValue:[info objectForKey:NSFileCreationDate] forKey:NSFileCreationDate];
+			[entry setValue:[info objectForKey:NSFileModificationDate] forKey:NSFileModificationDate];
+			[entry setValue:[info objectForKey:NSFileSize] forKey:NSFileSize];
+			[dictionary setObject:entry forKey:path];
+			[entry release];
+		}
+	}
+	else {
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" is not reachable", remotePath)];
+		return NO;
 	}
 	
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidSucceed:)])
@@ -91,9 +98,16 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	if(![[NSFileManager defaultManager] createDirectoryAtPath:[url path] withIntermediateDirectories:NO attributes:nil error:&error]) {
+	if(url) {
+		if(![[NSFileManager defaultManager] createDirectoryAtPath:[url path] withIntermediateDirectories:NO attributes:nil error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
+	}
+	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" is not reachable", remotePath)];
 		return NO;
 	}
 	
@@ -112,6 +126,14 @@
 	
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
 	return NO;
+	
+	if(url == nil) {
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+		[[self delegate] fileTransferControllerDidStart:self];
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" is not reachable", remotePath)];
+		return NO;
+	}
 	
 	info = [[NSFileManager defaultManager] attributesOfItemAtPath:[url path] error:&error];
 	if(info == nil)
@@ -133,6 +155,14 @@
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
 	return NO;
 	
+	if(url == nil) {
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
+		[[self delegate] fileTransferControllerDidStart:self];
+		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" is not reachable", remotePath)];
+		return NO;
+	}
+	
 	writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, (CFURLRef)url);
 	if(writeStream == NULL)
 	return NO;
@@ -150,15 +180,22 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
-		return NO;
+	if(fromURL && toURL) {
+		if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
+		
+		if(![manager moveItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
 	}
-	
-	if(![manager moveItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
+	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" or \"%@\" are not reachable", fromRemotePath, toRemotePath)];
 		return NO;
 	}
 	
@@ -178,15 +215,22 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
-		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
-		return NO;
+	if(fromURL && toURL) {
+		if([manager fileExistsAtPath:[toURL path]] && ![manager removeItemAtPath:[toURL path] error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
+
+		if(![manager copyItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
 	}
-	
-	if(![manager copyItemAtPath:[fromURL path] toPath:[toURL path] error:&error]) {
+	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" or \"%@\" are not reachable", fromRemotePath, toRemotePath)];
 		return NO;
 	}
 	
@@ -205,9 +249,16 @@
 	if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidStart:)])
 	[[self delegate] fileTransferControllerDidStart:self];
 	
-	if([manager fileExistsAtPath:[url path]] && ![manager removeItemAtPath:[url path] error:&error]) {
+	if(url) {
+		if([manager fileExistsAtPath:[url path]] && ![manager removeItemAtPath:[url path] error:&error]) {
+			if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
+			[[self delegate] fileTransferControllerDidFail:self withError:error];
+			return NO;
+		}
+	}
+	else {
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:error];
+		[[self delegate] fileTransferControllerDidFail:self withError:MAKE_FILETRANSFERCONTROLLER_ERROR(@"\"%@\" is not reachable", remotePath)];
 		return NO;
 	}
 	
@@ -233,13 +284,7 @@
 
 - (id) initWithBaseURL:(NSURL*)url
 {
-	OSStatus				error;
-	FSRef					directory;
-	NSURL*					volumeURL;
-	NSString*				path;
 	NSMutableArray*			components;
-	NSArray*				volumes;
-	const char*				filePath;
 	
 	if((self = [super initWithBaseURL:url])) {
 		components = [NSMutableArray arrayWithArray:[[url path] pathComponents]];
@@ -249,11 +294,58 @@
 			[self release];
 			return nil;
 		}
-		volumeURL = [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:[url host] port:0 path:[components objectAtIndex:0]];
+		_sharePoint = [[components objectAtIndex:0] copy];
 		[components removeObjectAtIndex:0];
+		_subPath = ([components count] ? [[NSString pathWithComponents:components] copy] : @"");
+	}
+	
+	return self;
+}
+
+- (void) dealloc
+{
+	pid_t					dissenter;
+	OSStatus				error;
+	
+	if(_fd)
+	close(_fd);
+	
+	if(_volumeRefNum) {
+		error = FSUnmountVolumeSync(_volumeRefNum, 0, &dissenter);
+		if(error != noErr)
+		NSLog(@"%s: FSUnmountVolumeSync() failed with error %i", __FUNCTION__, error);
+	}
+	
+	[_basePath release];
+	[_subPath release];
+	[_sharePoint release];
+	
+	[super dealloc];
+}
+
+- (BOOL) _automount
+{
+	NSURL*					url = [self baseURL];
+	NSArray*				volumes = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL];
+	OSStatus				error;
+	FSRef					directory;
+	NSURL*					volumeURL;
+	NSString*				path;
+	const char*				filePath;
+	
+	if(![[NSFileManager defaultManager] fileExistsAtPath:_basePath]) { //FIXME: Find a more reliable way to know if the volume is still mounted
+		if(_basePath) {
+			NSLog(@"%s: Volume is unavailable", __FUNCTION__);
+			if(_fd) {
+				close(_fd);
+				_fd = 0;
+			}
+			_volumeRefNum = 0;
+			[_basePath release];
+			_basePath = nil;
+		}
 		
-		volumes = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Volumes" error:NULL];
-		
+		volumeURL = [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:[url host] port:0 path:_sharePoint];
 		error = FSMountServerVolumeSync((CFURLRef)volumeURL, NULL, (CFStringRef)[url user], (CFStringRef)[url passwordByReplacingPercentEscapes], &_volumeRefNum, 0);
 		if(error != noErr)
 		NSLog(@"%s: FSMountServerVolumeSync() failed with error %i", __FUNCTION__, error);
@@ -268,16 +360,14 @@
 					error = -1;
 				}
 				else {
-					_basePath = ([components count] ? [[path stringByAppendingPathComponent:[NSString pathWithComponents:components]] copy] : [path copy]);
+					_basePath = [[path stringByAppendingPathComponent:_subPath] copy];
 					if([volumes containsObject:[path lastPathComponent]])
 					_volumeRefNum = 0; //HACK: Don't unmount volume as it was already present
 				}
 			}
 		}
-		if(error != noErr) {
-			[self release];
-			return nil;
-		}
+		if(error != noErr)
+		return NO;
 		
 		filePath = [[_basePath stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]] UTF8String];
 		_fd = open(filePath, O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -289,31 +379,15 @@
 		NSLog(@"%s: open(%s) failed with error \"%s\"", __FUNCTION__, filePath, strerror(errno));
 	}
 	
-	return self;
-}
-
-- (void) dealloc
-{
-	pid_t					dissenter;
-	OSStatus				error;
-	
-	[_basePath release];
-	
-	if(_fd)
-	close(_fd);
-	
-	if(_volumeRefNum) {
-		error = FSUnmountVolumeSync(_volumeRefNum, 0, &dissenter);
-		if(error != noErr)
-		NSLog(@"%s: FSUnmountVolumeSync() failed with error %i", __FUNCTION__, error);
-	}
-	
-	[super dealloc];
+	return YES;
 }
 
 /* Override completely */
 - (NSURL*) absoluteURLForRemotePath:(NSString*)path
 {
+	if(![self _automount])
+	return nil;
+	
 	return [NSURL fileURLWithPath:[_basePath stringByAppendingPathComponent:path]];
 }
 
