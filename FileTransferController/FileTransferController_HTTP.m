@@ -35,6 +35,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 #define kUpdateInterval					0.5
 #define kFileBufferSize					(256 * 1024)
 #define kDefaultHTTPError				@"Unsupported HTTP response"
+#define	kAmazonAWSSuffix				@".amazonaws.com"
 
 #define MAKE_HTTP_ERROR(__STATUS__, ...) MAKE_ERROR(@"http", __STATUS__, __VA_ARGS__)
 
@@ -78,7 +79,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	NSString*				password = [[self baseURL] passwordByReplacingPercentEscapes];
 	CFHTTPMessageRef		message;
 	
-	message = CFHTTPMessageCreateRequest(kCFAllocatorDefault, (CFStringRef)method, (CFURLRef)url, kCFHTTPVersion1_1);
+	message = (url ? CFHTTPMessageCreateRequest(kCFAllocatorDefault, (CFStringRef)method, (CFURLRef)url, kCFHTTPVersion1_1) : NULL);
 	if(message == NULL)
 	return NULL;
 	
@@ -707,6 +708,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	NSString*				host = [[self baseURL] host];
 	NSRange					range;
 	NSString*				query;
+	NSURL*					url;
 	
 	range = [path rangeOfString:@"?"];
 	if(range.location != NSNotFound) {
@@ -729,7 +731,11 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		}
 	}
 	
-	return [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:host port:0 path:path query:query];
+	url = [NSURL URLWithScheme:[[self class] urlScheme] user:nil password:nil host:host port:0 path:path query:query];
+	if(![[url host] hasSuffix:kAmazonAWSSuffix])
+	return nil;
+	
+	return url;
 }
 
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
@@ -769,7 +775,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	if([host isEqualToString:kFileTransferHost_AmazonS3])
 	[buffer appendString:@"/"];
 	else {
-		range = [host rangeOfString:@"." options:NSBackwardsSearch range:NSMakeRange(0, [host length] - [@".amazonaws.com" length])];
+		range = [host rangeOfString:@"." options:NSBackwardsSearch range:NSMakeRange(0, [host length] - [kAmazonAWSSuffix length])];
 		if(range.location == NSNotFound)
 		range.location = [host length]; //NOTE: This is not supposed to ever happen
 		if([[url path] length])
