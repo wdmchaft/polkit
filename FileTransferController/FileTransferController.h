@@ -205,6 +205,7 @@
 	NSString*							_newBucketLocation;
 }
 + (NSDictionary*) activateDesktopProduct:(NSString*)productToken activationKey:(NSString*)activationKey expirationInterval:(NSTimeInterval)expirationInterval error:(NSError**)error; //Returns kAmazonS3ActivationInfo_XXX keys
++ (BOOL) isBucketNameValid:(NSString*)name;
 - (id) initWithAccessKeyID:(NSString*)accessKeyID secretAccessKey:(NSString*)secretAccessKey bucket:(NSString*)bucket;
 @property(nonatomic, copy) NSString* productToken; //Must start with "{ProductToken}"
 @property(nonatomic, copy) NSString* userToken; //Must start with "{UserToken}"

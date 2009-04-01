@@ -669,6 +669,30 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	return dictionary;
 }
 
+/* http://docs.amazonwebservices.com/AmazonS3/latest/BucketRestrictions.html */
++ (BOOL) isBucketNameValid:(NSString*)name
+{
+	static NSMutableCharacterSet*	bucketCharacterSet = nil;
+	
+	//NOTE: We don't allow periods or dashes either which simplifies rules checking
+	if(bucketCharacterSet == nil) {
+		bucketCharacterSet = [NSMutableCharacterSet new];
+		[bucketCharacterSet formUnionWithCharacterSet:[NSCharacterSet lowercaseLetterCharacterSet]];
+		[bucketCharacterSet formUnionWithCharacterSet:[NSCharacterSet decimalDigitCharacterSet]];
+		[bucketCharacterSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"-"]];
+		[bucketCharacterSet invert];
+	}
+	
+	if(([name length] < 3) && ([name length] > 63))
+	return NO;
+	if([name rangeOfCharacterFromSet:bucketCharacterSet].location != NSNotFound)
+	return NO;
+	if([name characterAtIndex:([name length] - 1)] == '-')
+	return NO;
+	
+	return YES;
+}
+
 + (BOOL) hasUploadDataStream
 {
 	return YES;
