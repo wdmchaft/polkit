@@ -594,6 +594,7 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 	DIR*						dir;
 	CFTypeRef					value;
 	int							type;
+	CFNumberRef					typeNumbers[3];
 	
 	if(_delegate && [_delegate shouldAbortScanning:self])
 	return -1;
@@ -615,8 +616,15 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 	if((dir = opendir(fullPath))) {
 		fullPath[fullLength++] = '/';
 		
-		if(_exclusionPredicate)
-		variables = [NSMutableDictionary new];
+		if(_exclusionPredicate) {
+			variables = [NSMutableDictionary new];
+			type = 0;
+			typeNumbers[0] =  CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &type);
+			type = 1;
+			typeNumbers[1] =  CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &type);
+			type = 2;
+			typeNumbers[2] =  CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &type);
+		}
 		
 		dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &_UTF8KeyCallbacks, &itemValueCallbacks);
 		while(1) {
@@ -673,23 +681,20 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 				}
 				
 				if(_exclusionPredicate) {
-					value = CFStringCreateWithCString(kCFAllocatorDefault, &fullPath[rootLength + 1], kCFStringEncodingUTF8);
+					value = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, &fullPath[rootLength + 1], kCFStringEncodingUTF8, kCFAllocatorNull);
 					[variables setObject:(id)value forKey:@"PATH"];
 					CFRelease(value);
-					value = CFStringCreateWithCString(kCFAllocatorDefault, dirent->d_name, kCFStringEncodingUTF8);
+					value = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, dirent->d_name, kCFStringEncodingUTF8, kCFAllocatorNull);
 					[variables setObject:(id)value forKey:@"NAME"];
 					CFRelease(value);
 					type = (S_ISDIR(stats.st_mode) ? 0 : (S_ISREG(stats.st_mode) ? 1 : 2));
-					value = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &type);
-					[variables setObject:(id)value forKey:@"TYPE"];
-					CFRelease(value);
-					if(S_ISREG(stats.st_mode)) {
-						value = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &stats.st_size); //FIXME: This is only data fork size
-						[variables setObject:(id)value forKey:@"FILE_SIZE"];
-						CFRelease(value);
-					}
+					[variables setObject:(id)typeNumbers[type] forKey:@"TYPE"];
+					if(S_ISREG(stats.st_mode))
+					value = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &stats.st_size); //FIXME: This is only data fork size
 					else
-					[variables removeObjectForKey:@"FILE_SIZE"];
+					value = CFRetain(kCFNumberNaN); //FIXME: -[NSPredicate -evaluateWithObject:substitutionVariables:] can return invalid result for NAN variable (radr://6755236)
+					[variables setObject:(id)value forKey:@"FILE_SIZE"];
+					CFRelease(value);
 					value = CFDateCreate(kCFAllocatorDefault, (double)stats.st_ctimespec.tv_sec + (double)stats.st_ctimespec.tv_nsec / 1000000000.0 - kCFAbsoluteTimeIntervalSince1970);
 					[variables setObject:(id)value forKey:@"DATE_MODIFIED"];
 					CFRelease(value);
@@ -738,8 +743,12 @@ static void _DictionaryApplierFunction_DescriptionTrunk(const void* key, const v
 			result = 1;
 		}
 		
-		if(_exclusionPredicate)
-		[variables release];
+		if(_exclusionPredicate) {
+			CFRelease(typeNumbers[0]);
+			CFRelease(typeNumbers[1]);
+			CFRelease(typeNumbers[2]);
+			[variables release];
+		}
 		
 		closedir(dir);
 	}
