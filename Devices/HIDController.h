@@ -44,19 +44,24 @@
 	CFRunLoopSourceRef			_hidEventSource;
 	NSMutableDictionary*		_info;
 	CFMutableDictionaryRef		_cookies;
-	BOOL						_terminated;
 }
 + (BOOL) useHIDThread; //NO by default
 + (NSDictionary*) allDevices;
 
 - (id) initWithDevicePath:(NSString*)path exclusive:(BOOL)exclusive;
 - (id) initWithVendorID:(unsigned short)vendorID productID:(unsigned short)productID primaryUsagePage:(unsigned short)primaryUsagePage primaryUsage:(unsigned short)primaryUsage exclusive:(BOOL)exclusive;
+
+- (void) setDeviceVendorID:(unsigned short)vendorID productID:(unsigned short)productID primaryUsagePage:(unsigned short)primaryUsagePage primaryUsage:(unsigned short)primaryUsage;
 - (unsigned short) vendorID;
 - (unsigned short) productID;
 - (unsigned short) primaryUsagePage;
 - (unsigned short) primaryUsage;
-- (BOOL) isExclusive;
+
+- (void) setDevicePath:(NSString*)path;
 - (NSString*) devicePath;
+
+- (void) setExclusive:(BOOL)flag;
+- (BOOL) isExclusive;
 
 - (void) setDelegate:(id<HIDControllerDelegate>)delegate;
 - (id<HIDControllerDelegate>) delegate;
@@ -71,6 +76,6 @@
 - (NSDictionary*) allElements;
 - (BOOL) fetchElementWithCookie:(unsigned long)cookie value:(SInt32*)value min:(SInt32*)min max:(SInt32*)max;
 
-//For subclasses (called from arbitrary thread if +useHIDThread is YES) - Default implementation calls delegate on main thread
+/* For subclasses (called from arbitrary thread if +useHIDThread is YES) - Default implementation calls delegate on main thread */
 - (void) didUpdateElementWithCookie:(unsigned long)cookie value:(SInt32)value min:(SInt32)min max:(SInt32)max info:(NSDictionary*)info;
 @end

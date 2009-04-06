@@ -34,7 +34,7 @@ typedef struct {
 } ElementInfo;
 
 @interface HIDController ()
-- (void) _reconnect:(id)arg;
+- (void) _reconnect;
 - (void) _disconnect;
 - (void) _processEvents;
 @end
@@ -44,7 +44,6 @@ static IONotificationPortRef		_notificationPort;
 static io_iterator_t				_notificationAdd;
 static io_iterator_t				_notificationRemove;
 static CFMutableSetRef				_instanceList;
-static pthread_mutex_t				_instanceMutex = PTHREAD_MUTEX_INITIALIZER;
 static NSDictionary*				_usageTables;
 static CFRunLoopRef					_hidRunLoop;
 static pthread_cond_t				_hidCondition = PTHREAD_COND_INITIALIZER;
@@ -53,10 +52,7 @@ static pthread_cond_t				_hidCondition = PTHREAD_COND_INITIALIZER;
 
 static void _SetReconnectFunction(const void* value, void* context)
 {
-	if([[(HIDController*)value class] useHIDThread])
-	[(HIDController*)value performSelectorOnMainThread:@selector(_reconnect:) withObject:nil waitUntilDone:NO];
-	else
-	[(HIDController*)value _reconnect:nil];
+	[(HIDController*)value _reconnect];
 }
 
 static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
@@ -66,9 +62,7 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	while(IOIteratorNext(iterator))
 	;
 	
-	pthread_mutex_lock(&_instanceMutex);
 	CFSetApplyFunction(_instanceList, _SetReconnectFunction, NULL);
-	pthread_mutex_unlock(&_instanceMutex);
 	
 	[pool release];
 }
@@ -158,34 +152,6 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	return deviceList;
 }
 
-- (id) init
-{
-	return [self initWithVendorID:0 productID:0 primaryUsagePage:0 primaryUsage:0 exclusive:NO];
-}
-
-- (id) initWithDevicePath:(NSString*)path exclusive:(BOOL)exclusive
-{
-	NSArray*			components = [path componentsSeparatedByString:kHIDPathSeparator];
-	unsigned short		vendorID = 0,
-						productID = 0,
-						primaryUsagePage = 0,
-						primaryUsage = 0;
-	
-	if([components count] >= 1) {
-		vendorID = [[components objectAtIndex:0] intValue];
-		if([components count] >= 2) {
-			productID = [[components objectAtIndex:1] intValue];
-			if([components count] >= 3) {
-				primaryUsagePage = [[components objectAtIndex:2] intValue];
-				if([components count] >= 4)
-				primaryUsage = [[components objectAtIndex:3] intValue];
-			}
-		}
-	}
-	
-	return [self initWithVendorID:vendorID productID:productID primaryUsagePage:primaryUsagePage primaryUsage:primaryUsage exclusive:exclusive];
-}
-
 static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 {
 	;
@@ -218,11 +184,10 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 #endif
 }
 
-- (id) initWithVendorID:(unsigned short)vendorID productID:(unsigned short)productID primaryUsagePage:(unsigned short)primaryUsagePage primaryUsage:(unsigned short)primaryUsage exclusive:(BOOL)exclusive
+- (id) init
 {
 	kern_return_t				error;
 	
-	pthread_mutex_lock(&_instanceMutex);
 	if(CFSetGetCount(_instanceList) == 0) {
 		if([[self class] useHIDThread] && (_hidRunLoop == NULL)) {
 			pthread_mutex_lock(&_hidMutex);
@@ -234,7 +199,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		if(_notificationPort == NULL) {
 			_notificationPort = IONotificationPortCreate(kIOMasterPortDefault);
 			if(_notificationPort) {
-				CFRunLoopAddSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
+				CFRunLoopAddSource(CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
 				
 				error = IOServiceAddMatchingNotification(_notificationPort, kIOMatchedNotification, IOServiceMatching(kIOHIDDeviceKey), _ServiceMatchingCallback, NULL, &_notificationAdd);
 				if(error != kIOReturnSuccess) {
@@ -261,29 +226,18 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		}
 	}
 	CFSetAddValue(_instanceList, self);
-	pthread_mutex_unlock(&_instanceMutex);
 	
-	if((self = [super init])) {
-		_vendorID = vendorID;
-		_productID = productID;
-		_primaryUsagePage = primaryUsagePage;
-		_primaryUsage = primaryUsage;
-		_exclusive = exclusive;
-	}
-	
-	return self;
+	return [super init];
 }
 
 - (void) dealloc
 {
-	_terminated = YES;
-	[self setEnabled:NO];
+	[self _disconnect];
 	
-	pthread_mutex_lock(&_instanceMutex);
 	CFSetRemoveValue(_instanceList, self);
 	if(CFSetGetCount(_instanceList) == 0) {
 		if(_notificationPort != NULL) {
-			CFRunLoopRemoveSource(_hidRunLoop ? _hidRunLoop : CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
+			CFRunLoopRemoveSource(CFRunLoopGetMain(), IONotificationPortGetRunLoopSource(_notificationPort), kCFRunLoopCommonModes);
 			
 			if(_notificationAdd)
 			IOObjectRelease(_notificationAdd);
@@ -298,9 +252,43 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 			_hidRunLoop = NULL;
 		}
 	}
-	pthread_mutex_unlock(&_instanceMutex);
 	
 	[super dealloc];
+}
+
+- (id) initWithVendorID:(unsigned short)vendorID productID:(unsigned short)productID primaryUsagePage:(unsigned short)primaryUsagePage primaryUsage:(unsigned short)primaryUsage exclusive:(BOOL)exclusive
+{
+	if((self = [self init])) {
+		[self setDeviceVendorID:vendorID productID:productID primaryUsagePage:primaryUsagePage primaryUsage:primaryUsage];
+		[self setExclusive:exclusive];
+	}
+	
+	return self;
+}
+
+- (id) initWithDevicePath:(NSString*)path exclusive:(BOOL)exclusive
+{
+	if((self = [self init])) {
+		[self setDevicePath:path];
+		[self setExclusive:exclusive];
+	}
+	
+	return self;
+}
+
+- (void) setDeviceVendorID:(unsigned short)vendorID productID:(unsigned short)productID primaryUsagePage:(unsigned short)primaryUsagePage primaryUsage:(unsigned short)primaryUsage
+{
+	if((vendorID != _vendorID) || (productID != _productID) || (primaryUsagePage != _primaryUsagePage) || (primaryUsage != _primaryUsage)) {
+		_vendorID = vendorID;
+		_productID = productID;
+		_primaryUsagePage = primaryUsagePage;
+		_primaryUsage = primaryUsage;
+		
+		if(_enabled) {
+			[self _disconnect];
+			[self _reconnect];
+		}
+	}
 }
 
 - (unsigned short) vendorID
@@ -323,9 +311,27 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	return _primaryUsage;
 }
 
-- (BOOL) isExclusive
+- (void) setDevicePath:(NSString*)path
 {
-	return _exclusive;
+	NSArray*			components = [path componentsSeparatedByString:kHIDPathSeparator];
+	unsigned short		vendorID = 0,
+						productID = 0,
+						primaryUsagePage = 0,
+						primaryUsage = 0;
+	
+	if([components count] >= 1) {
+		vendorID = [[components objectAtIndex:0] intValue];
+		if([components count] >= 2) {
+			productID = [[components objectAtIndex:1] intValue];
+			if([components count] >= 3) {
+				primaryUsagePage = [[components objectAtIndex:2] intValue];
+				if([components count] >= 4)
+				primaryUsage = [[components objectAtIndex:3] intValue];
+			}
+		}
+	}
+	
+	[self setDeviceVendorID:vendorID productID:productID primaryUsagePage:primaryUsagePage primaryUsage:primaryUsage];
 }
 
 - (NSString*) devicePath
@@ -339,6 +345,23 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	}
 	
 	return string;
+}
+
+- (void) setExclusive:(BOOL)flag
+{
+	if(flag != _exclusive) {
+		_exclusive = flag;
+		
+		if(_enabled) {
+			[self _disconnect];
+			[self _reconnect];
+		}
+	}
+}
+
+- (BOOL) isExclusive
+{
+	return _exclusive;
 }
 
 - (void) setDelegate:(id<HIDControllerDelegate>)delegate
@@ -357,7 +380,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 		_enabled = flag;
 		
 		if(_enabled)
-		[self _reconnect:nil];
+		[self _reconnect];
 		else
 		[self _disconnect];
 	}
@@ -399,7 +422,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	[pool release];
 }
 
-- (void) _reconnect:(id)arg
+- (void) _reconnect
 {
 	BOOL					wasConnected = [self isConnected],
 							success = NO;
@@ -419,7 +442,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	NSString*				string;
 	kern_return_t			error;
 	
-	if(_terminated || !_enabled)
+	if(!_enabled)
 	return;
 	
 	dictionary = IOServiceMatching(kIOHIDDeviceKey);
@@ -570,7 +593,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 
 - (void) _didUpdateElement:(NSArray*)arguments
 {
-	if(!_terminated && _enabled)
+	if([self isConnected])
 	[_delegate HIDController:self didUpdateElementWithCookie:[[arguments objectAtIndex:0] unsignedLongValue] value:[[arguments objectAtIndex:1] intValue] min:[[arguments objectAtIndex:2] intValue] max:[[arguments objectAtIndex:3] intValue] info:([arguments count] > 4 ? [arguments objectAtIndex:4] : nil)];
 }
 
