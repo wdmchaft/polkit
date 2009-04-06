@@ -179,7 +179,7 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 			else
 			NSLog(@"%s: libssh2_session_init() failed", __FUNCTION__);
 		}
-		if(_socket == NULL) {
+		if(_sftp == NULL) {
 			[self _disconnect];
 			return NO;
 		}
