@@ -42,6 +42,7 @@
 								_enabled;
 	id<HIDControllerDelegate>	_delegate;
 	
+	pthread_mutex_t				_deviceMutex;
 	void*						_hidDeviceInterface;
 	void*						_queueInterface;
 	CFRunLoopSourceRef			_hidEventSource;

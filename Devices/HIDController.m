@@ -231,12 +231,17 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	}
 	CFSetAddValue(_instanceList, self);
 	
-	return [super init];
+	if((self = [super init]))
+	pthread_mutex_init(&_deviceMutex, NULL);
+	
+	return self;
 }
 
 - (void) dealloc
 {
 	[self _disconnect];
+	
+	pthread_mutex_destroy(&_deviceMutex);
 	
 	CFSetRemoveValue(_instanceList, self);
 	if(CFSetGetCount(_instanceList) == 0) {
@@ -449,6 +454,8 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	if(!_enabled)
 	return;
 	
+	pthread_mutex_lock(&_deviceMutex);
+	
 	dictionary = IOServiceMatching(kIOHIDDeviceKey);
 	error = IOServiceGetMatchingServices(kIOMasterPortDefault, dictionary, &iterator);
 	if(error == kIOReturnSuccess) {
@@ -543,6 +550,8 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	else
 	NSLog(@"%s: IOServiceGetMatchingServices() failed with error %i", __FUNCTION__, error);
 	
+	pthread_mutex_unlock(&_deviceMutex);
+	
 	if(success == NO)
 	[self _disconnect];
 	
@@ -561,6 +570,8 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 - (void) _disconnect
 {
 	BOOL					wasConnected = [self isConnected];
+	
+	pthread_mutex_lock(&_deviceMutex);
 	
 	if(_hidEventSource) {
 		(*(IOHIDQueueInterface**)_queueInterface)->stop((IOHIDQueueInterface**)_queueInterface);
@@ -591,6 +602,8 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 		_hidDeviceInterface = NULL;
 	}
 	
+	pthread_mutex_unlock(&_deviceMutex);
+	
 	if(wasConnected)
 	[_delegate HIDControllerDidDisconnect:self];
 }
@@ -609,6 +622,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 	[_delegate HIDController:self didUpdateElementWithCookie:cookie value:value min:min max:max info:info];
 }
 
+/* May be called from HID thread */
 - (void) _processEvents
 {
 	AbsoluteTime			zeroTime = {0,0};
@@ -616,6 +630,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 	CFDataRef				data;
 	ElementInfo*			info;
 	
+	pthread_mutex_lock(&_deviceMutex);
 	while((*(IOHIDQueueInterface**)_queueInterface)->getNextEvent((IOHIDQueueInterface**)_queueInterface, &hidEvent, zeroTime, 0) == kIOReturnSuccess) {
 		if((data = CFDictionaryGetValue(_cookies, (const void*)(long)hidEvent.elementCookie))) {
 			info = (ElementInfo*)CFDataGetBytePtr(data);
@@ -631,6 +646,7 @@ static void _DictionaryReleaseFunction(const void* key, const void* value, void*
 		if((hidEvent.longValueSize != 0) && (hidEvent.longValue != NULL))
 		free(hidEvent.longValue);
 	}
+	pthread_mutex_unlock(&_deviceMutex);
 }
 
 - (NSDictionary*) info

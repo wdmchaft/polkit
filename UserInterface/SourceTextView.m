@@ -734,4 +734,12 @@ static void _SourceColorizeCallback(NSString* source, SourceToken token, NSRange
 	[self _shiftRight:[NSValue valueWithRange:[self selectedRange]]];
 }
 
+- (BOOL) validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
+{
+	if(([anItem action] == @selector(shiftLeft:)) || ([anItem action] == @selector(shiftRight:)))
+	return ([[self window] firstResponder] == self);
+	
+	return [super validateUserInterfaceItem:anItem];
+}
+
 @end
