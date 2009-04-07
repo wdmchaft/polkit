@@ -1,3 +1,4 @@
+ARCHS[sdk=macosx10.4*] = i386 ppc
 ARCHS[sdk=macosx10.5*] = i386 ppc
 ARCHS[sdk=macosx10.6*] = i386 x86_64
 ALWAYS_SEARCH_USER_PATHS = NO
