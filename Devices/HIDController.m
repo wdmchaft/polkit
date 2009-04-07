@@ -64,6 +64,8 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	
 	CFSetApplyFunction(_instanceList, _SetReconnectFunction, NULL);
 	
+	[[NSNotificationCenter defaultCenter] postNotificationName:HIDControllerDidUpdateDevicesNotification object:nil];
+	
 	[pool release];
 }
 
@@ -128,14 +130,16 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 				string = (value < [table count] ? [table objectAtIndex:value] : nil);
 				[info setObject:([string length] ? string : [(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsageKey]) forKey:@kIOHIDPrimaryUsageKey];
 				
-				string = [NSString stringWithFormat:@"%@%@%@%@%@%@%@", [(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsagePageKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsageKey]];
-				if([deviceList objectForKey:string]) {
-					if([[NSUserDefaults standardUserDefaults] boolForKey:@"debug"])
-					NSLog(@"Found duplicate identifier '%@' for device \"%@\"", string, [(NSDictionary*)dictionary objectForKey:@kIOHIDProductKey]);
+				if([(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey] && [(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey]) {
+					string = [NSString stringWithFormat:@"%@%@%@%@%@%@%@", [(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsagePageKey], kHIDPathSeparator, [(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsageKey]];
+					if([deviceList objectForKey:string]) {
+						if([[NSUserDefaults standardUserDefaults] boolForKey:@"debug"])
+						NSLog(@"Found duplicate identifier '%@' for device \"%@\"", string, [(NSDictionary*)dictionary objectForKey:@kIOHIDProductKey]);
+					}
+					else
+					[deviceList setObject:info forKey:string];
+					[info release];
 				}
-				else
-				[deviceList setObject:info forKey:string];
-				[info release];
 				
 				CFRelease(dictionary);
 			}

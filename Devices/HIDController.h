@@ -20,6 +20,9 @@
 
 #define kHIDPathSeparator		@":"
 
+/* Only posted if at least one HIDController instance exists  */
+#define HIDControllerDidUpdateDevicesNotification	@"HIDControllerDidUpdateDevicesNotification"
+
 @class HIDController;
 
 @protocol HIDControllerDelegate <NSObject>
