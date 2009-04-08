@@ -394,6 +394,19 @@ static void _SourceColorizeCallback(NSString* source, SourceToken token, NSRange
 	[super dealloc];
 }
 
+- (BOOL) validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
+{
+	if([anItem action] == @selector(paste:))
+	return ([self isEditable] && [self preferredPasteboardTypeFromArray:[[NSPasteboard generalPasteboard] types] restrictedToTypesFromArray:[NSArray arrayWithObject:NSStringPboardType]]);
+	
+	return [super validateUserInterfaceItem:anItem];
+}
+
+- (void) paste:(id)sender
+{
+	[self pasteAsPlainText:sender];
+}
+
 //FIXME: This does not work correctly if the text view contains text
 - (void) _showLineNumbers:(BOOL)flag
 {
