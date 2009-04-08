@@ -27,6 +27,8 @@ typedef enum {
 	kSourceToken_Preprocessor
 } SourceToken;
 
+#define kTabWidth					4
+
 typedef void (*SourceTokenCallback)(NSString* source, SourceToken token, NSRange range, void* userInfo);
 
 @interface SourceRulerView : NSRulerView
@@ -337,6 +339,10 @@ static void _SourceColorizeCallback(NSString* source, SourceToken token, NSRange
 
 - (void) _finishInitialization
 {
+	NSMutableParagraphStyle*	style;
+	NSTextTab*					tabStop;
+	NSUInteger					i;
+	
 	[self setMaxSize:NSMakeSize(10000000, 10000000)];
 	[self setAutoresizingMask:NSViewNotSizable];
 	
@@ -349,6 +355,16 @@ static void _SourceColorizeCallback(NSString* source, SourceToken token, NSRange
 	_errorColor = [[NSColor colorWithDeviceRed:1.0 green:0.4 blue:0.5 alpha:1.0] retain];
 	[self setFont:[NSFont fontWithName:@"Monaco" size:10]];
 	[self setSmartInsertDeleteEnabled:NO];
+	
+	style = [NSMutableParagraphStyle new];
+	[style setTabStops:[NSArray array]];
+	for(i = 0; i < 128; ++i) {
+		tabStop = [[NSTextTab alloc] initWithType:NSLeftTabStopType location:(i * kTabWidth * 6)];
+		[style addTabStop:tabStop];
+		[tabStop release];
+	}
+	[[self textStorage] addAttributes:[NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName] range:NSMakeRange(0, [[[self textStorage] string] length])];
+	[style release];
 }
 
 - (id) initWithFrame:(NSRect)frame
