@@ -225,12 +225,10 @@
 @private
 	void*								_handle;
 	NSStringEncoding					_stringEncoding;
-	BOOL								_keepAlive,
-										_attemptTLSOrSSL;
+	BOOL								_keepAlive;
 	id									_transcript;
 }
 @property(nonatomic) NSStringEncoding stringEncoding; //ISO Latin 1 by default
-@property(nonatomic) BOOL attemptTLSOrSSL; //NO by default
 @property(nonatomic) BOOL keepConnectionAlive; //NO by default
 @end
 

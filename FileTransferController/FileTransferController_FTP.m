@@ -37,7 +37,7 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 
 @implementation FTPTransferController
 
-@synthesize handle=_handle, stringEncoding=_stringEncoding, keepConnectionAlive=_keepAlive, attemptTLSOrSSL=_attemptTLSOrSSL;
+@synthesize handle=_handle, stringEncoding=_stringEncoding, keepConnectionAlive=_keepAlive;
 
 + (void) initialize
 {
@@ -139,12 +139,11 @@ static int _DebugCallback(CURL* handle, curl_infotype type, char* data, size_t s
 		}
 		CFRelease(proxySettings);
 	}
-	
-	if(_attemptTLSOrSSL) {
-		curl_easy_setopt(_handle, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
-		curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYPEER, (long)0);
-		curl_easy_setopt(_handle, CURLOPT_SSL_VERIFYHOST, (long)0);
-	}
+}
+
+- (const char*) _convertURL:(NSURL*)url
+{
+	return [[url absoluteString] cStringUsingEncoding:_stringEncoding];
 }
 
 static int _WriteProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow)
@@ -186,7 +185,7 @@ static size_t _WriteCallback(void* buffer, size_t size, size_t nmemb, void* user
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
 	[self _reset];
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [self _convertURL:url]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _WriteCallback);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, params);
@@ -256,7 +255,7 @@ static size_t _ReadCallback(char* bufptr, size_t size, size_t nitems, void* user
 	params[2] = ([[self delegate] respondsToSelector:@selector(fileTransferControllerShouldAbort:)] ? self : NULL);
 	
 	[self _reset];
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [self _convertURL:url]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_READFUNCTION, _ReadCallback);
 	curl_easy_setopt(_handle, CURLOPT_READDATA, params);
@@ -381,7 +380,7 @@ static size_t _ListingCallback(void* buffer, size_t size, size_t nmemb, void* us
 #endif
 	
 	[self _reset];
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [self _convertURL:url]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, _ListingCallback);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, params);
@@ -444,7 +443,7 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	file = fopen("/dev/null", "a");
 	
 	[self _reset];
-	curl_easy_setopt(_handle, CURLOPT_URL, [[url absoluteString] cStringUsingEncoding:_stringEncoding]);
+	curl_easy_setopt(_handle, CURLOPT_URL, [self _convertURL:url]);
 	curl_easy_setopt(_handle, CURLOPT_ERRORBUFFER, buffer);
 	curl_easy_setopt(_handle, CURLOPT_WRITEDATA, file);
 #if __USE_COMMAND_PROGRESS__
@@ -544,9 +543,24 @@ static int _CommandProgressCallback(void* clientp, double dltotal, double dlnow,
 	return @"ftps";
 }
 
+/* Override */
 - (void) _reset
 {
 	[super _reset];
+	
+	curl_easy_setopt([self handle], CURLOPT_FTP_SSL, CURLFTPSSL_ALL);
+	curl_easy_setopt([self handle], CURLOPT_SSL_VERIFYPEER, (long)0);
+	curl_easy_setopt([self handle], CURLOPT_SSL_VERIFYHOST, (long)0);
+}
+
+/* Override completely */
+- (const char*) _convertURL:(NSURL*)url
+{
+	//We do implicit SSL if the port is explicitely set to 990, otherwise we do explicit SSL
+	if([[url port] integerValue] == 990)
+	return [[[url absoluteString] stringByReplacingOccurrencesOfString:@":990" withString:@""] cStringUsingEncoding:[self stringEncoding]]; //HACK: Return an "ftps://" URL
+	
+	return [[[url absoluteString] stringByReplacingOccurrencesOfString:@"ftps://" withString:@"ftp://"] cStringUsingEncoding:[self stringEncoding]]; //HACK: Return an "ftp://" URL
 }
 
 @end
