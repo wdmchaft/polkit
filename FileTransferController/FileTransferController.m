@@ -19,6 +19,7 @@
 #import <openssl/evp.h>
 #import <libkern/OSAtomic.h>
 #import <SystemConfiguration/SystemConfiguration.h>
+#import <arpa/inet.h>
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
@@ -42,6 +43,8 @@ static OSSpinLock						_downloadLock = 0,
 										_uploadLock = 0;
 static CFTimeInterval					_downloadTime = 0.0,
 										_uploadTime = 0.0;
+
+#define MAKE_IPV4(A, B, C, D) ((((UInt32)A) << 24) | (((UInt32)B) << 16) | (((UInt32)C) << 8) | ((UInt32)D))
 
 #define IS_REACHABLE(__FLAGS__) (((__FLAGS__) & kSCNetworkFlagsReachable) && !((__FLAGS__) & kSCNetworkFlagsConnectionRequired))
 
@@ -148,6 +151,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (id) initWithBaseURL:(NSURL*)url
 {
+	NSString*				host = [url host];
+	struct in_addr			ipv4Address;
+	UInt32					address;
+	
 	if(![[url scheme] isEqualToString:[[self class] urlScheme]]) {
 		[self release];
 		return nil;
@@ -155,7 +162,17 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	if((self = [super init])) {
 		_baseURL = [url copy];
-		_localHost = ([[[NSHost currentHost] names] containsObject:[_baseURL host]] || [[_baseURL host] hasSuffix:@".local"]);
+		if([[[NSHost currentHost] names] containsObject:host] || [[[NSHost currentHost] addresses] containsObject:host] || [host hasSuffix:@".local"])
+		_localHost = YES;
+		else if(inet_pton(AF_INET, [host UTF8String], &ipv4Address) == 1) { //FIXME: Also handle local IPv6 addresses
+			address = ntohl(ipv4Address.s_addr);
+			if((address >= MAKE_IPV4(10, 0, 0, 0)) && (address <= MAKE_IPV4(10, 255, 255, 255)))
+			_localHost = YES;
+			else if((address >= MAKE_IPV4(172, 16, 0, 0)) && (address <= MAKE_IPV4(172, 31, 255, 255)))
+			_localHost = YES;
+			else if((address >= MAKE_IPV4(192, 168, 0, 0)) && (address <= MAKE_IPV4(192, 168, 255, 255)))
+			_localHost = YES;
+		}
 	}
 	
 	return self;
