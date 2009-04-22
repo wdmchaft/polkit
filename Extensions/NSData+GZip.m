@@ -20,39 +20,114 @@
 
 #import "NSData+GZip.h"
 
-#define kChunkSize	(128 * 1024) //128Kb
+#define kMemoryChunkSize		1024
+#define kFileChunkSize			(128 * 1024) //128Kb
 
 @implementation NSData (GZip)
 
 - (NSData*) compressGZip
 {
-	uLong			length = compressBound([self length]);
-	NSMutableData*	data = [NSMutableData dataWithLength:(sizeof(unsigned int) + length)];
+	NSUInteger		length = [self length];
+	int				windowBits = 15 + 16, //Default + gzip header instead of zlib header
+					memLevel = 8, //Default
+					retCode;
+	NSMutableData*	result;
+	z_stream		stream;
+	unsigned char	output[kMemoryChunkSize];
+	uInt			gotBack;
 	
-	if(data == nil)
+	if((length == 0) || (length > UINT_MAX)) //FIXME: Support 64 bit inputs
 	return nil;
+
+	bzero(&stream, sizeof(z_stream));
+	stream.avail_in = (uInt)length;
+	stream.next_in = (unsigned char*)[self bytes];
 	
-	if(compress2((unsigned char*)[data mutableBytes] + sizeof(unsigned int), &length, [self bytes], [self length], Z_BEST_COMPRESSION) != Z_OK)
-	return nil;
+	retCode = deflateInit2(&stream, Z_BEST_COMPRESSION, Z_DEFLATED, windowBits, memLevel, Z_DEFAULT_STRATEGY);
+	if(retCode != Z_OK) {
+		NSLog(@"%s: deflateInit2() failed with error %i", __FUNCTION__, retCode);
+		return nil;
+	}
 	
-	*((unsigned int*)[data mutableBytes]) = NSSwapHostIntToBig([self length]);
-	[data setLength:(sizeof(unsigned int) + length)];
+	result = [NSMutableData dataWithCapacity:(length / 4)];
+	do {
+		stream.avail_out = kMemoryChunkSize;
+		stream.next_out = output;
+		retCode = deflate(&stream, Z_FINISH);
+		if((retCode != Z_OK) && (retCode != Z_STREAM_END)) {
+			NSLog(@"%s: deflate() failed with error %i", __FUNCTION__, retCode);
+			deflateEnd(&stream);
+			return nil;
+		}
+		gotBack = kMemoryChunkSize - stream.avail_out;
+		if(gotBack > 0)
+		[result appendBytes:output length:gotBack];
+	} while (retCode == Z_OK);
+	deflateEnd(&stream);
 	
-	return data;
+	if((stream.avail_in != 0) || (retCode != Z_STREAM_END)) {
+		NSLog(@"%s: Internal error during deflate()", __FUNCTION__);
+		return nil;
+	}
+	
+	return result;
 }
 
 - (NSData*) decompressGZip
 {
-	uLong			length = ([self length] >= sizeof(unsigned int) ? NSSwapBigIntToHost(*((unsigned int*)[self bytes])) : 0xFFFFFFFF);
-	NSMutableData*	data = (length < 0x40000000 ? [NSMutableData dataWithLength:length] : nil); //HACK: Prevent allocating more than 1 Gb
+	NSUInteger		length = [self length];
+	int				windowBits = 15 + 16, //Default + gzip header instead of zlib header
+					retCode;
+	unsigned char	output[kMemoryChunkSize];
+	uInt			gotBack;
+	NSMutableData*	result;
+	z_stream		stream;
+	uLong			size;
 	
-	if(data == nil)
+	if((length == 0) || (length > UINT_MAX)) //FIXME: Support 64 bit inputs
 	return nil;
 	
-	if(uncompress([data mutableBytes], &length, (unsigned char*)[self bytes] + sizeof(unsigned int), [self length] - sizeof(unsigned int)) != Z_OK)
-	return nil;
+	//FIXME: Remove support for original implementation of -compressGZip which wasn't generating real gzip data 
+	if((length >= sizeof(unsigned int)) && ((*((unsigned char*)[self bytes]) != 0x1F) || (*((unsigned char*)[self bytes] + 1) != 0x8B))) {
+		size = NSSwapBigIntToHost(*((unsigned int*)[self bytes]));
+		result = (size < 0x40000000 ? [NSMutableData dataWithLength:size] : nil); //HACK: Prevent allocating more than 1 Gb
+		if(result && (uncompress([result mutableBytes], &size, (unsigned char*)[self bytes] + sizeof(unsigned int), [self length] - sizeof(unsigned int)) != Z_OK))
+		result = nil;
+		return result;
+	}
 	
-	return data;
+	bzero(&stream, sizeof(z_stream));
+	stream.avail_in = (uInt)length;
+	stream.next_in = (unsigned char*)[self bytes];
+	
+	retCode = inflateInit2(&stream, windowBits);
+	if(retCode != Z_OK) {
+		NSLog(@"%s: inflateInit2() failed with error %i", __FUNCTION__, retCode);
+		return nil;
+	}
+	
+	result = [NSMutableData dataWithCapacity:(length * 4)];
+	do {
+		stream.avail_out = kMemoryChunkSize;
+		stream.next_out = output;
+		retCode = inflate(&stream, Z_NO_FLUSH);
+		if ((retCode != Z_OK) && (retCode != Z_STREAM_END)) {
+			NSLog(@"%s: inflate() failed with error %i", __FUNCTION__, retCode);
+			inflateEnd(&stream);
+			return nil;
+		}
+		gotBack = kMemoryChunkSize - stream.avail_out;
+		if(gotBack > 0)
+		[result appendBytes:output length:gotBack];
+	} while (retCode == Z_OK);
+	inflateEnd(&stream);
+	
+	if((stream.avail_in != 0) || (retCode != Z_STREAM_END)) {
+		NSLog(@"%s: Internal error during inflate()", __FUNCTION__);
+		return nil;
+	}
+	
+	return result;
 }
 
 - (id) initWithGZipFile:(NSString*)path
@@ -66,18 +141,18 @@
 	
 	file = gzopen(string, "r");
 	if(file != NULL) {
-		length = kChunkSize;
+		length = kFileChunkSize;
 		buffer = malloc(length);
 		while(1) {
-			result = gzread(file, buffer + length - kChunkSize, kChunkSize);
+			result = gzread(file, buffer + length - kFileChunkSize, kFileChunkSize);
 			if(result < 0)
 			break;
-			if(result < kChunkSize) {
-				length -= kChunkSize - result;
+			if(result < kFileChunkSize) {
+				length -= kFileChunkSize - result;
 				buffer = realloc(buffer, length);
 				break;
 			}
-			length += kChunkSize;
+			length += kFileChunkSize;
 			buffer = realloc(buffer, length);
 		}
 		

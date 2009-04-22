@@ -198,23 +198,32 @@
 
 - (void) testGZip
 {
-	NSString*				path = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+	NSString*				path1 = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+	NSString*				path2 = [@"/tmp" stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	NSData*					data1;
 	NSData*					data2;
 	NSError*				error;
 	
 	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
-	AssertTrue([data1 writeToGZipFile:path], nil);
-	
-	data2 = [[NSData alloc] initWithGZipFile:path];
+	AssertTrue([data1 writeToGZipFile:path1], nil);
+	data2 = [[NSData alloc] initWithGZipFile:path1];
 	AssertNotNil(data2, nil);
-	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path error:&error], [error localizedDescription]);
 	AssertEqualObjects(data1, data2, nil);
 	[data2 release];
+	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path1 error:&error], [error localizedDescription]);
 	
+	AssertNil([[NSData data] compressGZip], nil);
+	AssertNil([[NSData data] decompressGZip], nil);
 	data2 = [data1 compressGZip];
 	AssertEqualObjects(data1, [data2 decompressGZip], nil);
+	
+	AssertTrue([data2 writeToFile:path2 atomically:YES], nil);
+	data2 = [[NSData alloc] initWithGZipFile:path2];
+	AssertNotNil(data2, nil);
+	AssertEqualObjects(data1, data2, nil);
+	[data2 release];
+	AssertTrue([[NSFileManager defaultManager] removeItemAtPath:path2 error:&error], [error localizedDescription]);
 	
 	[data1 release];
 }
