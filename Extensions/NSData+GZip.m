@@ -62,15 +62,10 @@
 		gotBack = kMemoryChunkSize - stream.avail_out;
 		if(gotBack > 0)
 		[result appendBytes:output length:gotBack];
-	} while (retCode == Z_OK);
+	} while(retCode == Z_OK);
 	deflateEnd(&stream);
 	
-	if((stream.avail_in != 0) || (retCode != Z_STREAM_END)) {
-		NSLog(@"%s: Internal error during deflate()", __FUNCTION__);
-		return nil;
-	}
-	
-	return result;
+	return (retCode == Z_STREAM_END ? result : nil);
 }
 
 - (NSData*) decompressGZip
@@ -119,15 +114,10 @@
 		gotBack = kMemoryChunkSize - stream.avail_out;
 		if(gotBack > 0)
 		[result appendBytes:output length:gotBack];
-	} while (retCode == Z_OK);
+	} while(retCode == Z_OK);
 	inflateEnd(&stream);
 	
-	if((stream.avail_in != 0) || (retCode != Z_STREAM_END)) {
-		NSLog(@"%s: Internal error during inflate()", __FUNCTION__);
-		return nil;
-	}
-	
-	return result;
+	return (retCode == Z_STREAM_END ? result : nil);
 }
 
 - (id) initWithGZipFile:(NSString*)path
