@@ -21,7 +21,7 @@
 #import "NetworkConfiguration.h"
 #import "DirectoryWatcher.h"
 
-@interface Controller : NSObject <DiskWatcherDelegate, DirectoryWatcherDelegate, NetworkConfigurationDelegate, NetworkReachabilityDelegate>
+@interface Controller : NSObject <DiskWatcherDelegate, DirectoryWatcherDelegate, NetworkReachabilityDelegate>
 @end
 
 @implementation Controller
@@ -41,9 +41,9 @@
 	printf("%s: %s\n", __FUNCTION__, [[watcher rootDirectory] UTF8String]);
 }
 
-- (void) networkConfigurationDidChange:(NetworkConfiguration*)configuration
+- (void) didChangeNetworkConfiguration:(NSNotification*)notification
 {
-	printf("%s: %s\n", __FUNCTION__, [[configuration locationName] UTF8String]);
+	printf("%s: %s\n", __FUNCTION__, [[[NetworkConfiguration sharedNetworkConfiguration] locationName] UTF8String]);
 }
 
 - (void) networkReachabilityDidUpdate:(NetworkReachability*)reachability
@@ -60,13 +60,11 @@ int main(int argc, const char* argv[])
 	NSMutableArray*					diskWatchers = [NSMutableArray array];
 	DirectoryWatcher*				directoryWatcher;
 	NetworkReachability*			networkReachability;
-	NetworkConfiguration*			networkConfiguration;
 	DiskWatcher*					diskWatcher;
 	NSString*						volume;
 	
-	networkConfiguration = [NetworkConfiguration new];
-	if(networkConfiguration) {
-		[networkConfiguration setDelegate:controller];
+	if([NetworkConfiguration sharedNetworkConfiguration]) {
+		[[NSNotificationCenter defaultCenter] addObserver:controller selector:@selector(didChangeNetworkConfiguration:) name:NetworkConfigurationDidChangeNotification object:nil];
 		printf("Observing [network configuration]...\n");
 	}
 	networkReachability = [[NetworkReachability alloc] initWithHostName:@"apple.com"];
@@ -102,8 +100,7 @@ int main(int argc, const char* argv[])
 	[directoryWatcher release];
 	[networkReachability setDelegate:nil];
 	[networkReachability release];
-	[networkConfiguration setDelegate:nil];
-	[networkConfiguration release];
+	[[NSNotificationCenter defaultCenter] removeObserver:controller name:NetworkConfigurationDidChangeNotification object:nil];
 	[controller release];
 	[localPool release];
 	return 0;
