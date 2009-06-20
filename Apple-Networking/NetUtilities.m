@@ -44,7 +44,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 #import <ifaddrs.h>
 #import <netdb.h>
 #import <netinet/in.h>
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 #import <netinet6/in6.h>
 #import <IOKit/IOKitLib.h>
 #import <IOKit/network/IOEthernetInterface.h>
@@ -57,7 +57,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 //FUNCTIONS:
 
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 
 static NSString* _GetPrimaryMACAddress()
 {
@@ -100,13 +100,13 @@ static NSString* _GetPrimaryMACAddress()
 NSString* HostGetUniqueID()
 {
 	static NSString*			uniqueID = nil;
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	unsigned char				md5[CC_MD5_DIGEST_LENGTH];
 	const char*					buffer;
 #endif
 	
 	if(uniqueID == nil) {
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 		uniqueID = [[UIDevice currentDevice] uniqueIdentifier];
 		uniqueID = [[[uniqueID uppercaseString] stringByReplacingOccurrencesOfString:@":" withString:@"-"] copy];
 #else
@@ -132,7 +132,7 @@ NSString* HostGetName()
 	static NSString*				name = nil;
 	
 	if(name == nil) {
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 		name = [[UIDevice currentDevice] name];
 #else
 		name = [[NSHost currentHost] name];
@@ -157,7 +157,7 @@ const struct sockaddr* IPAddressGetCurrent()
 		if((ifap->ifa_name[0] == 'l') && (ifap->ifa_name[1] == 'o')) //Ignore loopback
 		continue;
 		
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 		if(ifap->ifa_addr->sa_family == AF_INET)
 #else
 		if((ifap->ifa_addr->sa_family == AF_INET) || (ifap->ifa_addr->sa_family == AF_INET6))
@@ -249,7 +249,7 @@ const struct sockaddr* IPAddressFromString(NSString* string)
 				((struct sockaddr_in*)info->ai_addr)->sin_port = port;
 				break;
 				
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 				case AF_INET6:
 				((struct sockaddr_in6*)info->ai_addr)->sin6_port = port;
 				break;

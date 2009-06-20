@@ -42,7 +42,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import <unistd.h>
 #import <netinet/in.h>
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 #import <netinet6/in6.h>
 #endif
 
@@ -168,7 +168,7 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	return [self initWithRemoteAddress:(struct sockaddr*)&ipAddress];
 }
 
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 
 - (id) initWithRemoteIPv6Address:(const struct in6_addr*)address port:(UInt16)port
 {
@@ -561,7 +561,7 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	if(_remoteAddress)
 	switch(_remoteAddress->sa_family) {
 		case AF_INET: return ntohs(((struct sockaddr_in*)_remoteAddress)->sin_port);
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 		case AF_INET6: return ntohs(((struct sockaddr_in6*)_remoteAddress)->sin6_port);
 #endif
 	}

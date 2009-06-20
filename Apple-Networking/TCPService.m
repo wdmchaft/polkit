@@ -42,7 +42,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import <unistd.h>
 #import <netinet/in.h>
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 #import <netinet6/in6.h>
 #endif
 
@@ -96,7 +96,7 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
     CFSocketContext				socketCtxt = {0, self, NULL, NULL, NULL};
 	int							yes = 1;
 	struct sockaddr_in			addr4;
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	BOOL						enableIPv6 = NO;
 	struct sockaddr_in6			addr6;
 #endif
@@ -117,7 +117,7 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 	}
 	setsockopt(CFSocketGetNative(_ipv4Socket), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 	
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	if(enableIPv6) {
 		_ipv6Socket = CFSocketCreate(kCFAllocatorDefault, PF_INET6, SOCK_STREAM, IPPROTO_TCP, kCFSocketAcceptCallBack, (CFSocketCallBack)&_AcceptCallBack, &socketCtxt);
 		if(!_ipv6Socket) {
@@ -142,7 +142,7 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 	if(getsockname(CFSocketGetNative(_ipv4Socket), _localAddress, &length) < 0)
 	[NSException raise:NSInternalInconsistencyException format:@"Unable to retrieve socket address"];
 	
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	if(enableIPv6) {
 		bzero(&addr6, sizeof(addr6));
 		addr6.sin6_len = sizeof(addr6);
@@ -160,7 +160,7 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 	CFRunLoopAddSource(_runLoop, source, kCFRunLoopCommonModes);
 	CFRelease(source);
 	
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	if(enableIPv6) {
 		source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _ipv6Socket, 0);
 		CFRunLoopAddSource(_runLoop, source, kCFRunLoopCommonModes);
@@ -226,7 +226,7 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 		CFRelease(_ipv4Socket);
 		_ipv4Socket = NULL;
 	}
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	if(_ipv6Socket) {
 		CFSocketInvalidate(_ipv6Socket);
 		CFRelease(_ipv6Socket);
