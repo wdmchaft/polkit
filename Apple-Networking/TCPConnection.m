@@ -446,7 +446,7 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 - (void) _handleStreamEvent:(CFStreamEventType)type forStream:(CFTypeRef)stream
 {
 	NSData*				data;
-	CFStreamError		error;
+	CFErrorRef			error;
 	
 #if __DEBUG__
 	NSLog(@"[%p] %@ (%i) = %i", self, stream, (CFGetTypeID(stream) == CFReadStreamGetTypeID() ? CFReadStreamGetStatus((CFReadStreamRef)stream) : CFWriteStreamGetStatus((CFWriteStreamRef)stream)), type);
@@ -489,8 +489,10 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 		break;
 		
 		case kCFStreamEventErrorOccurred:
-		error = (CFGetTypeID(stream) == CFWriteStreamGetTypeID() ? CFWriteStreamGetError((CFWriteStreamRef)stream) : CFReadStreamGetError((CFReadStreamRef)stream));
-		REPORT_ERROR(@"Error (%i) occured in CF stream", (int)error.error);
+		error = (CFGetTypeID(stream) == CFWriteStreamGetTypeID() ? CFWriteStreamCopyError((CFWriteStreamRef)stream) : CFReadStreamCopyError((CFReadStreamRef)stream));
+		REPORT_ERROR(@"Error occured in CF stream: %@", error);
+		if(error)
+		CFRelease(error);
 		case kCFStreamEventEndEncountered:
 		[self invalidate];
 		break;

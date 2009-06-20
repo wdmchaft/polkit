@@ -114,7 +114,7 @@ NSString* HostGetUniqueID()
 		if((buffer = [uniqueID UTF8String])) {
 			bzero(md5, CC_MD5_DIGEST_LENGTH);
 			CC_MD5(buffer, strlen(buffer), md5);
-			uniqueID = [NSString stringWithFormat:@"%08X-%08X-%08X-%08X", *((unsigned int*)&md5[0]), *((unsigned int*)&md5[4]), *((unsigned int*)&md5[8]), *((unsigned int*)&md5[12])];
+			uniqueID = [[NSString alloc] initWithFormat:@"%08X-%08X-%08X-%08X", *((unsigned int*)&md5[0]), *((unsigned int*)&md5[4]), *((unsigned int*)&md5[8]), *((unsigned int*)&md5[12])];
 		}
 		else
 		uniqueID = nil;

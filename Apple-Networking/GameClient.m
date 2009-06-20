@@ -337,7 +337,7 @@ static void _DictionaryApplierFunction(const void* key, const void* value, void*
 		[_delegate gameClientDidUpdateOnlineServers:self];
 	}
 	else
-	REPORT_ERROR(@"Failed creating GamePeer from %@", service);
+	REPORT_ERROR(@"Failed creating GamePeer from %@", [(id)CFCopyDescription(service) autorelease]);
 }
 
 - (void) browser:(NetServiceBrowser*)server didRemoveService:(CFNetServiceRef)service
