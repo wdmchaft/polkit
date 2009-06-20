@@ -79,9 +79,9 @@ See TCPService.h for other methods.
 + (BOOL) useConnectionThreads; //Use a separate thread for each connection - NO by default
 + (Class) connectionClass; //Must be a subclass of "TCPServerConnection"
 
-@property(readonly) NSArray* allConnections;
+@property(nonatomic, readonly) NSArray* allConnections;
 
-@property(assign) id<TCPServerDelegate> delegate;
+@property(nonatomic, assign) id<TCPServerDelegate> delegate;
 @end
 
 /*
@@ -92,5 +92,5 @@ Subclass of TCPConnection used by TCPServer for its connections.
 @private
 	TCPServer*			_server; //Not retained
 }
-@property(readonly) TCPServer* server;
+@property(nonatomic, readonly) TCPServer* server;
 @end

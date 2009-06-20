@@ -64,6 +64,6 @@ extern NSString* _MakeServiceType(NSString* applicationProtocol, NSString* trans
 //CLASS INTERFACES:
 
 @interface TCPConnection ()
-@property(readonly) CFRunLoopRef CFRunLoop;
+@property(nonatomic, readonly) CFRunLoopRef CFRunLoop;
 - (void) _invalidate; //For subclasses
 @end

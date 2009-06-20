@@ -75,8 +75,8 @@ In both cases, use the "usingCell" parameter to know if reachability is achieved
 - (id) initWithIPv4Address:(UInt32)address; //The "address" is assumed to be in host-endian
 - (id) initWithHostName:(NSString*)name;
 
-@property(assign) id<NetReachabilityDelegate> delegate;
+@property(nonatomic, assign) id<NetReachabilityDelegate> delegate;
 
-@property(readonly, getter=isReachable) BOOL reachable;
-@property(readonly, getter=isUsingCell) BOOL usingCell; //Only valid if "isReachable" is YES
+@property(nonatomic, readonly, getter=isReachable) BOOL reachable;
+@property(nonatomic, readonly, getter=isUsingCell) BOOL usingCell; //Only valid if "isReachable" is YES
 @end

@@ -81,9 +81,9 @@ extern NSString* _ApplicationProtocolFromGameIdentifier(NSString* string);
 //CLASS INTERFACES:
 
 @interface GamePeer ()
-@property(assign) id<GamePeerDelegate> delegate;
-@property(readonly, getter=isService) BOOL service;
-@property(readonly) const struct sockaddr* socketAddress;
+@property(nonatomic, assign) id<GamePeerDelegate> delegate;
+@property(nonatomic, readonly, getter=isService) BOOL service;
+@property(nonatomic, readonly) const struct sockaddr* socketAddress;
 
 - (id) initWithCFNetService:(CFNetServiceRef)netService;
 - (id) initWithName:(NSString*)name address:(const struct sockaddr*)address;

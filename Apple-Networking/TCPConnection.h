@@ -94,19 +94,19 @@ The TCPConnection instance will use the current runloop at its time of creation.
 - (id) initWithCFNetService:(CFNetServiceRef)service timeOut:(NSTimeInterval)timeOut; //Pass a negative value if you don't want to attempt to resolve the CFNetService, or zero for an infinite timeout
 - (id) initWithServiceDomain:(NSString*)domain type:(NSString*)type name:(NSString*)name timeOut:(NSTimeInterval)timeOut; //Pass a negative value if you don't want to attempt to resolve the CFNetService, or zero for an infinite timeout
 
-@property(assign) id<TCPConnectionDelegate> delegate;
+@property(nonatomic, assign) id<TCPConnectionDelegate> delegate;
 
-@property(readonly, getter=isValid) BOOL valid;
+@property(nonatomic, readonly, getter=isValid) BOOL valid;
 - (void) invalidate; //Close the connection
 
-@property(readonly) UInt16 localPort;
-@property(readonly) UInt32 localIPv4Address; //The returned address is in host-endian
-@property(readonly) NSString* localAddress;
-@property(readonly) UInt16 remotePort;
-@property(readonly) UInt32 remoteIPv4Address; //The returned address is in host-endian
-@property(readonly) NSString* remoteAddress;
+@property(nonatomic, readonly) UInt16 localPort;
+@property(nonatomic, readonly) UInt32 localIPv4Address; //The returned address is in host-endian
+@property(nonatomic, readonly) NSString* localAddress;
+@property(nonatomic, readonly) UInt16 remotePort;
+@property(nonatomic, readonly) UInt32 remoteIPv4Address; //The returned address is in host-endian
+@property(nonatomic, readonly) NSString* remoteAddress;
 
-@property(readonly) const struct sockaddr* remoteSocketAddress;
+@property(nonatomic, readonly) const struct sockaddr* remoteSocketAddress;
 
 - (BOOL) sendData:(NSData*)data; //Blocking - Must be called from same thread the connection was created on
 - (BOOL) hasDataAvailable; //Non-blocking - Must be called from same thread the connection was created on

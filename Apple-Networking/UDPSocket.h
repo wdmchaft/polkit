@@ -84,17 +84,17 @@ You can also enable Bonjour advertising for the listening UDP port.
 }
 - (id) initWithPort:(UInt16)port; //Pass 0 to have a port automatically be chosen
 
-@property(assign) id<UDPSocketDelegate> delegate;
+@property(nonatomic, assign) id<UDPSocketDelegate> delegate;
 
-@property(readonly, getter=isValid) BOOL valid;
+@property(nonatomic, readonly, getter=isValid) BOOL valid;
 - (void) invalidate; //Close the connection
 
-@property(readonly) UInt16 localPort;
-@property(readonly) UInt32 localIPv4Address; //The returned address is in host-endian
-@property(readonly) NSString* localAddress;
+@property(nonatomic, readonly) UInt16 localPort;
+@property(nonatomic, readonly) UInt32 localIPv4Address; //The returned address is in host-endian
+@property(nonatomic, readonly) NSString* localAddress;
 
 - (BOOL) enableBonjourWithDomain:(NSString*)domain applicationProtocol:(NSString*)protocol name:(NSString*)name; //Pass "nil" for the default local domain - Pass only the application protocol for "protocol" e.g. "myApp"
-@property(readonly, getter=isBonjourEnabled) BOOL bonjourEnabled;
+@property(nonatomic, readonly, getter=isBonjourEnabled) BOOL bonjourEnabled;
 - (void) disableBonjour;
 
 - (BOOL) sendData:(NSData*)data toRemoteAddress:(const struct sockaddr*)address; //Blocking - Must be called from same thread the connection was created on

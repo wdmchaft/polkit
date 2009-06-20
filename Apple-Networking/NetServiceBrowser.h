@@ -84,9 +84,9 @@ This class wraps the CFNetServiceBrowser APIs from CFNetwork and allows to disco
 - (id) initTCPBrowserWithDomain:(NSString*)domain applicationProtocol:(NSString*)protocol; //Assumes a TCP transport protocol - Pass "nil" for the default local domain - Pass only the application protocol for "protocol" e.g. "myApp"
 - (id) initUDPBrowserWithDomain:(NSString*)domain applicationProtocol:(NSString*)protocol; //Assumes an UDP transport protocol - Pass "nil" for the default local domain - Pass only the application protocol for "protocol" e.g. "myApp"
 
-@property(assign) id<NetServiceBrowserDelegate> delegate;
+@property(nonatomic, assign) id<NetServiceBrowserDelegate> delegate;
 
 - (BOOL) startUsingRunLoop:(NSRunLoop*)runLoop;
-@property(readonly, getter=isRunning) BOOL running;
+@property(nonatomic, readonly, getter=isRunning) BOOL running;
 - (void) stop;
 @end

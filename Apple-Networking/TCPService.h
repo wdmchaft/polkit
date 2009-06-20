@@ -74,15 +74,15 @@ You can also enable Bonjour advertising for the listening TCP port.
 - (id) initWithPort:(UInt16)port; //Pass 0 to have a port automatically be chosen
 
 - (BOOL) startUsingRunLoop:(NSRunLoop*)runLoop;
-@property(readonly, getter=isRunning) BOOL running;
+@property(nonatomic, readonly, getter=isRunning) BOOL running;
 - (void) stop;
 
-@property(readonly) UInt16 localPort; //Only valid when running
-@property(readonly) UInt32 localIPv4Address; //Only valid when running - The returned address is in host-endian
-@property(readonly) NSString* localAddress; //Only valid when running
+@property(nonatomic, readonly) UInt16 localPort; //Only valid when running
+@property(nonatomic, readonly) UInt32 localIPv4Address; //Only valid when running - The returned address is in host-endian
+@property(nonatomic, readonly) NSString* localAddress; //Only valid when running
 
 - (BOOL) enableBonjourWithDomain:(NSString*)domain applicationProtocol:(NSString*)protocol name:(NSString*)name; //Pass "nil" for the default local domain - Pass only the application protocol for "protocol" e.g. "myApp"
-@property(readonly, getter=isBonjourEnabled) BOOL bonjourEnabled;
+@property(nonatomic, readonly, getter=isBonjourEnabled) BOOL bonjourEnabled;
 - (void) disableBonjour;
 
 - (void) handleNewConnectionWithSocket:(NSSocketNativeHandle)socket fromRemoteAddress:(const struct sockaddr*)address; //To be implemented by subclasses

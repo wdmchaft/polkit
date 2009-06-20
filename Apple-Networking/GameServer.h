@@ -85,17 +85,17 @@ The server can be registered for automatic discovery by GameClients on the local
 	BOOL						_advertising;
 }
 - (id) initWithName:(NSString*)name infoPlist:(id)plist port:(UInt16)port; //The "name" and "plist" can be "nil" - Pass 0 to have a port automatically be chosen
-@property(readonly) NSString* name;
-@property(readonly) id infoPlist;
-@property(readonly) UInt16 port;
+@property(nonatomic, readonly) NSString* name;
+@property(nonatomic, readonly) id infoPlist;
+@property(nonatomic, readonly) UInt16 port;
 
-@property(assign) id<GameServerDelegate> delegate;
+@property(nonatomic, assign) id<GameServerDelegate> delegate;
 
 - (BOOL) startAdvertisingToClientsWithIdentifier:(NSString*)identifier; //The "identifier" must be unique to your game
-@property(readonly, getter=isAdvertising) BOOL advertising;
+@property(nonatomic, readonly, getter=isAdvertising) BOOL advertising;
 - (void) stopAdvertisingToClients;
 
-@property(readonly) NSArray* connectedClients;
+@property(nonatomic, readonly) NSArray* connectedClients;
 - (void) disconnectFromClient:(GamePeer*)client;
 
 - (NSTimeInterval) measureRoundTripLatencyToClient:(GamePeer*)client; //Returns < 0.0 on error

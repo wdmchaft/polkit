@@ -87,18 +87,18 @@ Servers can be automatically found on the local network using Bonjour.
 + (GamePeer*) serverWithIPv4Address:(UInt32)address port:(UInt16)port; //The "address" is assumed to be in host-endian
 
 - (id) initWithName:(NSString*)name infoPlist:(id)plist; //The "name" and "plist" can be "nil"
-@property(readonly) NSString* name;
-@property(readonly) id infoPlist;
+@property(nonatomic, readonly) NSString* name;
+@property(nonatomic, readonly) id infoPlist;
 
-@property(assign) id<GameClientDelegate> delegate;
+@property(nonatomic, assign) id<GameClientDelegate> delegate;
 
 - (BOOL) startDiscoveringServersWithIdentifier:(NSString*)identifier; //The "identifier" must be unique to your game
-@property(readonly, getter=isDiscoveringServers) BOOL discoveringServers;
-@property(readonly) NSArray* onlineServers; //Returns nil when not discovering servers
+@property(nonatomic, readonly, getter=isDiscoveringServers) BOOL discoveringServers;
+@property(nonatomic, readonly) NSArray* onlineServers; //Returns nil when not discovering servers
 - (void) stopDiscoveringServers;
 
 - (BOOL) connectToServer:(GamePeer*)server;
-@property(readonly) NSArray* connectedServers;
+@property(nonatomic, readonly) NSArray* connectedServers;
 - (void) disconnectFromServer:(GamePeer*)server;
 
 - (NSTimeInterval) measureRoundTripLatencyToServer:(GamePeer*)server; //Returns < 0.0 on error

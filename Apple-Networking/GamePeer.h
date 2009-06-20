@@ -68,14 +68,14 @@ If you obtainted a GamePeer instance from a GameServer, then it represents a rem
 	id						_delegate;
 	BOOL					_disconnecting;
 }
-@property(readonly, getter=isServer) BOOL server;
-@property(readonly) NSString* uniqueID;
-@property(readonly) NSString* name;
-@property(readonly) UInt32 IPv4Address; //The returned address is in host-endian
-@property(readonly) NSString* address;
-@property(readonly, getter=isLocal) BOOL local; //Yes if on the same subnet as the host
+@property(nonatomic, readonly, getter=isServer) BOOL server;
+@property(nonatomic, readonly) NSString* uniqueID;
+@property(nonatomic, readonly) NSString* name;
+@property(nonatomic, readonly) UInt32 IPv4Address; //The returned address is in host-endian
+@property(nonatomic, readonly) NSString* address;
+@property(nonatomic, readonly, getter=isLocal) BOOL local; //Yes if on the same subnet as the host
 
-@property(readonly, getter=isConnecting) BOOL connecting;
-@property(readonly, getter=isConnected) BOOL connected;
-@property(readonly) id infoPlist; //Only valid if connected
+@property(nonatomic, readonly, getter=isConnecting) BOOL connecting;
+@property(nonatomic, readonly, getter=isConnected) BOOL connected;
+@property(nonatomic, readonly) id infoPlist; //Only valid if connected
 @end
