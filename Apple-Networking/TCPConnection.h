@@ -41,10 +41,10 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 */
 
 #import <Foundation/Foundation.h>
-#if !TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-#import <CoreServices/CoreServices.h>
-#else
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 #import <CFNetwork/CFNetwork.h>
+#else
+#import <CoreServices/CoreServices.h>
 #endif
 #import <sys/socket.h>
 
