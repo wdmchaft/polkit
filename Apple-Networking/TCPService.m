@@ -42,10 +42,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import <unistd.h>
 #import <netinet/in.h>
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 #import <netinet6/in6.h>
-#endif
 #endif
 
 #import "TCPService.h"
@@ -98,11 +96,9 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
     CFSocketContext				socketCtxt = {0, self, NULL, NULL, NULL};
 	int							yes = 1;
 	struct sockaddr_in			addr4;
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	BOOL						enableIPv6 = NO;
 	struct sockaddr_in6			addr6;
-#endif
 #endif
 	CFRunLoopSourceRef			source;
 	socklen_t					length;
@@ -121,7 +117,6 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 	}
 	setsockopt(CFSocketGetNative(_ipv4Socket), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 	
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	if(enableIPv6) {
 		_ipv6Socket = CFSocketCreate(kCFAllocatorDefault, PF_INET6, SOCK_STREAM, IPPROTO_TCP, kCFSocketAcceptCallBack, (CFSocketCallBack)&_AcceptCallBack, &socketCtxt);
@@ -131,7 +126,6 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 		}
 		setsockopt(CFSocketGetNative(_ipv6Socket), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 	}
-#endif
 #endif
 	
 	bzero(&addr4, sizeof(addr4));
@@ -148,7 +142,6 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 	if(getsockname(CFSocketGetNative(_ipv4Socket), _localAddress, &length) < 0)
 	[NSException raise:NSInternalInconsistencyException format:@"Unable to retrieve socket address"];
 	
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	if(enableIPv6) {
 		bzero(&addr6, sizeof(addr6));
@@ -162,20 +155,17 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 		}
 	}
 #endif
-#endif
 	
 	source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _ipv4Socket, 0);
 	CFRunLoopAddSource(_runLoop, source, kCFRunLoopCommonModes);
 	CFRelease(source);
 	
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	if(enableIPv6) {
 		source = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _ipv6Socket, 0);
 		CFRunLoopAddSource(_runLoop, source, kCFRunLoopCommonModes);
 		CFRelease(source);
 	}
-#endif
 #endif
 	
 	_running = YES;
@@ -236,14 +226,12 @@ static void _AcceptCallBack(CFSocketRef socket, CFSocketCallBackType type, CFDat
 		CFRelease(_ipv4Socket);
 		_ipv4Socket = NULL;
 	}
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	if(_ipv6Socket) {
 		CFSocketInvalidate(_ipv6Socket);
 		CFRelease(_ipv6Socket);
 		_ipv6Socket = NULL;
 	}
-#endif
 #endif
 	if(_runLoop) {
 		CFRelease(_runLoop);

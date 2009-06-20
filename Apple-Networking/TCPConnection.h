@@ -85,10 +85,8 @@ The TCPConnection instance will use the current runloop at its time of creation.
 - (id) initWithSocketHandle:(int)socket; //Acquires ownership of the socket
 - (id) initWithRemoteAddress:(const struct sockaddr*)address;
 - (id) initWithRemoteIPv4Address:(UInt32)address port:(UInt16)port; //The "address" is assumed to be in host-endian
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 - (id) initWithRemoteIPv6Address:(const struct in6_addr*)address port:(UInt16)port;
-#endif
 #endif
 - (id) initWithRemoteHostName:(NSString*)name port:(UInt16)port;
 - (id) initWithCFNetService:(CFNetServiceRef)service timeOut:(NSTimeInterval)timeOut; //Pass a negative value if you don't want to attempt to resolve the CFNetService, or zero for an infinite timeout

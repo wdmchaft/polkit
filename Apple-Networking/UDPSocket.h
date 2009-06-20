@@ -99,10 +99,8 @@ You can also enable Bonjour advertising for the listening UDP port.
 
 - (BOOL) sendData:(NSData*)data toRemoteAddress:(const struct sockaddr*)address; //Blocking - Must be called from same thread the connection was created on
 - (BOOL) sendData:(NSData*)data toRemoteIPv4Address:(UInt32)address port:(UInt16)port; //Blocking - Must be called from same thread the connection was created on - The "address" is assumed to be in host-endian
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 - (BOOL) sendData:(NSData*)data toRemoteIPv6Address:(const struct in6_addr*)address port:(UInt16)port; //Blocking - Must be called from same thread the connection was created on
-#endif
 #endif
 @end
 

@@ -42,10 +42,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import <unistd.h>
 #import <netinet/in.h>
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 #import <netinet6/in6.h>
-#endif
 #endif
 
 #import "TCPConnection.h"
@@ -170,7 +168,6 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	return [self initWithRemoteAddress:(struct sockaddr*)&ipAddress];
 }
 
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 
 - (id) initWithRemoteIPv6Address:(const struct in6_addr*)address port:(UInt16)port
@@ -186,7 +183,6 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	return [self initWithRemoteAddress:(struct sockaddr*)&ipAddress];
 }
 
-#endif
 #endif
 
 - (id) initWithRemoteHostName:(NSString*)name port:(UInt16)port
@@ -452,10 +448,8 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	NSData*				data;
 	CFStreamError		error;
 	
-#ifndef __CODEX__
 #if __DEBUG__
 	NSLog(@"[%p] %@ (%i) = %i", self, stream, (CFGetTypeID(stream) == CFReadStreamGetTypeID() ? CFReadStreamGetStatus((CFReadStreamRef)stream) : CFWriteStreamGetStatus((CFWriteStreamRef)stream)), type);
-#endif
 #endif
 	
 	switch(type) {
@@ -567,10 +561,8 @@ static void _WriteClientCallBack(CFWriteStreamRef stream, CFStreamEventType type
 	if(_remoteAddress)
 	switch(_remoteAddress->sa_family) {
 		case AF_INET: return ntohs(((struct sockaddr_in*)_remoteAddress)->sin_port);
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 		case AF_INET6: return ntohs(((struct sockaddr_in6*)_remoteAddress)->sin6_port);
-#endif
 #endif
 	}
 	

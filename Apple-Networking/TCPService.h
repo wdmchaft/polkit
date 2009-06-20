@@ -62,10 +62,8 @@ You can also enable Bonjour advertising for the listening TCP port.
 	
 	CFRunLoopRef		_runLoop;
 	CFSocketRef			_ipv4Socket;
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 	CFSocketRef			_ipv6Socket;
-#endif
 #endif
 	CFNetServiceRef		_netService;
 	BOOL				_running;

@@ -42,10 +42,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import <unistd.h>
 #import <netinet/in.h>
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 #import <netinet6/in6.h>
-#endif
 #endif
 
 #import "UDPSocket.h"
@@ -232,7 +230,6 @@ static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef 
 	}
 }
 
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 
 /*
@@ -250,7 +247,6 @@ static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef 
 }
 */
 
-#endif
 #endif
 
 - (BOOL) isValid
@@ -286,10 +282,8 @@ static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef 
 	if(_localAddress)
 	switch(_localAddress->sa_family) {
 		case AF_INET: return ntohs(((struct sockaddr_in*)_localAddress)->sin_port);
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 		case AF_INET6: return ntohs(((struct sockaddr_in6*)_localAddress)->sin6_port);
-#endif
 #endif
 	}
 	
@@ -324,7 +318,6 @@ static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef 
 	return [self sendData:data toRemoteAddress:(struct sockaddr*)&ipAddress];
 }
 
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 
 - (BOOL) sendData:(NSData*)data toRemoteIPv6Address:(const struct in6_addr*)address port:(UInt16)port
@@ -340,7 +333,6 @@ static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef 
 	return [self sendData:data toRemoteAddress:(struct sockaddr*)&ipAddress];
 }
 
-#endif
 #endif
 
 - (NSString*) description

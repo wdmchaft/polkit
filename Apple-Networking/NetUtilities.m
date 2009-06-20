@@ -44,12 +44,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 #import <ifaddrs.h>
 #import <netdb.h>
 #import <netinet/in.h>
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 #import <netinet6/in6.h>
-#endif
-#endif
-#if !TARGET_OS_IPHONE
 #import <IOKit/IOKitLib.h>
 #import <IOKit/network/IOEthernetInterface.h>
 #import <IOKit/network/IONetworkInterface.h>
@@ -161,14 +157,10 @@ const struct sockaddr* IPAddressGetCurrent()
 		if((ifap->ifa_name[0] == 'l') && (ifap->ifa_name[1] == 'o')) //Ignore loopback
 		continue;
 		
-#ifndef __CODEX__
 #if TARGET_OS_IPHONE
 		if(ifap->ifa_addr->sa_family == AF_INET)
 #else
 		if((ifap->ifa_addr->sa_family == AF_INET) || (ifap->ifa_addr->sa_family == AF_INET6))
-#endif
-#else
-		if(ifap->ifa_addr->sa_family == AF_INET)
 #endif
 		{
 			data = [NSData dataWithBytes:ifap->ifa_addr length:ifap->ifa_addr->sa_len];
@@ -181,9 +173,7 @@ const struct sockaddr* IPAddressGetCurrent()
 	return [data bytes];
 }
 
-#ifndef __CODEX__
 //FIXME: Handle IPv6 addresses
-#endif
 BOOL IPAddressIsLocal(const struct sockaddr* address)
 {
 	BOOL							local = NO;
@@ -259,12 +249,10 @@ const struct sockaddr* IPAddressFromString(NSString* string)
 				((struct sockaddr_in*)info->ai_addr)->sin_port = port;
 				break;
 				
-#ifndef __CODEX__
 #if !TARGET_OS_IPHONE
 				case AF_INET6:
 				((struct sockaddr_in6*)info->ai_addr)->sin6_port = port;
 				break;
-#endif
 #endif
 				
 				default:
