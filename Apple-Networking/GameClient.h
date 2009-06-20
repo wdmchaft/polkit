@@ -98,6 +98,7 @@ Servers can be automatically found on the local network using Bonjour.
 - (void) stopDiscoveringServers;
 
 - (BOOL) connectToServer:(GamePeer*)server;
+@property(nonatomic, readonly) NSArray* connectingServers;
 @property(nonatomic, readonly) NSArray* connectedServers;
 - (void) disconnectFromServer:(GamePeer*)server;
 

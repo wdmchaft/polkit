@@ -104,6 +104,11 @@ static void _DictionaryApplierFunction(const void* key, const void* value, void*
 	return [[[GamePeer alloc] initWithName:nil address:(struct sockaddr*)&ipAddress] autorelease];
 }
 
+- (NSArray*) connectingServers
+{
+	return [_connectingServers allObjects];
+}
+
 - (NSArray*) connectedServers
 {
 	return [_connectedServers allObjects];
