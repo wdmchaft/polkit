@@ -1058,7 +1058,7 @@ static NSMutableDictionary* _CompareDirectories(CFDictionaryRef newDirectories, 
 	DirectoryItemData*				newRoot;
 	DirectoryItem*					info;
 	
-	dirPath = [[_rootDirectory stringByStandardizingPath] UTF8String];
+	dirPath = [[[_rootDirectory stringByStandardizingPath] stringByResolvingSymlinksInPath] UTF8String];
 	if((lstat(dirPath, &stats) != 0) || !S_ISDIR(stats.st_mode))
 	return nil;
 	
