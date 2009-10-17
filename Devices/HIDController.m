@@ -138,9 +138,9 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 					}
 					else
 					[deviceList setObject:info forKey:string];
-					[info release];
 				}
 				
+				[info release];
 				CFRelease(dictionary);
 			}
 			

@@ -64,6 +64,8 @@ static NSString* _GetPrimaryMACAddress()
 			}
 			CFRelease(propertyMatchingDictionary);
 		}
+		else
+		CFRelease(matchingDictionary);
 	}
 	
 	return string;

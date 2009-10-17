@@ -233,7 +233,7 @@
 	if(object == nil)
 	[NSException raise:NSInternalInconsistencyException format:@"%s: Failed creating object: %@", __FUNCTION__, string];
 	
-	return object;
+	return [object autorelease];
 }
 
 - (NSString*) decodeString
