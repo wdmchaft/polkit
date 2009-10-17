@@ -30,8 +30,8 @@
 - (void) _killTimer:(NSTimer*)timer
 {
 	if(!_delegate || [_delegate shouldAbortTask:self]) {
-		[[timer userInfo] terminate];
-		[[timer userInfo] interrupt];
+		[(NSTask*)[timer userInfo] terminate];
+		[(NSTask*)[timer userInfo] interrupt];
 	}
 }
 
