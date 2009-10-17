@@ -123,9 +123,11 @@
 	AssertNil(mountPoint, nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:YES];
 	AssertNotNil(mountPoint, nil);
-	AssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
-	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	sleep(1);
+	if(mountPoint) {
+		AssertTrue([[manager contentsOfDirectoryAtPath:mountPoint error:NULL] count] >= [[manager contentsOfDirectoryAtPath:sourcePath error:NULL] count], nil);
+		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+		sleep(1);
+	}
 	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
@@ -135,9 +137,11 @@
 	AssertTrue([controller makeDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:NO];
 	AssertNotNil(mountPoint, nil);
-	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	sleep(1);
+	if(mountPoint) {
+		AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+		sleep(1);
+	}
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertTrue([controller makeCompressedDiskImageAtPath:imagePath2 withDiskImage:imagePath password:nil], nil);
 	AssertTrue([manager removeItemAtPath:imagePath2 error:&error], [error localizedDescription]);
@@ -148,9 +152,11 @@
 	AssertTrue([controller makeSparseDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
 	AssertNotNil(mountPoint, nil);
-	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	sleep(1);
+	if(mountPoint) {
+		AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+		sleep(1);
+	}
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
 	
@@ -159,9 +165,11 @@
 	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:NO];
 	AssertNotNil(mountPoint, nil);
-	AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
-	AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
-	sleep(1);
+	if(mountPoint) {
+		AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
+		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
+		sleep(1);
+	}
 	AssertNil([controller infoForDiskImageAtPath:imagePath password:nil], nil);
 	AssertNotNil([controller infoForDiskImageAtPath:imagePath password:kPassword], nil);
 	AssertTrue([manager removeItemAtPath:imagePath error:&error], [error localizedDescription]);
