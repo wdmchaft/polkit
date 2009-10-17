@@ -59,7 +59,7 @@
 	AssertNotNil(configuration, nil);
 	
 	AssertNotNil([configuration locationName], nil);
-	AssertNotNil([configuration dnsDomainName], nil);
+	//AssertNotNil([configuration dnsDomainName], nil);
 	AssertNotEquals([[configuration dnsServerAddresses] count], 0, nil);
 	AssertNotEquals([[configuration networkAddresses] count], 0, nil);
 	AssertNotNil([configuration airportNetworkName], nil);
