@@ -46,6 +46,9 @@
 			AssertTrue([controller primaryUsagePage], nil);
 			AssertTrue([controller primaryUsage], nil);
 			AssertNotNil([controller devicePath], nil);
+			
+			[controller setEnabled:YES];
+			AssertTrue([controller isEnabled], nil);
 			AssertTrue([controller isConnected], nil);
 			AssertNotNil([controller info], nil);
 			AssertNotNil([controller allElements], nil);
