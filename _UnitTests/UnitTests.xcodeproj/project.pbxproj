@@ -120,6 +120,7 @@
 		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
 		727A64500F4BA75700CBC567 /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
+		B4894B6B108A3B10001C5F2D /* Base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = "../Xcode-Configurations/Base.xcconfig"; sourceTree = SOURCE_ROOT; };
 		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		E225A36A0F449ADD00023F66 /* NetworkConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkConfiguration.h; sourceTree = "<group>"; };
 		E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkConfiguration.m; sourceTree = "<group>"; };
@@ -285,6 +286,7 @@
 		E24D28440E9295B000E298A9 = {
 			isa = PBXGroup;
 			children = (
+				B4894B6B108A3B10001C5F2D /* Base.xcconfig */,
 				E24D287C0E92977600E298A9 /* Debug.xcconfig */,
 				E24D287B0E92977600E298A9 /* Release.xcconfig */,
 				E24D294A0E92996000E298A9 /* Prefix.pch */,
