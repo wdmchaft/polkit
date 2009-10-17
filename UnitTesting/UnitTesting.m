@@ -28,6 +28,21 @@
 
 static BOOL					_abortOnFailure = NO;
 
+NSString* UnitTest_MakeFormatString(NSString* format, ...)
+{
+	NSString* description;
+	if(format) {
+		va_list list;
+		va_start(list, format);
+		description = [[[NSString alloc] initWithFormat:format arguments:list] autorelease];
+		va_end(list);
+	}
+	else
+	description = nil;
+	
+	return description;
+}
+
 @implementation UnitTest
 
 @synthesize numberOfSuccesses=_successes, numberOfFailures=_failures;
