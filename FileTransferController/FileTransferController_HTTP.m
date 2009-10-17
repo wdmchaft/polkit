@@ -642,7 +642,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 				}
 				if([dictionary count] != 3) {
 					if(error)
-					*error = MAKE_ERROR(@"s3", -1, (string ? string : @"Incomplete response"));
+					*error = MAKE_ERROR(@"s3", -1, (string ? @"%@" : @"Incomplete response"), string);
 					dictionary = nil;
 				}
 			}
@@ -658,7 +658,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 						string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
 					}
 				}
-				*error = MAKE_ERROR(@"s3", -1, (string ? string : @"Invalid response"));
+				*error = MAKE_ERROR(@"s3", -1, (string ? @"%@" : @"Invalid response"), string);
 			}
 			[document release];
 		}

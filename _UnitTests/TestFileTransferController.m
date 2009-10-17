@@ -18,7 +18,6 @@
 
 #import "UnitTesting.h"
 #import "FileTransferController.h"
-#import "Keychain.h"
 #import "NSURL+Parameters.h"
 
 #define kTimeOut				30.0
@@ -28,36 +27,17 @@
 
 @implementation UnitTests_FileTransferController
 
-- (NSArray*) _testURLsForProtocol:(NSString*)protocol
+- (NSURL*) _testURLForProtocol:(NSString*)protocol
 {
-	static NSMutableDictionary*	servers = nil;
 	NSString*					string;
-	NSArray*					components;
-	NSMutableArray*				array;
+	NSURL*						url;
 	
-	if(servers == nil) {
-		servers = [NSMutableDictionary new];
-		
-		string = [[Keychain sharedKeychain] genericPasswordForService:@"PolKit" account:@"TestURLs"];
-		for(string in [string componentsSeparatedByString:@"\n"]) {
-			components = [string componentsSeparatedByString:@" "];
-			if([components count] == 2) {
-				array = [servers objectForKey:[components objectAtIndex:0]];
-				if(array == nil) {
-					array = [NSMutableArray new];
-					[servers setObject:array forKey:[components objectAtIndex:0]];
-					[array release];
-				}
-				[array addObject:[NSURL URLWithString:[components objectAtIndex:1]]];
-			}
-		}
-	}
+	string = [[[NSProcessInfo processInfo] environment] objectForKey:protocol];
+	url = string ? [NSURL URLWithString:string] : nil;
+	if(url == nil)
+	[self logMessage:@"WARNING: No test server for \"%@\" protocol, please define corresponding environment variable", protocol];
 	
-	array = [servers objectForKey:protocol];
-	if(array == nil)
-	[self logMessage:@"WARNING: No test server for \"%@\" protocol", protocol];
-	
-	return array;
+	return url;
 }
 
 - (void) fileTransferControllerDidFail:(FileTransferController*)controller withError:(NSError*)error
@@ -323,7 +303,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"AFP"])
+	if((url = [self _testURLForProtocol:@"AFP"]))
 	[self _testURL:url flag:NO];
 }
 
@@ -331,7 +311,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"SMB"])
+	if((url = [self _testURLForProtocol:@"SMB"]))
 	[self _testURL:url flag:NO];
 }
 
@@ -339,7 +319,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"SFTP"])
+	if((url = [self _testURLForProtocol:@"SFTP"]))
 	[self _testURL:url flag:NO];
 }
 
@@ -347,7 +327,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"FTP"]) {
+	if((url = [self _testURLForProtocol:@"FTP"])) {
 		[self _testURL:url flag:NO];
 		[self _testURL:url flag:YES];
 	}
@@ -357,7 +337,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"FTPS"]) {
+	if((url = [self _testURLForProtocol:@"FTPS"])) {
 		[self _testURL:url flag:NO];
 		[self _testURL:url flag:YES];
 	}
@@ -367,7 +347,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"iDisk"])
+	if((url = [self _testURLForProtocol:@"iDisk"]))
 	[self _testURL:url flag:NO];
 }
 
@@ -375,7 +355,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"WebDAV"])
+	if((url = [self _testURLForProtocol:@"WebDAV"]))
 	[self _testURL:url flag:NO];
 }
 
@@ -383,7 +363,7 @@ Exit:
 {
 	NSURL*						url;
 	
-	for(url in [self _testURLsForProtocol:@"SecureWebDAV"])
+	if((url = [self _testURLForProtocol:@"SecureWebDAV"]))
 	[self _testURL:url flag:YES];
 }
 
@@ -394,8 +374,9 @@ Exit:
 	NSURL*						url;
 	NSString*					name;
 	
-	for(url in [self _testURLsForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")]) {
+	if((url = [self _testURLForProtocol:(secure ? @"SecureAmazonS3" : @"AmazonS3")])) {
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithAccessKeyID:[url user] secretAccessKey:[url passwordByReplacingPercentEscapes] bucket:nil];
+		AssertNotNil(controller, nil);
 		[controller setDelegate:self];
 		[controller setTimeOut:kTimeOut];
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
@@ -426,6 +407,7 @@ Exit:
 		[controller release];
 		
 		controller = [[(secure ? [SecureAmazonS3TransferController class] : [AmazonS3TransferController class]) alloc] initWithBaseURL:url];
+		AssertNotNil(controller, nil);
 		[controller setDelegate:self];
 		AssertNotNil([controller contentsOfDirectoryAtPath:nil], nil);
 		AssertTrue([controller uploadFileFromPath:imagePath toPath:@"Test.jpg"], nil);

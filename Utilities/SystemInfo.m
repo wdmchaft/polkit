@@ -92,6 +92,7 @@ static NSString* _GetPrimaryMACAddress()
 	NSDictionary*			plist;
 	uint32_t				value32;
 	uint64_t				value64;
+	NSString*				path;
 	
 	if((self = [super init])) {
 		_computerName = (NSString*)SCDynamicStoreCopyComputerName(NULL, NULL);
@@ -102,7 +103,13 @@ static NSString* _GetPrimaryMACAddress()
 		if(sysctlbyname("hw.model", &buffer, &length, NULL, 0) == 0) {
 			_modelType = [[NSString alloc] initWithBytes:buffer length:strlen(buffer) encoding:NSASCIIStringEncoding];
 			if(_modelType) {
-				plist = [NSPropertyListSerialization propertyListFromData:[NSData dataWithContentsOfFile:@"/System/Library/SystemProfiler/SPPlatformReporter.spreporter/Contents/Resources/SPMachineTypes.plist"] mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
+#if !defined(MAC_OS_X_VERSION_10_6) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+				if(kCFCoreFoundationVersionNumber < 500.0)
+				path = @"/System/Library/SystemProfiler/SPPlatformReporter.spreporter/Contents/Resources/SPMachineTypes.plist";
+				else
+#endif
+				path = @"/System/Library/CoreServices/Resources/SPMachineTypes.plist";
+				plist = [NSPropertyListSerialization propertyListFromData:[NSData dataWithContentsOfFile:path] mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
 				_modelName = [[plist objectForKey:_modelType] copy];
 			}
 			if(_modelName == nil)

@@ -151,7 +151,7 @@
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparseimage"];
 	AssertTrue([controller makeSparseDiskImageAtPath:imagePath withName:nil size:(10 * 1024) password:nil], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:nil private:NO verify:YES];
-	AssertNotNil(mountPoint, nil);
+	AssertNotNil(mountPoint, nil); //FIXME: This fails on 10.6.1 because of fsck (Radar 7312247)
 	if(mountPoint) {
 		AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
@@ -164,7 +164,7 @@
 	imagePath = [[imagePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sparsebundle"];
 	AssertTrue([controller makeSparseBundleDiskImageAtPath:imagePath withName:nil password:kPassword], nil);
 	mountPoint = [controller mountDiskImage:imagePath atPath:nil usingShadowFile:nil password:kPassword private:NO verify:NO];
-	AssertNotNil(mountPoint, nil);
+	AssertNotNil(mountPoint, nil); //FIXME: This fails on 10.6.1 because of fsck (Radar 7312247)
 	if(mountPoint) {
 		AssertTrue([manager copyItemAtPath:sourcePath toPath:[mountPoint stringByAppendingPathComponent:[sourcePath lastPathComponent]] error:&error], [error localizedDescription]);
 		AssertTrue([controller unmountDiskImageAtPath:mountPoint force:NO], nil);
