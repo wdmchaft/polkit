@@ -16,6 +16,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//FIXME: Disable SVN_DEPRECATED warnings when building on 10.6
+#if defined(MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+#define SVN_DEPRECATED
+#endif
+
 #import <svn_client.h>
 #import <svn_config.h>
 #import <svn_time.h>

@@ -18,11 +18,24 @@
 
 #import <Foundation/Foundation.h>
 
+static inline NSString* __MakeFormatString(NSString* format, ...)
+{
+	NSString* description;
+	if(format) {
+		va_list list;
+		va_start(list, format);
+		description = [[[NSString alloc] initWithFormat:format arguments:list] autorelease];
+		va_end(list);
+	}
+	else
+	description = nil;
+	
+	return description;
+}
+
 #define _LogAssertionFailureMessage(__MESSAGE__, __DESCRIPTION__, ...) \
 	do { \
-		NSString* _description = (__DESCRIPTION__); \
-		if(_description) \
-		_description = [NSString stringWithFormat:_description, ##__VA_ARGS__]; \
+		NSString* _description = __MakeFormatString(__DESCRIPTION__, ##__VA_ARGS__); \
 		[self logMessage:@"%s @ line %i\n%@\n%@", __FILE__, __LINE__, __MESSAGE__, _description]; \
 	} while(0)
 	
