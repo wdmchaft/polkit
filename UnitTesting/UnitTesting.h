@@ -54,7 +54,7 @@ do { \
 do { \
     __typeof__(__VALUE1__) _value1 = (__VALUE1__); \
 	__typeof__(__VALUE2__) _value2 = (__VALUE2__); \
-	if((@encode(__typeof__(__VALUE1__)) != @encode(__typeof__(__VALUE2__))) || (_value1 != _value2)) { \
+	if(strcmp(@encode(__typeof__(_value1)), @encode(__typeof__(_value2))) || (_value1 != _value2)) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
 		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
@@ -67,7 +67,7 @@ do { \
 do { \
     __typeof__(__VALUE1__) _value1 = (__VALUE1__); \
 	__typeof__(__VALUE2__) _value2 = (__VALUE2__); \
-	if((@encode(__typeof__(__VALUE1__)) == @encode(__typeof__(__VALUE2__))) && (_value1 == _value2)) { \
+	if(!strcmp(@encode(__typeof__(_value1)), @encode(__typeof__(_value2))) && (_value1 == _value2)) { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) != (%@))", [NSString stringWithUTF8String: #__VALUE1__], [NSString stringWithUTF8String: #__VALUE2__]]; \
 		_LogAssertionFailureMessage(_message, __DESCRIPTION__, ##__VA_ARGS__); \
 		[self reportResult:NO]; \
@@ -104,7 +104,7 @@ do { \
 do { \
     id _object1 = (__OBJECT1__); \
 	id _object2 = (__OBJECT2__); \
-	if((_object1 == _object2) || ((@encode(__typeof__(_object1)) == @encode(id)) && (@encode(__typeof__(_object2)) == @encode(id)) && [(id)_object1 isEqual:(id)_object2])) \
+	if((_object1 == _object2) || (!strcmp(@encode(__typeof__(_object1)), @encode(id)) && !strcmp(@encode(__typeof__(_object2)), @encode(id)) && [(id)_object1 isEqual:(id)_object2])) \
 	[self reportResult:YES]; \
 	else { \
 		NSString* _message = [NSString stringWithFormat:@"((%@) == (%@))", [NSString stringWithUTF8String: #__OBJECT1__], [NSString stringWithUTF8String: #__OBJECT2__]]; \

@@ -44,6 +44,13 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 @property(nonatomic, readonly) CFHTTPMessageRef responseHeaders;
 @end
 
+/* Required for the compiler not to complain */
+@interface StreamTransferController (DataStreamSource)
+- (BOOL) openDataStream:(id)userInfo;
+- (NSInteger) readDataFromStream:(id)userInfo buffer:(void*)buffer maxLength:(NSUInteger)length;
+- (void) closeDataStream:(id)userInfo;
+@end
+
 @implementation HTTPTransferController
 
 @synthesize SSLCertificateValidationDisabled=_disableSSLCertificates, keepConnectionAlive=_keepAlive, responseHeaders=_responseHeaders;
@@ -218,7 +225,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 - (BOOL) openDataStream:(id)userInfo
 {
-	return ([userInfo isKindOfClass:[NSInputStream class]] ? [self openInputStream:userInfo isFileTransfer:YES] : [(id<DataStreamSource>)super openDataStream:userInfo]);
+	return ([userInfo isKindOfClass:[NSInputStream class]] ? [self openInputStream:userInfo isFileTransfer:YES] : [super openDataStream:userInfo]);
 }
 
 - (NSInteger) readDataFromStream:(id)userInfo buffer:(void*)buffer maxLength:(NSUInteger)length
@@ -226,7 +233,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	NSInteger				numBytes;
 	
 	if(![userInfo isKindOfClass:[NSInputStream class]])
-	return [(id<DataStreamSource>)super readDataFromStream:userInfo buffer:buffer maxLength:length];
+	return [super readDataFromStream:userInfo buffer:buffer maxLength:length];
 	
 	//HACK: The StreamTransferController runloop is not necessarily running during the body upload, so we need to check for abort directly
 	if(_hasShouldAbort && [[self delegate] fileTransferControllerShouldAbort:self])
@@ -244,7 +251,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if([userInfo isKindOfClass:[NSInputStream class]])
 	[self closeInputStream:userInfo];
 	else
-	[(id<DataStreamSource>)super closeDataStream:userInfo];
+	[super closeDataStream:userInfo];
 }
 
 - (BOOL) _uploadFileToPath:(NSString*)remotePath fromStream:(NSInputStream*)stream

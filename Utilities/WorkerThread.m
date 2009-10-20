@@ -17,6 +17,7 @@
 */
 
 #import <pthread.h>
+#import <objc/objc-runtime.h>
 
 #import "WorkerThread.h"
 
