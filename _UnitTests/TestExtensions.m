@@ -133,16 +133,26 @@
 	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
-	data2 = [data1 encryptBlowfishWithPassword:@"info@pol-online.net"];
+	data2 = [data1 encryptBlowfishWithPassword:@"info@pol-online.net" useSalt:NO];
 	AssertNotNil(data2, nil);
-	
-	//Generated with 'openssl bf-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.bf'
-	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.bf"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.bf"]; //Generated with 'openssl bf-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.bf'
 	AssertNotNil(data3, nil);
-	
 	AssertEqualObjects(data2, data3, nil);
+	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNil(data3, nil);
 	
-	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net"];
+	data2 = [NSData dataWithContentsOfFile:@"Resources/Image.bf-salted"]; //Generated with 'openssl bf-cbc -k "info@pol-online.net" -in Image.jpg -out Image.bf-salted'
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertNil(data3, nil);
+	
+	data2 = [data1 encryptBlowfishWithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptBlowfishWithPassword:@"info@pol-online.net" useSalt:YES];
 	AssertEqualObjects(data3, data1, nil);
 	
 	[data1 release];
@@ -157,16 +167,26 @@
 	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
-	data2 = [data1 encryptAES128WithPassword:@"info@pol-online.net"];
+	data2 = [data1 encryptAES128WithPassword:@"info@pol-online.net" useSalt:NO];
 	AssertNotNil(data2, nil);
-	
-	//Generated with 'openssl aes-128-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes128'
-	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes128"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes128"]; //Generated with 'openssl aes-128-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes128'
 	AssertNotNil(data3, nil);
-	
 	AssertEqualObjects(data2, data3, nil);
+	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNil(data3, nil);
 	
-	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net"];
+	data2 = [NSData dataWithContentsOfFile:@"Resources/Image.aes128-salted"]; //Generated with 'openssl aes-128-cbc -k "info@pol-online.net" -in Image.jpg -out Image.aes128-salted'
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertNil(data3, nil);
+	
+	data2 = [data1 encryptAES128WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptAES128WithPassword:@"info@pol-online.net" useSalt:YES];
 	AssertEqualObjects(data3, data1, nil);
 	
 	[data1 release];
@@ -181,16 +201,26 @@
 	data1 = [[NSData alloc] initWithContentsOfFile:@"Resources/Image.jpg"];
 	AssertNotNil(data1, nil);
 	
-	data2 = [data1 encryptAES256WithPassword:@"info@pol-online.net"];
+	data2 = [data1 encryptAES256WithPassword:@"info@pol-online.net" useSalt:NO];
 	AssertNotNil(data2, nil);
-	
-	//Generated with 'openssl aes-256-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes256'
-	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes256"];
+	data3 = [NSData dataWithContentsOfFile:@"Resources/Image.aes256"]; //Generated with 'openssl aes-256-cbc -k "info@pol-online.net" -nosalt -in Image.jpg -out Image.aes256'
 	AssertNotNil(data3, nil);
-	
 	AssertEqualObjects(data2, data3, nil);
+	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNil(data3, nil);
 	
-	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net"];
+	data2 = [NSData dataWithContentsOfFile:@"Resources/Image.aes256-salted"]; //Generated with 'openssl aes-256-cbc -k "info@pol-online.net" -in Image.jpg -out Image.aes256-salted'
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertEqualObjects(data3, data1, nil);
+	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net" useSalt:NO];
+	AssertNil(data3, nil);
+	
+	data2 = [data1 encryptAES256WithPassword:@"info@pol-online.net" useSalt:YES];
+	AssertNotNil(data2, nil);
+	data3 = [data2 decryptAES256WithPassword:@"info@pol-online.net" useSalt:YES];
 	AssertEqualObjects(data3, data1, nil);
 	
 	[data1 release];

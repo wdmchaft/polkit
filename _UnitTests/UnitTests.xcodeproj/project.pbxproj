@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		727A64510F4BA75700CBC567 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 727A64500F4BA75700CBC567 /* libcurl.dylib */; };
+		E20030EA109771A700FFB451 /* Image.bf-salted in CopyFiles */ = {isa = PBXBuildFile; fileRef = E20030DE109770CF00FFB451 /* Image.bf-salted */; };
+		E20030EB109771A700FFB451 /* Image.aes128-salted in CopyFiles */ = {isa = PBXBuildFile; fileRef = E20030DD109770CF00FFB451 /* Image.aes128-salted */; };
+		E20030EC109771A700FFB451 /* Image.aes256-salted in CopyFiles */ = {isa = PBXBuildFile; fileRef = E20030DC109770CF00FFB451 /* Image.aes256-salted */; };
 		E20048ED0F3D64470025B23C /* TestDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2E430E95E6F600E298A9 /* TestDevices.m */; };
 		E20048EE0F3D64470025B23C /* TestExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2BE90E948BE100E298A9 /* TestExtensions.m */; };
 		E20048EF0F3D64480025B23C /* TestFileSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = E24D2F480E95EEB100E298A9 /* TestFileSystem.m */; };
@@ -106,8 +109,11 @@
 				E2004A6C0F3D64C00025B23C /* Image.sha1 in CopyFiles */,
 				E2004A6D0F3D64C00025B23C /* Image.hmac-sha1 in CopyFiles */,
 				E2004A6E0F3D64C00025B23C /* Image.bf in CopyFiles */,
+				E20030EA109771A700FFB451 /* Image.bf-salted in CopyFiles */,
 				E2004A6F0F3D64C00025B23C /* Image.aes128 in CopyFiles */,
+				E20030EB109771A700FFB451 /* Image.aes128-salted in CopyFiles */,
 				E2004A700F3D64C00025B23C /* Image.aes256 in CopyFiles */,
+				E20030EC109771A700FFB451 /* Image.aes256-salted in CopyFiles */,
 				E2004A710F3D64C00025B23C /* Volume.dmg in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -121,6 +127,9 @@
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
 		727A64500F4BA75700CBC567 /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
 		B4894B6B108A3B10001C5F2D /* Base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = "../Xcode-Configurations/Base.xcconfig"; sourceTree = SOURCE_ROOT; };
+		E20030DC109770CF00FFB451 /* Image.aes256-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.aes256-salted"; sourceTree = "<group>"; };
+		E20030DD109770CF00FFB451 /* Image.aes128-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.aes128-salted"; sourceTree = "<group>"; };
+		E20030DE109770CF00FFB451 /* Image.bf-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.bf-salted"; sourceTree = "<group>"; };
 		E20048E80F3D641A0025B23C /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		E225A36A0F449ADD00023F66 /* NetworkConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkConfiguration.h; sourceTree = "<group>"; };
 		E225A36B0F449ADD00023F66 /* NetworkConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkConfiguration.m; sourceTree = "<group>"; };
@@ -392,8 +401,11 @@
 				E2E7AF130F1032280057A9A5 /* Image.sha1 */,
 				E284E81C0F0FB34C0054C122 /* Image.hmac-sha1 */,
 				E284E9270F0FCA580054C122 /* Image.bf */,
+				E20030DE109770CF00FFB451 /* Image.bf-salted */,
 				E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */,
+				E20030DD109770CF00FFB451 /* Image.aes128-salted */,
 				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
+				E20030DC109770CF00FFB451 /* Image.aes256-salted */,
 				E2C085410F3847C80058019D /* Volume.dmg */,
 			);
 			name = _UnitTests;

@@ -31,17 +31,17 @@
 /* Equivalent to 'openssl sha1 -hmac KEY IN_FILE' */
 - (NSData*) sha1HMacWithKey:(NSString*)key;
 
-/* Equivalent to 'openssl bf-cbc -e/-d -k PASSWORD -nosalt -in IN_FILE -out OUT_FILE' */
-- (NSData*) encryptBlowfishWithPassword:(NSString*)password;
-- (NSData*) decryptBlowfishWithPassword:(NSString*)password;
+/* Equivalent to 'openssl bf-cbc -e/-d -k PASSWORD [-nosalt] -in IN_FILE -out OUT_FILE' */
+- (NSData*) encryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag;
+- (NSData*) decryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag;
 
-/* Equivalent to 'openssl aes-128-cbc -e/-d -k PASSWORD -nosalt -in IN_FILE -out OUT_FILE' */
-- (NSData*) encryptAES128WithPassword:(NSString*)password;
-- (NSData*) decryptAES128WithPassword:(NSString*)password;
+/* Equivalent to 'openssl aes-128-cbc -e/-d -k PASSWORD [-nosalt] -in IN_FILE -out OUT_FILE' */
+- (NSData*) encryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag;
+- (NSData*) decryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag;
 
-/* Equivalent to 'openssl aes-256-cbc -e/-d -k PASSWORD -nosalt -in IN_FILE -out OUT_FILE' */
-- (NSData*) encryptAES256WithPassword:(NSString*)password;
-- (NSData*) decryptAES256WithPassword:(NSString*)password;
+/* Equivalent to 'openssl aes-256-cbc -e/-d -k PASSWORD [-nosalt] -in IN_FILE -out OUT_FILE' */
+- (NSData*) encryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag;
+- (NSData*) decryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag;
 
 /* Equivalent to 'openssl base64 -e -in IN_FILE -out OUT_FILE' */
 - (NSString*) encodeBase64;

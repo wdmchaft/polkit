@@ -18,11 +18,13 @@
 
 #import <openssl/hmac.h>
 #import <openssl/evp.h>
+#import <openssl/rand.h>
 #import <pthread.h>
 
 #define kBufferSize				1024
 
 static pthread_mutex_t*			_opensslLocks = NULL;
+static const char				_magic[]="Salted__";
 
 static unsigned long _opensslThreadID()
 {
@@ -148,7 +150,8 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	return [string autorelease];
 }
 
-- (NSData*) _createEncryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData
+/* See apps/enc.c from OpenSSL source */
+- (NSData*) _createEncryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
 {
 	int							inLength = [self length],
 								outLength;
@@ -157,14 +160,22 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	unsigned char				keyBuffer[EVP_MAX_KEY_LENGTH];
 	unsigned char				ivBuffer[EVP_MAX_IV_LENGTH];
 	NSMutableData*				data;
+	unsigned char				salt[PKCS5_SALT_LEN];
 	
-	if(EVP_BytesToKey(cipher, EVP_md5(), NULL, [passwordData bytes], [passwordData length], 1, keyBuffer, ivBuffer) == 0)
+	if(salted && !RAND_pseudo_bytes(salt, PKCS5_SALT_LEN))
+	return nil;
+	
+	if(EVP_BytesToKey(cipher, EVP_md5(), salted ? salt : NULL, [passwordData bytes], [passwordData length], 1, keyBuffer, ivBuffer) == 0)
 	return nil;
 	
 	EVP_CIPHER_CTX_init(&context);
 	
 	if(EVP_EncryptInit(&context, cipher, keyBuffer, ivBuffer) == 1) {
-		data = [[NSMutableData alloc] initWithCapacity:([self length] + EVP_MAX_BLOCK_LENGTH)];
+		data = [[NSMutableData alloc] initWithCapacity:((salted ? sizeof(_magic) - 1 + PKCS5_SALT_LEN : 0) + [self length] + EVP_MAX_BLOCK_LENGTH)];
+		if(salted) {
+			[data appendBytes:_magic length:(sizeof(_magic) - 1)];
+			[data appendBytes:salt length:PKCS5_SALT_LEN];
+		}
 		while(inLength > 0) {
 			if(EVP_EncryptUpdate(&context, buffer, &outLength, (unsigned char*)[self bytes] + [self length] - inLength, MIN(inLength, kBufferSize)) != 1) {
 				[data release];
@@ -189,22 +200,23 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	return data;
 }
 
-- (NSData*) encryptBlowfishWithPassword:(NSString*)password
+- (NSData*) encryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createEncryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
-- (NSData*) encryptAES128WithPassword:(NSString*)password
+- (NSData*) encryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createEncryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
-- (NSData*) encryptAES256WithPassword:(NSString*)password
+- (NSData*) encryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createEncryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
-- (NSData*) _createDecryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData
+/* See apps/enc.c from OpenSSL source */
+- (NSData*) _createDecryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
 {
 	int							inLength = [self length],
 								outLength;
@@ -213,8 +225,18 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	unsigned char				keyBuffer[EVP_MAX_KEY_LENGTH];
 	unsigned char				ivBuffer[EVP_MAX_IV_LENGTH];
 	NSMutableData*				data;
+	unsigned char				salt[PKCS5_SALT_LEN];
 	
-	if(EVP_BytesToKey(cipher, EVP_md5(), NULL, [passwordData bytes], [passwordData length], 1, keyBuffer, ivBuffer) == 0)
+	if(salted) {
+		if(inLength < sizeof(_magic) - 1 + PKCS5_SALT_LEN)
+		return nil;
+		if(memcmp([self bytes], _magic, sizeof(_magic) - 1))
+		return nil;
+		bcopy((char*)[self bytes] + sizeof(_magic) - 1, salt, PKCS5_SALT_LEN);
+		inLength -= sizeof(_magic) - 1 + PKCS5_SALT_LEN;
+	}
+	
+	if(EVP_BytesToKey(cipher, EVP_md5(), salted ? salt : NULL, [passwordData bytes], [passwordData length], 1, keyBuffer, ivBuffer) == 0)
 	return nil;
 	
 	EVP_CIPHER_CTX_init(&context);
@@ -245,19 +267,19 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 	return data;
 }
 
-- (NSData*) decryptBlowfishWithPassword:(NSString*)password
+- (NSData*) decryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createDecryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
-- (NSData*) decryptAES128WithPassword:(NSString*)password
+- (NSData*) decryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createDecryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
-- (NSData*) decryptAES256WithPassword:(NSString*)password
+- (NSData*) decryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding]] autorelease];
+	return [[self _createDecryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 @end
