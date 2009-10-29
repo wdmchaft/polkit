@@ -126,7 +126,6 @@
 		23CB96930F3CD5020072DD9D /* SystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemInfo.h; sourceTree = "<group>"; };
 		23CB96940F3CD5020072DD9D /* SystemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemInfo.m; sourceTree = "<group>"; };
 		727A64500F4BA75700CBC567 /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
-		B4894B6B108A3B10001C5F2D /* Base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = "../Xcode-Configurations/Base.xcconfig"; sourceTree = SOURCE_ROOT; };
 		E20030DC109770CF00FFB451 /* Image.aes256-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.aes256-salted"; sourceTree = "<group>"; };
 		E20030DD109770CF00FFB451 /* Image.aes128-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.aes128-salted"; sourceTree = "<group>"; };
 		E20030DE109770CF00FFB451 /* Image.bf-salted */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Image.bf-salted"; sourceTree = "<group>"; };
@@ -143,8 +142,6 @@
 		E230C37D0F3837BD00421E40 /* DiskWatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiskWatcher.m; sourceTree = "<group>"; };
 		E230C37E0F3837BD00421E40 /* DiskWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiskWatcher.h; sourceTree = "<group>"; };
 		E230C3C40F3841F800421E40 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = System/Library/Frameworks/DiskArbitration.framework; sourceTree = SDKROOT; };
-		E24D287B0E92977600E298A9 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = "../Xcode-Configurations/Release.xcconfig"; sourceTree = SOURCE_ROOT; };
-		E24D287C0E92977600E298A9 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = "../Xcode-Configurations/Debug.xcconfig"; sourceTree = SOURCE_ROOT; };
 		E24D28BE0E9298FF00E298A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E24D294A0E92996000E298A9 /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
 		E24D29940E92C96B00E298A9 /* Image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Image.jpg; sourceTree = "<group>"; };
@@ -233,6 +230,10 @@
 		E284EA320F0FE6DC0054C122 /* NSFileManager+LockedItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+LockedItems.m"; sourceTree = "<group>"; };
 		E286099A0F28F47D0032DF7D /* DataStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataStream.m; sourceTree = "<group>"; };
 		E286099B0F28F47D0032DF7D /* DataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataStream.h; sourceTree = "<group>"; };
+		E29399A51099BD6700BA5DB6 /* ProcessInfoPlists.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ProcessInfoPlists.sh; sourceTree = "<group>"; };
+		E29399A71099BD7100BA5DB6 /* Base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		E29399A81099BD7100BA5DB6 /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		E29399A91099BD7100BA5DB6 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		E2A82D870F798BA400A4B20C /* StreamCoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamCoding.h; sourceTree = "<group>"; };
 		E2A82D880F798BA400A4B20C /* StreamCoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamCoding.m; sourceTree = "<group>"; };
 		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
@@ -295,9 +296,8 @@
 		E24D28440E9295B000E298A9 = {
 			isa = PBXGroup;
 			children = (
-				B4894B6B108A3B10001C5F2D /* Base.xcconfig */,
-				E24D287C0E92977600E298A9 /* Debug.xcconfig */,
-				E24D287B0E92977600E298A9 /* Release.xcconfig */,
+				E29399A61099BD7100BA5DB6 /* Xcode-Configurations */,
+				E29399A41099BD6700BA5DB6 /* Scripts */,
 				E24D294A0E92996000E298A9 /* Prefix.pch */,
 				E24D2BF90E94957800E298A9 /* _UnitTests */,
 				E2D5896A0F3D82C4005575BD /* UnitTesting */,
@@ -505,6 +505,26 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		E29399A41099BD6700BA5DB6 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				E29399A51099BD6700BA5DB6 /* ProcessInfoPlists.sh */,
+			);
+			name = Scripts;
+			path = ../Scripts;
+			sourceTree = SOURCE_ROOT;
+		};
+		E29399A61099BD7100BA5DB6 /* Xcode-Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				E29399A71099BD7100BA5DB6 /* Base.xcconfig */,
+				E29399A81099BD7100BA5DB6 /* Debug.xcconfig */,
+				E29399A91099BD7100BA5DB6 /* Release.xcconfig */,
+			);
+			name = "Xcode-Configurations";
+			path = "../Xcode-Configurations";
+			sourceTree = SOURCE_ROOT;
+		};
 		E2D5896A0F3D82C4005575BD /* UnitTesting */ = {
 			isa = PBXGroup;
 			children = (
@@ -692,7 +712,7 @@
 		};
 		E24D28470E9295B000E298A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E24D287C0E92977600E298A9 /* Debug.xcconfig */;
+			baseConfigurationReference = E29399A81099BD7100BA5DB6 /* Debug.xcconfig */;
 			buildSettings = {
 				SDKROOT = macosx10.5;
 			};
@@ -700,7 +720,7 @@
 		};
 		E24D28480E9295B000E298A9 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E24D287B0E92977600E298A9 /* Release.xcconfig */;
+			baseConfigurationReference = E29399A91099BD7100BA5DB6 /* Release.xcconfig */;
 			buildSettings = {
 				SDKROOT = macosx10.5;
 			};
