@@ -475,7 +475,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 			if(IORegistryEntryCreateCFProperties(hidDevice, &dictionary, kCFAllocatorDefault, 0) != kIOReturnSuccess)
 			continue;
 			
-			if(([[(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey] unsignedShortValue] == _vendorID) && ([[(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey] unsignedShortValue] == _productID) && ((_primaryUsagePage == 0) || ([[(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsagePageKey] unsignedShortValue] == _primaryUsagePage)) && ((_primaryUsage == 0) || ([[(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsageKey] unsignedShortValue] == _primaryUsage))) {
+			if([(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey] && [(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey] && ([[(NSDictionary*)dictionary objectForKey:@kIOHIDVendorIDKey] unsignedShortValue] == _vendorID) && ([[(NSDictionary*)dictionary objectForKey:@kIOHIDProductIDKey] unsignedShortValue] == _productID) && ((_primaryUsagePage == 0) || ([[(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsagePageKey] unsignedShortValue] == _primaryUsagePage)) && ((_primaryUsage == 0) || ([[(NSDictionary*)dictionary objectForKey:@kIOHIDPrimaryUsageKey] unsignedShortValue] == _primaryUsage))) {
 				if(_hidEventSource == NULL) {
 					error = IOCreatePlugInInterfaceForService(hidDevice, kIOHIDDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plugInInterface, &score);
 					if(error == kIOReturnSuccess) {
