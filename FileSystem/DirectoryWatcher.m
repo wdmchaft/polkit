@@ -45,7 +45,7 @@ static void _FSEventCallback(ConstFSEventStreamRef streamRef, void* clientCallBa
 		}
 	}
 	
-	[pool release];
+	[pool drain];
 }
 
 @implementation DirectoryWatcher
@@ -75,7 +75,7 @@ static void _FSEventCallback(ConstFSEventStreamRef streamRef, void* clientCallBa
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	[self stopWatching];
 	
@@ -84,6 +84,18 @@ static void _FSEventCallback(ConstFSEventStreamRef streamRef, void* clientCallBa
 		FSEventStreamInvalidate(_eventStream);
 		FSEventStreamRelease(_eventStream);
 	}
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[_rootDirectory release];
 	

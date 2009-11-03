@@ -124,6 +124,13 @@ static CFSocketRef _CreateSocketConnectedToHost(NSString* name, UInt16 port, CFO
 	}
 }
 
+- (void) finalize
+{
+	[self _disconnect];
+	
+	[super finalize];
+}
+
 - (void) dealloc
 {
 	[self _disconnect];

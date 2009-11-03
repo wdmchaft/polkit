@@ -48,7 +48,7 @@
 		SecKeychainItemFreeContent(NULL, data);
 	}
 	else if(error != errSecItemNotFound)
-	NSLog(@"%s: Failed retrieving generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+	NSLog(@"%s: Failed retrieving generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 	
 	return password;
 }
@@ -65,7 +65,7 @@
 	
 	error = SecKeychainAddGenericPassword(NULL, strlen(utf8Service), utf8Service, strlen(utf8Account), utf8Account, [data length], [data bytes], NULL);
 	if((error != noErr) && (error != errSecDuplicateItem)) {
-		NSLog(@"%s: Failed adding generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+		NSLog(@"%s: Failed adding generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 		return NO;
 	}
 	
@@ -83,7 +83,7 @@
 	if(error == noErr)
 	error = SecKeychainItemDelete(item); //FIXME: Should we call CFRelease() on the item as well?
 	if((error != noErr) && (error != errSecItemNotFound)) {
-		NSLog(@"%s: Failed deleting generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+		NSLog(@"%s: Failed deleting generic password for \"%@\" @ \"%@\" (error %i: \"%@\")", __FUNCTION__, service, account, error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 		return NO;
 	}
 	
@@ -135,7 +135,7 @@ static SecProtocolType _ProtocolFromURLScheme(NSString* scheme)
 	
 	error = SecKeychainAddInternetPassword(NULL, strlen(utf8Host), utf8Host, 0, NULL, strlen(utf8Account), utf8Account, strlen(utf8Path), utf8Path, port, protocol, kSecAuthenticationTypeDefault, strlen(utf8Password), utf8Password, NULL);
 	if((error != noErr) && (error != errSecDuplicateItem)) {
-		NSLog(@"%s: Failed adding Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+		NSLog(@"%s: Failed adding Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 		return NO;
 	}
 	
@@ -159,7 +159,7 @@ static SecProtocolType _ProtocolFromURLScheme(NSString* scheme)
 	if(error == noErr)
 	error = SecKeychainItemDelete(item); //FIXME: Should we call CFRelease() on the item as well?
 	if((error != noErr) && (error != errSecItemNotFound)) {
-		NSLog(@"%s: Failed deleting Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+		NSLog(@"%s: Failed deleting Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 		return NO;
 	}
 	
@@ -190,7 +190,7 @@ static SecProtocolType _ProtocolFromURLScheme(NSString* scheme)
 		SecKeychainItemFreeContent(NULL, data);
 	}
 	else if(error != errSecItemNotFound)
-	NSLog(@"%s: Failed retrieving Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [(id)SecCopyErrorMessageString(error, NULL) autorelease]);
+	NSLog(@"%s: Failed retrieving Internet password for \"%@@%@%@\" (error %i: \"%@\")", __FUNCTION__, [url user], [url host], [url path], error, [NSMakeCollectable(SecCopyErrorMessageString(error, NULL)) autorelease]);
 	
 	return url;
 }

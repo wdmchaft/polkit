@@ -341,10 +341,22 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 	_basePath = nil;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_basePath)
 	[self _unmount];
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[_subPath release];
 	[_sharePoint release];
@@ -378,7 +390,7 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 			if(error != noErr)
 			NSLog(@"%s: FSGetVolumeInfo() failed with error %i", __FUNCTION__, error);
 			else {
-				path = [[(id)CFURLCreateFromFSRef(kCFAllocatorDefault, &directory) autorelease] path];
+				path = [(NSURL*)[NSMakeCollectable(CFURLCreateFromFSRef(kCFAllocatorDefault, &directory)) autorelease] path];
 				if(path == nil) {
 					NSLog(@"%s: CFURLCreateFromFSRef() failed", __FUNCTION__);
 					error = -1;

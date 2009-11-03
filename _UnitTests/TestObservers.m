@@ -102,6 +102,6 @@ int main(int argc, const char* argv[])
 	[networkReachability release];
 	[[NSNotificationCenter defaultCenter] removeObserver:controller name:NetworkConfigurationDidChangeNotification object:nil];
 	[controller release];
-	[localPool release];
+	[localPool drain];
 	return 0;
 }

@@ -178,7 +178,7 @@ int main(int argc, const char* argv[])
 				@catch(id exception) {
 					printf("<IGNORED EXCEPTION> %s\n", [[exception description] UTF8String]);
 				}
-				[localPool release];
+				[localPool drain];
 			}
 		}
 	}

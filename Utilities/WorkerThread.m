@@ -36,11 +36,23 @@
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	pthread_mutex_destroy(&_threadMutex);
 	pthread_mutex_destroy(&_mutex);
 	pthread_cond_destroy(&_condition);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[super dealloc];
 }
@@ -67,7 +79,7 @@
 	_running = NO;
 	pthread_mutex_unlock(&_threadMutex);
 	
-	[localPool release];
+	[localPool drain];
 }
 
 - (void) startWithTarget:(id)target selector:(SEL)selector argument:(id)argument

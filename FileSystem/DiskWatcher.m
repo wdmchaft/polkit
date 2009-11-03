@@ -123,7 +123,7 @@ static void _DiskCallback(DADiskRef disk, void* context)
 		CFRelease(description);
 	}
 	
-	[pool release];
+	[pool drain];
 }
 
 + (void) _addClient:(DiskWatcher*)watcher

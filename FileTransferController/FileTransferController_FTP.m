@@ -65,10 +65,22 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_handle)
 	curl_easy_cleanup(_handle);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[_transcript release];
 	

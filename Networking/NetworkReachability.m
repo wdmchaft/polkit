@@ -34,7 +34,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 	
 	[self->_delegate networkReachabilityDidUpdate:self];
 	
-	[pool release];
+	[pool drain];
 }
 
 - (id) _initWithNetworkReachability:(SCNetworkReachabilityRef)reachability
@@ -79,14 +79,26 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 	return [self _initWithNetworkReachability:([name length] ? SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [name UTF8String]) : NULL)];
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
-	[self setDelegate:nil];
-	
 	if(_runLoop)
 	CFRelease(_runLoop);
 	if(_reachability)
 	CFRelease(_reachability);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self setDelegate:nil];
+	
+	[self _cleanUp];
 	
 	[super dealloc];
 }

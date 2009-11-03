@@ -42,6 +42,13 @@
 	return self;
 }
 
+- (void) finalize
+{
+	[self invalidate];
+	
+	[super finalize];
+}
+
 - (void) dealloc
 {
 	[self invalidate];

@@ -204,7 +204,7 @@
 	[controller setDelegate:nil];
 	
 Exit:
-	[pool release];
+	[pool drain];
 }
 
 - (void) _testDigest:(BOOL)encryption

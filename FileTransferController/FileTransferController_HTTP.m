@@ -80,7 +80,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	[super invalidate];
 }
 
-- (CFHTTPMessageRef) _createHTTPRequestWithMethod:(NSString*)method url:(NSURL*)url
+- (CFHTTPMessageRef) _newHTTPRequestWithMethod:(NSString*)method url:(NSURL*)url
 {
 	NSString*				user = [[self baseURL] user];
 	NSString*				password = [[self baseURL] passwordByReplacingPercentEscapes];
@@ -102,12 +102,12 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	return message;
 }
 
-- (CFHTTPMessageRef) _createHTTPRequestWithMethod:(NSString*)method path:(NSString*)path
+- (CFHTTPMessageRef) _newHTTPRequestWithMethod:(NSString*)method path:(NSString*)path
 {
-	return [self _createHTTPRequestWithMethod:method url:[self absoluteURLForRemotePath:path]];
+	return [self _newHTTPRequestWithMethod:method url:[self absoluteURLForRemotePath:path]];
 }
 
-- (CFReadStreamRef) _createReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(NSInputStream*)stream
+- (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(NSInputStream*)stream
 {
 	CFReadStreamRef			readStream = NULL;
 	CFDictionaryRef			proxySettings;
@@ -184,9 +184,9 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	
 	if([method isEqualToString:@"HEAD"]) {
 		if((status == 200) || (status == 404))
-		result = [(id)CFHTTPMessageCopyRequestURL(_responseHeaders) autorelease];
+		result = [NSMakeCollectable(CFHTTPMessageCopyRequestURL(_responseHeaders)) autorelease];
 		else if((status == 301) || (status == 307)) {
-			if((location = [(id)CFHTTPMessageCopyHeaderFieldValue(_responseHeaders, CFSTR("Location")) autorelease]))
+			if((location = [NSMakeCollectable(CFHTTPMessageCopyHeaderFieldValue(_responseHeaders, CFSTR("Location"))) autorelease]))
 			result = [NSURL URLWithString:location];
 		}
 	}
@@ -213,11 +213,11 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if(!stream || ([stream streamStatus] != NSStreamStatusNotOpen))
 	return NO;
 	
-	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"GET" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
-	readStream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	readStream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:readStream dataStream:stream userInfo:@"GET" isFileTransfer:YES] boolValue];
@@ -276,14 +276,14 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if(stream == nil)
 	return NO;
 	
-	request = [self _createHTTPRequestWithMethod:@"PUT" url:finalURL];
+	request = [self _newHTTPRequestWithMethod:@"PUT" url:finalURL];
 	if(request == NULL)
 	return NO;
 	
 	if([[remotePath pathExtension] length]) {
-		UTI = [(NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)[remotePath pathExtension], NULL) autorelease];
+		UTI = (NSString*)[NSMakeCollectable(UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)[remotePath pathExtension], NULL)) autorelease];
 		if([UTI length])
-		type = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];
+		type = (NSString*)[NSMakeCollectable(UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType)) autorelease];
 	}
 	if(![type length])
 	type = @"application/octet-stream";
@@ -292,7 +292,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	if([self maxLength] > 0)
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%i", [self maxLength]]);
 	
-	readStream = [self _createReadStreamWithHTTPRequest:request bodyStream:stream];
+	readStream = [self _newReadStreamWithHTTPRequest:request bodyStream:stream];
 	CFRelease(request);
 	
 	return [[self runReadStream:readStream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"PUT" isFileTransfer:YES] boolValue];
@@ -303,11 +303,11 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	request = [self _createHTTPRequestWithMethod:@"HEAD" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"HEAD" path:remotePath];
 	if(request == NULL)
 	return nil;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [self runReadStream:stream dataStream:([[self class] hasUploadDataStream] ? [NSOutputStream outputStreamToMemory] : nil) userInfo:@"HEAD" isFileTransfer:NO];
@@ -387,7 +387,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 #endif
 	
 	if(responseHeaders && [data length]) {
-		type = [[(NSString*)CFHTTPMessageCopyHeaderFieldValue(responseHeaders, CFSTR("Content-Type")) autorelease] lowercaseString];
+		type = [(NSString*)[NSMakeCollectable(CFHTTPMessageCopyHeaderFieldValue(responseHeaders, CFSTR("Content-Type"))) autorelease] lowercaseString];
 		if([type length]) {
 			range = [type rangeOfString:@";" options:0 range:NSMakeRange(0, [type length])];
 			if(range.location != NSNotFound)
@@ -468,13 +468,13 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	else if(![remotePath hasSuffix:@"/"])
 	remotePath = [remotePath stringByAppendingString:@"/"];
 	
-	request = [self _createHTTPRequestWithMethod:@"PROPFIND" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"PROPFIND" path:remotePath];
 	if(request == NULL)
 	return nil;
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Depth"), CFSTR("1"));
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Brief"), CFSTR("T"));
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"PROPFIND" isFileTransfer:NO];
@@ -485,11 +485,11 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	request = [self _createHTTPRequestWithMethod:@"MKCOL" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"MKCOL" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:nil userInfo:@"MKCOL" isFileTransfer:NO] boolValue];
@@ -500,7 +500,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	request = [self _createHTTPRequestWithMethod:(copy ? @"COPY" : @"MOVE") path:fromRemotePath];
+	request = [self _newHTTPRequestWithMethod:(copy ? @"COPY" : @"MOVE") path:fromRemotePath];
 	if(request == NULL)
 	return NO;
 #if 0
@@ -510,7 +510,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 #endif
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Overwrite"), CFSTR("T"));
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:nil userInfo:(copy ? @"COPY" : @"MOVE") isFileTransfer:NO] boolValue];
@@ -531,11 +531,11 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	request = [self _createHTTPRequestWithMethod:@"DELETE" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"DELETE" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:nil userInfo:@"DELETE" isFileTransfer:NO] boolValue];
@@ -770,9 +770,9 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 }
 
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
-- (CFReadStreamRef) _createReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
+- (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
 {
-	NSURL*					url = [(id)CFHTTPMessageCopyRequestURL(request) autorelease];
+	NSURL*					url = [NSMakeCollectable(CFHTTPMessageCopyRequestURL(request)) autorelease];
 	NSString*				query = [url query];
 	NSString*				host = [url host];
 	NSMutableString*		amzHeaders = [NSMutableString string];
@@ -792,9 +792,9 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	if(_productToken && _userToken)
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("x-amz-security-token"), (CFStringRef)[NSString stringWithFormat:@"%@,%@", _productToken, _userToken]);
 	
-	headers = [(id)CFHTTPMessageCopyAllHeaderFields(request) autorelease];
+	headers = [NSMakeCollectable(CFHTTPMessageCopyAllHeaderFields(request)) autorelease];
 	buffer = [NSMutableString new];
-	[buffer appendFormat:@"%@\n", [(id)CFHTTPMessageCopyRequestMethod(request) autorelease]];
+	[buffer appendFormat:@"%@\n", [NSMakeCollectable(CFHTTPMessageCopyRequestMethod(request)) autorelease]];
 	[buffer appendFormat:@"%@\n", ([headers objectForKey:@"Content-MD5"] ? [headers objectForKey:@"Content-MD5"] : @"")];
 	[buffer appendFormat:@"%@\n", ([headers objectForKey:@"Content-Type"] ? [headers objectForKey:@"Content-Type"] : @"")];
 	[buffer appendFormat:@"%@\n", dateString];
@@ -821,7 +821,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Authorization"), (CFStringRef)[NSString stringWithFormat:@"AWS %@:%@", [[self baseURL] user], authorization]);
 	
-	return [super _createReadStreamWithHTTPRequest:request bodyStream:stream];
+	return [super _newReadStreamWithHTTPRequest:request bodyStream:stream];
 }
 
 static NSDictionary* _DictionaryFromS3Buckets(NSXMLElement* element, NSString** path)
@@ -903,7 +903,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 #endif
 	
 	if(responseHeaders && [data length]) {
-		type = [[(NSString*)CFHTTPMessageCopyHeaderFieldValue(responseHeaders, CFSTR("Content-Type")) autorelease] lowercaseString];
+		type = [(NSString*)[NSMakeCollectable(CFHTTPMessageCopyHeaderFieldValue(responseHeaders, CFSTR("Content-Type"))) autorelease] lowercaseString];
 		if([type length]) {
 			range = [type rangeOfString:@";" options:0 range:NSMakeRange(0, [type length])];
 			if(range.location != NSNotFound)
@@ -1019,11 +1019,11 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		remotePath = (remotePath ? [remotePath stringByAppendingFormat:@"?%@", query] : [NSString stringWithFormat:@"?%@", query]);
 	}
 	
-	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"GET" path:remotePath];
 	if(request == NULL)
 	return nil;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	result = [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET/" isFileTransfer:NO];
@@ -1058,7 +1058,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		else
 		marker = nil;
 		[allResults addEntriesFromDictionary:result];
-		[localPool release];
+		[localPool drain];
 		[marker autorelease];
 		if(result == nil)
 		return nil;
@@ -1072,11 +1072,11 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	CFHTTPMessageRef		request;
 	CFReadStreamRef			stream;
 	
-	request = [self _createHTTPRequestWithMethod:@"DELETE" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"DELETE" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"DELETE" isFileTransfer:NO] boolValue];
@@ -1101,14 +1101,14 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		fromRemotePath = [NSString stringWithFormat:@"%@/%@", [host substringToIndex:([host length] - [kFileTransferHost_AmazonS3 length] - 1)], fromRemotePath];
 	}
 	
-	request = [self _createHTTPRequestWithMethod:@"PUT" path:toRemotePath];
+	request = [self _newHTTPRequestWithMethod:@"PUT" path:toRemotePath];
 	if(request == NULL)
 	return NO;
 	
-	fromRemotePath = [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)fromRemotePath, NULL, NULL, kCFStringEncodingUTF8) autorelease];
+	fromRemotePath = [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)fromRemotePath, NULL, NULL, kCFStringEncodingUTF8)) autorelease];
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("x-amz-copy-source"), (CFStringRef)fromRemotePath);
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"COPY" isFileTransfer:NO] boolValue];
@@ -1121,7 +1121,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	NSString*				xmlString;
 	NSData*					xmlData;
 	
-	request = [self _createHTTPRequestWithMethod:@"PUT" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"PUT" path:remotePath];
 	if(request == NULL)
 	return NO;
 	
@@ -1132,7 +1132,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		CFHTTPMessageSetBody(request, (CFDataRef)xmlData);
 	}
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [[self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"PUT" isFileTransfer:NO] boolValue];
@@ -1161,11 +1161,11 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 		remotePath = [remotePath stringByAppendingString:@"?location"];
 	}
 	
-	request = [self _createHTTPRequestWithMethod:@"GET" path:remotePath];
+	request = [self _newHTTPRequestWithMethod:@"GET" path:remotePath];
 	if(request == NULL)
 	return nil;
 	
-	stream = [self _createReadStreamWithHTTPRequest:request bodyStream:nil];
+	stream = [self _newReadStreamWithHTTPRequest:request bodyStream:nil];
 	CFRelease(request);
 	
 	return [self runReadStream:stream dataStream:[NSOutputStream outputStreamToMemory] userInfo:@"GET?" isFileTransfer:NO];

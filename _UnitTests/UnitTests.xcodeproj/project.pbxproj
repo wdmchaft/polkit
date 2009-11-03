@@ -714,6 +714,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E29399A81099BD7100BA5DB6 /* Debug.xcconfig */;
 			buildSettings = {
+				GCC_ENABLE_OBJC_GC = supported;
 				SDKROOT = macosx10.5;
 			};
 			name = Debug;
@@ -722,6 +723,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E29399A91099BD7100BA5DB6 /* Release.xcconfig */;
 			buildSettings = {
+				GCC_ENABLE_OBJC_GC = supported;
 				SDKROOT = macosx10.5;
 			};
 			name = Release;

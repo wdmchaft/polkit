@@ -51,7 +51,7 @@
 		NSLog(@"%@", exception);
 		success = NO;
 	}
-	[localPool release];
+	[localPool drain];
 	
 	[encoder release];
 	
@@ -169,7 +169,7 @@
 		NSLog(@"%@", exception);
 		object = nil;
 	}
-	[localPool release];
+	[localPool drain];
 	
 	[decoder release];
 	

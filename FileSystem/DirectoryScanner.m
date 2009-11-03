@@ -507,7 +507,7 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_xattrBuffer)
 	free(_xattrBuffer);
@@ -515,6 +515,18 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 	CFRelease(_directories);
 	if(_root)
 	_DirectoryItemDataReleaseCallback(NULL, _root);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[_exclusionPredicate release];
 	[_info release];
@@ -1345,8 +1357,8 @@ static void _DictionaryApplierFunction_Enumerator(const void* key, const void* v
 	
 	if((long)params[2] > 1)
 	bcopy(key, (char*)params[1] + (long)params[2], strlen(key) + 1);
-	**((id**)params) = [[DirectoryItem alloc] initWithPath:((long)params[2] > 1 ? params[1] : key) data:(DirectoryItemData*)value];
-	*((id**)params) += 1;
+	**((void***)params) = [[DirectoryItem alloc] initWithPath:((long)params[2] > 1 ? params[1] : key) data:(DirectoryItemData*)value];
+	*((void***)params) += 1;
 }
 
 - (NSUInteger) countByEnumeratingWithState:(NSFastEnumerationState*)state objects:(id*)stackbuf count:(NSUInteger)len
@@ -1660,7 +1672,7 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	if(success == NO)
 	NSLog(@"%s: NSPropertyListSerialization failed with error \"%@\"", __FUNCTION__, error);
 	
-	[localPool release];
+	[localPool drain];
 	
 	return success;
 }
@@ -1681,7 +1693,7 @@ static DirectoryItemData* _CreateDirectoryItemDataFromDictionary(NSDictionary* d
 	self = [self initWithPropertyList:[NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&error]];
 	if(self == nil)
 	NSLog(@"%s: NSPropertyListSerialization failed with error \"%@\"", __FUNCTION__, error);
-	[localPool release];
+	[localPool drain];
 	
 	[data release];
 	
@@ -1921,7 +1933,7 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 	
 	localPool = [NSAutoreleasePool new];
 	data = [[[NSKeyedArchiver archivedDataWithRootObject:self] compressGZip] retain];
-	[localPool release];
+	[localPool drain];
 	
 	return [data autorelease];
 }
@@ -1937,7 +1949,7 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 	self = [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
 	else
 	self = nil;
-	[localPool release];
+	[localPool drain];
 	
 	return self;
 }

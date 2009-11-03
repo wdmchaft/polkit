@@ -19,9 +19,9 @@
 #import "NSURL+Parameters.h"
 
 /* See http://www.faqs.org/rfcs/rfc1738.html */
-#define ESCAPE_USER_PASSWORD(_STRING_) [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, CFSTR(":@/?"), kCFStringEncodingUTF8) autorelease]
-#define ESCAPE_STRING(_STRING_) [(id)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, NULL, kCFStringEncodingUTF8) autorelease]
-#define UNESCAPE_STRING(_STRING_) [(id)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)_STRING_, CFSTR(""), kCFStringEncodingUTF8) autorelease]
+#define ESCAPE_USER_PASSWORD(_STRING_) [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, CFSTR(":@/?"), kCFStringEncodingUTF8)) autorelease]
+#define ESCAPE_STRING(_STRING_) [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)_STRING_, NULL, NULL, kCFStringEncodingUTF8)) autorelease]
+#define UNESCAPE_STRING(_STRING_) [NSMakeCollectable(CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)_STRING_, CFSTR(""), kCFStringEncodingUTF8)) autorelease]
 
 @implementation NSURL (Parameters)
 

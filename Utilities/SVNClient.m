@@ -349,12 +349,25 @@ static void _svnAddFunction(void* baton, const char* path, svn_wc_status2_t* sta
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_localPool)
 	apr_pool_destroy(_localPool);
 	if(_masterPool)
 	apr_pool_destroy(_masterPool);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
+	
 	[_path release];
 	
 	[super dealloc];

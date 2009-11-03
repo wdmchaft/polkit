@@ -188,14 +188,26 @@
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	[_udpSocket invalidate];
-	[_udpSocket release];
 	
 	if(_cachedAddress)
 	free(_cachedAddress);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
 	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
+	
+	[_udpSocket release];
 	[_address release];
 	
 	[super dealloc];

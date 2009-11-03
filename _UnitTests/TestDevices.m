@@ -33,12 +33,13 @@
 	HIDController*			controller;
 	NSDictionary*			dictionary;
 	NSString*				key;
+	NSString*				string;
 	
 	dictionary = [HIDController allDevices];
 	AssertNotNil(dictionary, nil);
 	
 	for(key in dictionary) {
-		if(([[[dictionary objectForKey:key] objectForKey:@"Product"] rangeOfString:@"Keyboard"].location != NSNotFound) && ([[[dictionary objectForKey:key] objectForKey:@kIOHIDPrimaryUsageKey] unsignedShortValue] == kHIDUsage_GD_Keyboard)) {
+		if((string = [[dictionary objectForKey:key] objectForKey:@"Product"]) && ([string rangeOfString:@"Keyboard"].location != NSNotFound) && ([[[dictionary objectForKey:key] objectForKey:@kIOHIDPrimaryUsageKey] unsignedShortValue] == kHIDUsage_GD_Keyboard)) {
 			controller = [[HIDController alloc] initWithDevicePath:key exclusive:NO];
 			AssertNotNil(controller, nil);
 			AssertTrue([controller vendorID], nil);

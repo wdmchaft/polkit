@@ -183,10 +183,22 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return [self initWithBaseURL:[NSURL URLWithScheme:[[self class] urlScheme] user:username password:password host:host port:port path:basePath]];
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_reachability)
 	CFRelease(_reachability);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[_encryptionPassword release];
 	[_baseURL release];
@@ -895,12 +907,24 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	[self invalidate];
 	
 	if(_streamBuffer)
 	free(_streamBuffer);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[super dealloc];
 }
@@ -943,7 +967,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 	
 	[(StreamTransferController*)clientCallBackInfo readStreamClientCallBack:stream type:type];
 	
-	[pool release];
+	[pool drain];
 }
 
 - (void) _doneWithResult:(id)result
@@ -986,7 +1010,7 @@ static void _ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType 
 		
 		case kCFStreamEventErrorOccurred:
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:[(id)CFReadStreamCopyError(stream) autorelease]];
+		[[self delegate] fileTransferControllerDidFail:self withError:[NSMakeCollectable(CFReadStreamCopyError(stream)) autorelease]];
 		[self _doneWithResult:nil];
 		break;
 		
@@ -1109,7 +1133,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 	
 	[(StreamTransferController*)clientCallBackInfo writeStreamClientCallBack:stream type:type];
 	
-	[pool release];
+	[pool drain];
 }
 
 - (void) writeStreamClientCallBack:(CFWriteStreamRef)stream type:(CFStreamEventType)type
@@ -1143,7 +1167,7 @@ static void _WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventTyp
 		
 		case kCFStreamEventErrorOccurred:
 		if([[self delegate] respondsToSelector:@selector(fileTransferControllerDidFail:withError:)])
-		[[self delegate] fileTransferControllerDidFail:self withError:[(id)CFWriteStreamCopyError(stream) autorelease]];
+		[[self delegate] fileTransferControllerDidFail:self withError:[NSMakeCollectable(CFWriteStreamCopyError(stream)) autorelease]];
 		[self _doneWithResult:nil];
 		break;
 		

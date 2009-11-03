@@ -60,7 +60,7 @@
 	if([data length])
 	[fileHandle waitForDataInBackgroundAndNotify];
 	
-	[localPool release];
+	[localPool drain];
 }
 
 - (BOOL) _runTask:(NSArray*)arguments inData:(NSData*)inData outData:(NSData**)outData errorData:(NSData**)errorData status:(int*)status error:(NSString**)error

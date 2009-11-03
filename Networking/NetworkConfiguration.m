@@ -28,7 +28,7 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:NetworkConfigurationDidChangeNotification object:(id)info];
 	
-	[localPool release];
+	[localPool drain];
 }
 
 @implementation NetworkConfiguration
@@ -69,7 +69,7 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	if(_runLoopSource) {
 		CFRunLoopRemoveSource(CFRunLoopGetMain(), _runLoopSource, kCFRunLoopCommonModes);
@@ -78,42 +78,54 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 	}
 	if(_dynamicStore)
 	CFRelease(_dynamicStore);
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[super dealloc];
 }
 
 - (NSString*) locationName
 {
-	return [[(id)SCDynamicStoreCopyValue(_dynamicStore, CFSTR("Setup:/")) autorelease] objectForKey:(id)kSCPropUserDefinedName];
+	return [[NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, CFSTR("Setup:/"))) autorelease] objectForKey:(id)kSCPropUserDefinedName];
 }
 
 - (NSString*) dnsDomainName
 {
-	return [[(id)SCDynamicStoreCopyValue(_dynamicStore, CFSTR("State:/Network/Global/DNS")) autorelease] objectForKey:(id)kSCPropNetDNSDomainName];
+	return [[NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, CFSTR("State:/Network/Global/DNS"))) autorelease] objectForKey:(id)kSCPropNetDNSDomainName];
 }
 
 - (NSArray*) dnsServerAddresses
 {
-	return [[(id)SCDynamicStoreCopyValue(_dynamicStore, CFSTR("State:/Network/Global/DNS")) autorelease] objectForKey:(id)kSCPropNetDNSServerAddresses];
+	return [[NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, CFSTR("State:/Network/Global/DNS"))) autorelease] objectForKey:(id)kSCPropNetDNSServerAddresses];
 }
 
 - (NSArray*) networkAddresses
 {
-	NSArray*						list = [(id)SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("State:/Network/Service/.*/IPv4")) autorelease];
+	NSArray*						list = [NSMakeCollectable(SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("State:/Network/Service/.*/IPv4"))) autorelease];
 	NSMutableArray*					array = [NSMutableArray array];
 	NSString*						key;
 	
 	for(key in list)
-	[array addObjectsFromArray:[[(id)SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)key) autorelease] objectForKey:(id)kSCPropNetIPv4Addresses]];
+	[array addObjectsFromArray:[[NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)key)) autorelease] objectForKey:(id)kSCPropNetIPv4Addresses]];
 	
 	return array;
 }
 
 - (NSDictionary*) _airportInfo
 {
-	NSArray*						list = [(id)SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("State:/Network/Interface/.*/AirPort")) autorelease];
+	NSArray*						list = [NSMakeCollectable(SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("State:/Network/Interface/.*/AirPort"))) autorelease];
 	
-	return ([list count] ? [(id)SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)[list objectAtIndex:0]) autorelease] : nil);
+	return ([list count] ? [NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)[list objectAtIndex:0])) autorelease] : nil);
 }
 
 - (NSString*) airportNetworkName
@@ -128,19 +140,19 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (NSString*) description
 {
-	NSArray*						list = [(id)SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR(".*/Network/.*")) autorelease];
+	NSArray*						list = [NSMakeCollectable(SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR(".*/Network/.*"))) autorelease];
 	NSMutableDictionary*			dictionary = [NSMutableDictionary dictionary];
 	NSString*						key;
 	
 	for(key in list)
-	[dictionary setValue:[(id)SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)key) autorelease] forKey:key];
+	[dictionary setValue:[NSMakeCollectable(SCDynamicStoreCopyValue(_dynamicStore, (CFStringRef)key)) autorelease] forKey:key];
 	
 	return [dictionary description];
 }
 
 - (NSDictionary*) allInterfaces
 {
-	NSArray*						list = [(id)SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("Setup:/Network/Service/.*/Interface")) autorelease];
+	NSArray*						list = [NSMakeCollectable(SCDynamicStoreCopyKeyList(_dynamicStore, CFSTR("Setup:/Network/Service/.*/Interface"))) autorelease];
 	NSMutableDictionary*			dictionary = [NSMutableDictionary dictionary];
 	NSString*						key;
 	CFDictionaryRef					info;

@@ -151,7 +151,7 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 }
 
 /* See apps/enc.c from OpenSSL source */
-- (NSData*) _createEncryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
+- (NSData*) _copyEncryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
 {
 	int							inLength = [self length],
 								outLength;
@@ -202,21 +202,21 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 
 - (NSData*) encryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyEncryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 - (NSData*) encryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyEncryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 - (NSData*) encryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createEncryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyEncryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 /* See apps/enc.c from OpenSSL source */
-- (NSData*) _createDecryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
+- (NSData*) _copyDecryptedDataUsingCipher:(const EVP_CIPHER*)cipher passwordData:(NSData*)passwordData salted:(BOOL)salted
 {
 	int							inLength = [self length],
 								outLength;
@@ -269,17 +269,17 @@ static NSData* _ComputeDigest(const EVP_MD* type, const void* bytes, NSUInteger 
 
 - (NSData*) decryptBlowfishWithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyDecryptedDataUsingCipher:EVP_bf_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 - (NSData*) decryptAES128WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyDecryptedDataUsingCipher:EVP_aes_128_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 - (NSData*) decryptAES256WithPassword:(NSString*)password useSalt:(BOOL)flag
 {
-	return [[self _createDecryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
+	return [[self _copyDecryptedDataUsingCipher:EVP_aes_256_cbc() passwordData:[password dataUsingEncoding:NSUTF8StringEncoding] salted:flag] autorelease];
 }
 
 @end

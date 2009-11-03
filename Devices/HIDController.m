@@ -66,7 +66,7 @@ static void _ServiceMatchingCallback(void* refcon, io_iterator_t iterator)
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:HIDControllerDidUpdateDevicesNotification object:nil];
 	
-	[pool release];
+	[pool drain];
 }
 
 + (void) initialize
@@ -237,7 +237,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	return self;
 }
 
-- (void) dealloc
+- (void) _cleanUp
 {
 	[self _disconnect];
 	
@@ -261,6 +261,18 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 			_hidRunLoop = NULL;
 		}
 	}
+}
+
+- (void) finalize
+{
+	[self _cleanUp];
+	
+	[super finalize];
+}
+
+- (void) dealloc
+{
+	[self _cleanUp];
 	
 	[super dealloc];
 }
@@ -428,7 +440,7 @@ static void _QueueCallbackFunction(void* target, IOReturn result, void* refcon, 
 	if(result == kIOReturnSuccess)
 	[(HIDController*)refcon _processEvents];
 	
-	[pool release];
+	[pool drain];
 }
 
 - (void) _reconnect

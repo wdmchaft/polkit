@@ -72,7 +72,7 @@
 		success = YES;
 		for(i = 0; i < CFArrayGetCount(items); ++i) {
 			item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
-			if([[(NSString*)LSSharedFileListItemCopyDisplayName(item) autorelease] isEqualToString:name]) {
+			if([(NSString*)[NSMakeCollectable(LSSharedFileListItemCopyDisplayName(item)) autorelease] isEqualToString:name]) {
 				if(LSSharedFileListItemRemove(list, item) != noErr) {
 					NSLog(@"%s: Failed removing entry \"%s\" from shared file list for session login items", __FUNCTION__, name);
 					success = NO;
@@ -111,7 +111,7 @@
 	if(items) {
 		for(i = 0; i < CFArrayGetCount(items); ++i) {
 			item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
-			if([[(NSString*)LSSharedFileListItemCopyDisplayName(item) autorelease] isEqualToString:name]) {
+			if([(NSString*)[NSMakeCollectable(LSSharedFileListItemCopyDisplayName(item)) autorelease] isEqualToString:name]) {
 				found = YES;
 				break;
 			}
