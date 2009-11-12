@@ -13,7 +13,6 @@
 		E2827C4210AB1578004F6550 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B1710AB147D004F6550 /* NSData+GZip.m */; };
 		E2827C4A10AB1582004F6550 /* NSFileManager+LockedItems.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B1910AB147D004F6550 /* NSFileManager+LockedItems.m */; };
 		E2827C4E10AB1584004F6550 /* NSURL+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B1B10AB147D004F6550 /* NSURL+Parameters.m */; };
-		E2827C6910AB160F004F6550 /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B5910AB147D004F6550 /* UnitTesting.m */; };
 		E2827C6D10AB1615004F6550 /* DataStream.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B6110AB147D004F6550 /* DataStream.m */; };
 		E2827C7710AB162C004F6550 /* MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B6910AB147D004F6550 /* MD5.m */; };
 		E2827C7B10AB162E004F6550 /* StreamCoding.m in Sources */ = {isa = PBXBuildFile; fileRef = E2827B6B10AB147D004F6550 /* StreamCoding.m */; };
@@ -392,7 +391,6 @@
 				E2827C4210AB1578004F6550 /* NSData+GZip.m in Sources */,
 				E2827C4A10AB1582004F6550 /* NSFileManager+LockedItems.m in Sources */,
 				E2827C4E10AB1584004F6550 /* NSURL+Parameters.m in Sources */,
-				E2827C6910AB160F004F6550 /* UnitTesting.m in Sources */,
 				E2827C6D10AB1615004F6550 /* DataStream.m in Sources */,
 				E2827C7710AB162C004F6550 /* MD5.m in Sources */,
 				E2827C7B10AB162E004F6550 /* StreamCoding.m in Sources */,
@@ -425,6 +423,7 @@
 		};
 		1DEB922308733DC00010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E2827AF510AB141B004F6550 /* Debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = "${SDKROOT}/usr/include/libxml2";
 				SDKROOT = iphoneos3.0;
@@ -433,6 +432,7 @@
 		};
 		1DEB922408733DC00010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E2827AF610AB141B004F6550 /* Release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = "${SDKROOT}/usr/include/libxml2";
 				SDKROOT = iphoneos3.0;

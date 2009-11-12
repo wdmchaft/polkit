@@ -22,8 +22,10 @@
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
 
+#if !TARGET_OS_IPHONE
 static CFMutableBagRef		_mountedList = NULL;
 static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 @implementation LocalTransferController
 

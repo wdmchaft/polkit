@@ -17,7 +17,9 @@
 */
 
 #import <TargetConditionals.h>
-#if !TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
+#import <unistd.h>
+#else
 #import <openssl/evp.h>
 #endif
 #import <libkern/OSAtomic.h>
@@ -527,10 +529,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 - (BOOL) flushOutputStream:(NSOutputStream*)stream
 {
 	BOOL						success = YES;
+#if !TARGET_OS_IPHONE
 	int							offset = 0,
 								outLength,
 								numBytes;
-#if !TARGET_OS_IPHONE
 	unsigned char				buffer[EVP_MAX_BLOCK_LENGTH];
 #endif
 	
@@ -617,10 +619,12 @@ static CFTimeInterval					_downloadTime = 0.0,
 {
 	double						maxSpeed = (_fileTransfer && ![self isLocalHost] ? _maximumUploadSpeed : 0.0);
 	CFAbsoluteTime				time = 0.0;
-	void*						newBytes;
-	int							newLength;
 	NSInteger					result;
 	CFTimeInterval				dTime;
+#if !TARGET_OS_IPHONE
+	void*						newBytes;
+	int							newLength;
+#endif
 	
 #if !TARGET_OS_IPHONE
 	if(_encryptionContext) {

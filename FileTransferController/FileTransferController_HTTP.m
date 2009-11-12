@@ -114,7 +114,9 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 - (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(NSInputStream*)stream
 {
 	CFReadStreamRef			readStream = NULL;
+#if !TARGET_OS_IPHONE
 	CFDictionaryRef			proxySettings;
+#endif
 	CFMutableDictionaryRef	sslSettings;
 	
 #if __LOG_HTTP_MESSAGES__
