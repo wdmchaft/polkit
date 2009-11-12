@@ -94,6 +94,9 @@
 		E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = E225AB930F61C8C800999E7D /* WorkerThread.m */; };
 		E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */ = {isa = PBXBuildFile; fileRef = E2A82D880F798BA400A4B20C /* StreamCoding.m */; };
 		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
+		E2DCBB2A10ABF4C900AEC193 /* MiniXMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E2DCBB2910ABF4C900AEC193 /* MiniXMLParser.m */; };
+		E2DCBB4D10ABF5D400AEC193 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E2DCBB4C10ABF5D400AEC193 /* libxml2.dylib */; };
+		E2DCBB5410ABF68C00AEC193 /* WebDAV.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = E2DCBB5310ABF66600AEC193 /* WebDAV.xml */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -115,6 +118,7 @@
 				E2004A700F3D64C00025B23C /* Image.aes256 in CopyFiles */,
 				E20030EC109771A700FFB451 /* Image.aes256-salted in CopyFiles */,
 				E2004A710F3D64C00025B23C /* Volume.dmg in CopyFiles */,
+				E2DCBB5410ABF68C00AEC193 /* WebDAV.xml in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +243,10 @@
 		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
 		E2D5896B0F3D82C4005575BD /* UnitTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTesting.h; sourceTree = "<group>"; };
 		E2D5896C0F3D82C4005575BD /* UnitTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTesting.m; sourceTree = "<group>"; };
+		E2DCBB2810ABF4C900AEC193 /* MiniXMLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MiniXMLParser.h; sourceTree = "<group>"; };
+		E2DCBB2910ABF4C900AEC193 /* MiniXMLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MiniXMLParser.m; sourceTree = "<group>"; };
+		E2DCBB4C10ABF5D400AEC193 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		E2DCBB5310ABF66600AEC193 /* WebDAV.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = WebDAV.xml; sourceTree = "<group>"; };
 		E2E7AF130F1032280057A9A5 /* Image.sha1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Image.sha1; sourceTree = "<group>"; };
 		E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes256; sourceTree = "<group>"; };
 		E2E7AF9E0F103CFF0057A9A5 /* Image.aes128 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Image.aes128; sourceTree = "<group>"; };
@@ -262,6 +270,7 @@
 				E2004A4A0F3D64600025B23C /* libsvn_subr-1.dylib in Frameworks */,
 				E2004A4B0F3D64600025B23C /* libapr-1.dylib in Frameworks */,
 				727A64510F4BA75700CBC567 /* libcurl.dylib in Frameworks */,
+				E2DCBB4D10ABF5D400AEC193 /* libxml2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +343,8 @@
 				2394F5820F2FF2C10046622E /* LoginItems.m */,
 				E24D2A350E92F29200E298A9 /* MD5.h */,
 				E24D2A340E92F29200E298A9 /* MD5.m */,
+				E2DCBB2810ABF4C900AEC193 /* MiniXMLParser.h */,
+				E2DCBB2910ABF4C900AEC193 /* MiniXMLParser.m */,
 				E2A82D870F798BA400A4B20C /* StreamCoding.h */,
 				E2A82D880F798BA400A4B20C /* StreamCoding.m */,
 				E24D2A390E92F29200E298A9 /* SVNClient.h */,
@@ -365,6 +376,7 @@
 				E24D2B980E92F40600E298A9 /* libsvn_subr-1.dylib */,
 				E24D2B9A0E92F41300E298A9 /* libapr-1.dylib */,
 				727A64500F4BA75700CBC567 /* libcurl.dylib */,
+				E2DCBB4C10ABF5D400AEC193 /* libxml2.dylib */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -407,6 +419,7 @@
 				E2E7AF9D0F103CFF0057A9A5 /* Image.aes256 */,
 				E20030DC109770CF00FFB451 /* Image.aes256-salted */,
 				E2C085410F3847C80058019D /* Volume.dmg */,
+				E2DCBB5310ABF66600AEC193 /* WebDAV.xml */,
 			);
 			name = _UnitTests;
 			sourceTree = "<group>";
@@ -648,6 +661,7 @@
 				E225A36C0F449ADD00023F66 /* NetworkConfiguration.m in Sources */,
 				E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */,
 				E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */,
+				E2DCBB2A10ABF4C900AEC193 /* MiniXMLParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -670,8 +684,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"/usr/include/subversion-1",
-					"/usr/include/apr-1",
+					"${SDKROOT}/usr/include/libxml2",
+					"${SDKROOT}/usr/include/subversion-1",
+					"${SDKROOT}/usr/include/apr-1",
 				);
 				PRODUCT_NAME = UnitTests;
 			};
@@ -681,8 +696,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"/usr/include/subversion-1",
-					"/usr/include/apr-1",
+					"${SDKROOT}/usr/include/libxml2",
+					"${SDKROOT}/usr/include/subversion-1",
+					"${SDKROOT}/usr/include/apr-1",
 				);
 				PRODUCT_NAME = UnitTests;
 			};

@@ -25,6 +25,7 @@
 #import "LoginItems.h"
 #import "SystemInfo.h"
 #import "WorkerThread.h"
+#import "MiniXMLParser.h"
 
 #define kKeychainService @"unit-testing"
 #define kLogin @"polkit"
@@ -228,6 +229,39 @@
 	AssertFalse([worker isRunning], nil);
 	
 	[worker release];
+}
+
+- (void) testMiniXMLParser
+{
+	NSData*				data;
+	MiniXMLParser*		parser;
+	NSArray*			array;
+	
+	data = [[NSData alloc] initWithContentsOfFile:@"Resources/WebDAV.xml"];
+	
+	parser = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:@"DAV:"];
+	AssertNotNil(parser, nil);
+	AssertEqualObjects([parser firstValueAtPath:@"multistatus:response:propstat:prop:creationdate"], @"2009-11-12T03:21:52Z", nil);
+	AssertEqualObjects([[parser firstNodeAtPath:@"multistatus:response:propstat:status"] value], @"HTTP/1.1 200 OK", nil);
+	AssertNil([parser firstValueAtPath:@"multistatus:response:propstat:prop:resourcetype:collection"], nil);
+	array = [[parser firstNodeAtPath:@"multistatus"] children];
+	AssertTrue([array count] == 3, nil);
+	AssertEqualObjects([[array objectAtIndex:0] firstValueAtSubpath:@"propstat:status"], @"HTTP/1.1 200 OK", nil);
+	[parser release];
+	
+	parser = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:@"foobar"];
+	AssertNotNil(parser, nil);
+	AssertNil([parser firstValueAtPath:@"multistatus:response:propstat:prop:creationdate"], nil);
+	AssertNil([parser firstNodeAtPath:@"multistatus"], nil);
+	[parser release];
+	
+	parser = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:nil];
+	AssertNotNil(parser, nil);
+	AssertEqualObjects([parser firstValueAtPath:@"multistatus:response:propstat:prop:creationdate"], @"2009-11-12T03:21:52Z", nil);
+	AssertEqualObjects([[parser firstNodeAtPath:@"multistatus:response:propstat:status"] value], @"HTTP/1.1 200 OK", nil);
+	[parser release];
+	
+	[data release];
 }
 
 @end
