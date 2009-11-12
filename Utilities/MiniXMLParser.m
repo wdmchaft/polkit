@@ -238,4 +238,32 @@
 	return (node ? [[[MiniXMLNode alloc] initWithParser:self node:node] autorelease] : nil);
 }
 
+static void _AppendNodeDescription(xmlNodePtr node, NSMutableString* string, NSString* prefix)
+{
+	if(!xmlIsBlankNode(node)) {
+		if(node->content)
+		[string appendFormat:@"%@%s = %s\n", prefix, node->name, node->content];
+		else
+		[string appendFormat:@"%@%s\n", prefix, node->name];
+		
+		node = node->children;
+		if(node) {
+			prefix = [prefix stringByAppendingString:@"\t"];
+			while(node) {
+				_AppendNodeDescription(node, string, prefix);
+				node = node->next;
+			}
+		}
+	}
+}
+
+- (NSString*) description
+{
+	NSMutableString*	string = [NSMutableString string];
+	
+	_AppendNodeDescription(xmlDocGetRootElement(_xmlDoc), string, @"");
+	
+	return [NSString stringWithFormat:@"<%@>\n%@", [self class], string];
+}
+
 @end
