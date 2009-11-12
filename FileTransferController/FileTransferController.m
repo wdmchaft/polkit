@@ -33,9 +33,11 @@
 #define kFileTransferRunLoopActiveMode	CFSTR("FileTransferActiveMode")
 #define kStreamBufferSize				(256 * 1024)
 #define kRunLoopInterval				1.0
+#if !TARGET_OS_IPHONE
 #define kEncryptionCipher				EVP_aes_256_cbc()
 #define kEncryptionCipherBlockSize		16
 #define kDigestType						EVP_md5()
+#endif
 
 typedef struct {
 	unsigned char*						buffer;
