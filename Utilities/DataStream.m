@@ -172,7 +172,7 @@
 /* Internal SPI required to be implemented for subclasses of NSStream to work */
 - (void) _unscheduleFromCFRunLoop:(CFRunLoopRef)runLoop forMode:(CFStringRef)runLoopMode
 {
-    ;
+	;
 }
 
 @end
@@ -324,7 +324,7 @@
 /* Internal SPI required to be implemented for subclasses of NSStream to work */
 - (void) _unscheduleFromCFRunLoop:(CFRunLoopRef)runLoop forMode:(CFStringRef)runLoopMode
 {
-    ;
+	;
 }
 
 @end

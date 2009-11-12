@@ -22,6 +22,7 @@ Amazon S3: http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?REST
 HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 */
 
+#import <CommonCrypto/CommonHMAC.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #if TARGET_OS_IPHONE
 #import <MobileCoreServices/MobileCoreServices.h>
@@ -29,7 +30,6 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
-#import "NSData+Encryption.h"
 #import "DataStream.h"
 #import "MiniXMLParser.h"
 #if !TARGET_OS_IPHONE
@@ -56,6 +56,8 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 - (NSInteger) readDataFromStream:(id)userInfo buffer:(void*)buffer maxLength:(NSUInteger)length;
 - (void) closeDataStream:(id)userInfo;
 @end
+
+static char* NewBase64Encode(const void *buffer, size_t length, bool separateLines, size_t *outputLength);
 
 @implementation HTTPTransferController
 
@@ -771,6 +773,31 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 	return url;
 }
 
+static NSData* _ComputeSHA1HMAC(NSData* data, NSString* key)
+{
+	NSMutableData*				hash = [NSMutableData dataWithLength:CC_SHA1_DIGEST_LENGTH];
+	const char*					keyString = [key UTF8String];
+	
+	CCHmac(kCCHmacAlgSHA1, keyString, strlen(keyString), [data bytes], [data length], [hash mutableBytes]);
+	
+	return hash;
+}
+
+static NSString* _EncodeBase64(NSData* data)
+{
+	NSString*				string = nil;
+	char*					buffer;
+	size_t					length;
+	
+	buffer = NewBase64Encode([data bytes], [data length], false, &length);
+	if(buffer) {
+		string = [[[NSString alloc] initWithBytes:buffer length:length encoding:NSUTF8StringEncoding] autorelease];
+		free(buffer);
+	}
+	
+	return string;
+}
+
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
 - (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
 {
@@ -822,7 +849,7 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 	}
 	if([query isEqualToString:@"location"] || [query isEqualToString:@"logging"] || [query isEqualToString:@"torrent"])
 	[buffer appendFormat:@"?%@", query];
-	authorization = [[[buffer dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[[self baseURL] passwordByReplacingPercentEscapes]] encodeBase64];
+	authorization = _EncodeBase64(_ComputeSHA1HMAC([buffer dataUsingEncoding:NSUTF8StringEncoding], [[self baseURL] passwordByReplacingPercentEscapes]));
 	[buffer release];
 	
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Authorization"), (CFStringRef)[NSString stringWithFormat:@"AWS %@:%@", [[self baseURL] user], authorization]);
@@ -1199,3 +1226,155 @@ static NSDictionary* _DictionaryFromS3Objects(MiniXMLNode* node, NSString* baseP
 }
 
 @end
+
+/* Source below was copied from http://cocoawithlove.com/2009/06/base64-encoding-options-on-mac-and.html */
+
+//
+//  NSData+Base64.h
+//  base64
+//
+//  Created by Matt Gallagher on 2009/06/03.
+//  Copyright 2009 Matt Gallagher. All rights reserved.
+//
+//  Permission is given to use this source code file, free of charge, in any
+//  project, commercial or otherwise, entirely at your risk, with the condition
+//  that any redistribution (in part or whole) of source code must retain
+//  this copyright and permission notice. Attribution in compiled projects is
+//  appreciated but not required.
+//
+
+static unsigned char base64EncodeLookup[65] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+//
+// Fundamental sizes of the binary and base64 encode/decode units in bytes
+//
+#define BINARY_UNIT_SIZE 3
+#define BASE64_UNIT_SIZE 4
+
+//
+// NewBase64Decode
+//
+// Encodes the arbitrary data in the inputBuffer as base64 into a newly malloced
+// output buffer.
+//
+//  inputBuffer - the source data for the encode
+//	length - the length of the input in bytes
+//  separateLines - if zero, no CR/LF characters will be added. Otherwise
+//		a CR/LF pair will be added every 64 encoded chars.
+//	outputLength - if not-NULL, on output will contain the encoded length
+//		(not including terminating 0 char)
+//
+// returns the encoded buffer. Must be free'd by caller. Length is given by
+//	outputLength.
+//
+static char *NewBase64Encode(
+	const void *buffer,
+	size_t length,
+	bool separateLines,
+	size_t *outputLength)
+{
+	const unsigned char *inputBuffer = (const unsigned char *)buffer;
+	
+	#define MAX_NUM_PADDING_CHARS 2
+	#define OUTPUT_LINE_LENGTH 64
+	#define INPUT_LINE_LENGTH ((OUTPUT_LINE_LENGTH / BASE64_UNIT_SIZE) * BINARY_UNIT_SIZE)
+	#define CR_LF_SIZE 2
+	
+	//
+	// Byte accurate calculation of final buffer size
+	//
+	size_t outputBufferSize =
+			((length / BINARY_UNIT_SIZE)
+				+ ((length % BINARY_UNIT_SIZE) ? 1 : 0))
+					* BASE64_UNIT_SIZE;
+	if (separateLines)
+	{
+		outputBufferSize +=
+			(outputBufferSize / OUTPUT_LINE_LENGTH) * CR_LF_SIZE;
+	}
+	
+	//
+	// Include space for a terminating zero
+	//
+	outputBufferSize += 1;
+
+	//
+	// Allocate the output buffer
+	//
+	char *outputBuffer = (char *)malloc(outputBufferSize);
+	if (!outputBuffer)
+	{
+		return NULL;
+	}
+
+	size_t i = 0;
+	size_t j = 0;
+	const size_t lineLength = separateLines ? INPUT_LINE_LENGTH : length;
+	size_t lineEnd = lineLength;
+	
+	while (true)
+	{
+		if (lineEnd > length)
+		{
+			lineEnd = length;
+		}
+
+		for (; i + BINARY_UNIT_SIZE - 1 < lineEnd; i += BINARY_UNIT_SIZE)
+		{
+			//
+			// Inner loop: turn 48 bytes into 64 base64 characters
+			//
+			outputBuffer[j++] = base64EncodeLookup[(inputBuffer[i] & 0xFC) >> 2];
+			outputBuffer[j++] = base64EncodeLookup[((inputBuffer[i] & 0x03) << 4)
+				| ((inputBuffer[i + 1] & 0xF0) >> 4)];
+			outputBuffer[j++] = base64EncodeLookup[((inputBuffer[i + 1] & 0x0F) << 2)
+				| ((inputBuffer[i + 2] & 0xC0) >> 6)];
+			outputBuffer[j++] = base64EncodeLookup[inputBuffer[i + 2] & 0x3F];
+		}
+		
+		if (lineEnd == length)
+		{
+			break;
+		}
+		
+		//
+		// Add the newline
+		//
+		outputBuffer[j++] = '\r';
+		outputBuffer[j++] = '\n';
+		lineEnd += lineLength;
+	}
+	
+	if (i + 1 < length)
+	{
+		//
+		// Handle the single '=' case
+		//
+		outputBuffer[j++] = base64EncodeLookup[(inputBuffer[i] & 0xFC) >> 2];
+		outputBuffer[j++] = base64EncodeLookup[((inputBuffer[i] & 0x03) << 4)
+			| ((inputBuffer[i + 1] & 0xF0) >> 4)];
+		outputBuffer[j++] = base64EncodeLookup[(inputBuffer[i + 1] & 0x0F) << 2];
+		outputBuffer[j++] =	'=';
+	}
+	else if (i < length)
+	{
+		//
+		// Handle the double '=' case
+		//
+		outputBuffer[j++] = base64EncodeLookup[(inputBuffer[i] & 0xFC) >> 2];
+		outputBuffer[j++] = base64EncodeLookup[(inputBuffer[i] & 0x03) << 4];
+		outputBuffer[j++] = '=';
+		outputBuffer[j++] = '=';
+	}
+	outputBuffer[j] = 0;
+	
+	//
+	// Set the output length and return the buffer
+	//
+	if (outputLength)
+	{
+		*outputLength = j;
+	}
+	return outputBuffer;
+}

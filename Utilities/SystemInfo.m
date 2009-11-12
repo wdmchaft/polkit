@@ -40,15 +40,15 @@ static NSString* _GetPrimaryMACAddress()
 	CFMutableDictionaryRef		propertyMatchingDictionary;
 	io_iterator_t				intfIterator;
 	io_object_t					intfService;
-    io_object_t					controllerService;
-    CFDataRef					addressData;
+	io_object_t					controllerService;
+	CFDataRef					addressData;
 	unsigned char*				address;
 	
 	if((matchingDictionary = IOServiceMatching(kIOEthernetInterfaceClass))) {
 		if((propertyMatchingDictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))) {
 			CFDictionarySetValue(propertyMatchingDictionary, CFSTR(kIOPrimaryInterface), kCFBooleanTrue); 
 			CFDictionarySetValue(matchingDictionary, CFSTR(kIOPropertyMatchKey), propertyMatchingDictionary);
-            if(IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDictionary, &intfIterator) == KERN_SUCCESS) { //NOTE: This consumes a reference of "matchingDictionary"
+			if(IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDictionary, &intfIterator) == KERN_SUCCESS) { //NOTE: This consumes a reference of "matchingDictionary"
 				if((intfService = IOIteratorNext(intfIterator))) {
 					if(IORegistryEntryGetParentEntry(intfService, kIOServicePlane, &controllerService) == KERN_SUCCESS) {
 						if((addressData = IORegistryEntryCreateCFProperty(controllerService, CFSTR(kIOMACAddress), kCFAllocatorDefault, 0))) {
