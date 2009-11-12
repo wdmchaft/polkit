@@ -46,7 +46,7 @@
 	MiniXMLParser*		_parser;
 	void*				_xmlNode;
 	NSString*			_name;
-	NSMutableArray*		_children;
+	NSArray*			_children;
 	NSString*			_value;
 }
 @property(nonatomic, readonly) NSString* name;
@@ -54,4 +54,5 @@
 @property(nonatomic, readonly) NSString* value;
 - (NSString*) firstValueAtSubpath:(NSString*)path;
 - (MiniXMLNode*) firstNodeAtSubpath:(NSString*)path;
+- (NSArray*) childrenWithName:(NSString*)name;
 @end

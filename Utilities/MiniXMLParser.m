@@ -61,23 +61,32 @@
 	return _name;
 }
 
-- (NSArray*) children
+- (NSArray*) _copyChildrenWithName:(NSString*)name
 {
+	NSMutableArray*		array = [NSMutableArray new];
 	xmlNodePtr			child = ((xmlNodePtr)_xmlNode)->children;
 	void*				namespace = [_parser _namespace];
+	xmlChar*			string = (xmlChar*)[name UTF8String];
 	MiniXMLNode*		node;
 	
-	if(_children == nil) {
-		_children = [NSMutableArray new];
-		while(child) {
-			if((child->type == XML_ELEMENT_NODE) && (!namespace || (child->ns && child->ns->href && !xmlStrcmp(child->ns->href, namespace)))) {
+	while(child) {
+		if((child->type == XML_ELEMENT_NODE) && (!namespace || (child->ns && child->ns->href && !xmlStrcmp(child->ns->href, namespace)))) {
+			if(!string || (child->name && !xmlStrcmp(child->name, string))) {
 				node = [[MiniXMLNode alloc] initWithParser:_parser node:child];
-				[_children addObject:node];
+				[array addObject:node];
 				[node release];
 			}
-			child = child->next;
 		}
+		child = child->next;
 	}
+	
+	return array;
+}
+
+- (NSArray*) children
+{
+	if(_children == nil)
+	_children = [self _copyChildrenWithName:nil];
 	
 	return _children;
 }
@@ -112,6 +121,11 @@
 	xmlNodePtr			node = [_parser _firstNodeAtUTF8Path:[path UTF8String] rootNode:_xmlNode];
 	
 	return (node ? [[[MiniXMLNode alloc] initWithParser:_parser node:node] autorelease] : nil);
+}
+
+- (NSArray*) childrenWithName:(NSString*)name
+{
+	return [[self _copyChildrenWithName:name] autorelease];
 }
 
 - (NSString*) description
@@ -241,6 +255,8 @@
 static void _AppendNodeDescription(xmlNodePtr node, NSMutableString* string, NSString* prefix)
 {
 	if(!xmlIsBlankNode(node)) {
+		if(node->ns && node->ns->prefix)
+		[string appendFormat:@"%s:", node->ns->prefix];
 		if(node->content)
 		[string appendFormat:@"%@%s = %s\n", prefix, node->name, node->content];
 		else
