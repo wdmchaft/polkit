@@ -31,8 +31,10 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 #import "NSURL+Parameters.h"
 #import "NSData+Encryption.h"
 #import "DataStream.h"
-#import "Keychain.h"
 #import "MiniXMLParser.h"
+#if !TARGET_OS_IPHONE
+#import "Keychain.h"
+#endif
 
 #define __LOG_HTTP_MESSAGES__ 0
 
@@ -583,11 +585,13 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 
 - (id) initWithIDiskForUser:(NSString*)username password:(NSString*)password basePath:(NSString*)basePath
 {
+#if !TARGET_OS_IPHONE
 	if(username == nil)
 	username = [[NSUserDefaults standardUserDefaults] stringForKey:@"iToolsMember"];
 	
 	if([username length] && (password == nil))
 	password = [[Keychain sharedKeychain] genericPasswordForService:@"iTools" account:username];
+#endif
 	
 	if([username length] && ![username isEqualToString:@"public"] && ![basePath hasSuffix:[NSString stringWithFormat:@"/%@", username]] && ![basePath hasPrefix:[NSString stringWithFormat:@"/%@/", username]])
 	basePath = [[NSString stringWithFormat:@"/%@", username] stringByAppendingPathComponent:basePath];
