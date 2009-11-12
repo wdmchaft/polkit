@@ -16,7 +16,10 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#import <TargetConditionals.h>
+#if !TARGET_OS_IPHONE
 #import <openssl/evp.h>
+#endif
 #import <libkern/OSAtomic.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <arpa/inet.h>
@@ -50,7 +53,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 @implementation FileTransferController
 
-@synthesize baseURL=_baseURL, delegate=_delegate, localHost=_localHost, maxLength=_maxLength, currentLength=_currentLength, digestComputation=_digestComputation, encryptionPassword=_encryptionPassword, timeOut=_timeOut, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
+@synthesize baseURL=_baseURL, delegate=_delegate, localHost=_localHost, maxLength=_maxLength, currentLength=_currentLength, timeOut=_timeOut, maximumDownloadSpeed=_maxDownloadSpeed, maximumUploadSpeed=_maxUploadSpeed;
+#if !TARGET_OS_IPHONE
+@synthesize digestComputation=_digestComputation, encryptionPassword=_encryptionPassword;
+#endif
 
 + (id) allocWithZone:(NSZone*)zone
 {
@@ -103,11 +109,13 @@ static CFTimeInterval					_downloadTime = 0.0,
 	if([[url scheme] isEqualToString:@"file"])
 	return [[(LocalTransferController*)[NSClassFromString(@"LocalTransferController") alloc] initWithBaseURL:url] autorelease];
 	
+#if !TARGET_OS_IPHONE
 	if([[url scheme] isEqualToString:@"afp"])
 	return [[(AFPTransferController*)[NSClassFromString(@"AFPTransferController") alloc] initWithBaseURL:url] autorelease];
 	
 	if([[url scheme] isEqualToString:@"smb"])
 	return [[(SMBTransferController*)[NSClassFromString(@"SMBTransferController") alloc] initWithBaseURL:url] autorelease];
+#endif
 	
 	if([[url scheme] isEqualToString:@"http"]) {
 		if([[url host] isEqualToString:kFileTransferHost_iDisk]) {
@@ -133,6 +141,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 		return [[(SecureWebDAVTransferController*)[NSClassFromString(@"SecureWebDAVTransferController") alloc] initWithBaseURL:url] autorelease];
 	}
 	
+#if !TARGET_OS_IPHONE
 	if([[url scheme] isEqualToString:@"ftp"])
 	return [[(FTPTransferController*)[NSClassFromString(@"FTPTransferController") alloc] initWithBaseURL:url] autorelease];
 	if([[url scheme] isEqualToString:@"ftps"])
@@ -140,6 +149,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	if([[url scheme] isEqualToString:@"ssh"])
 	return [[(SFTPTransferController*)[NSClassFromString(@"SFTPTransferController") alloc] initWithBaseURL:url] autorelease];
+#endif
 	
 	return nil;
 }
@@ -162,9 +172,12 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	if((self = [super init])) {
 		_baseURL = [url copy];
+#if !TARGET_OS_IPHONE
 		if([[[NSHost currentHost] names] containsObject:host] || [[[NSHost currentHost] addresses] containsObject:host] || [host hasSuffix:@".local"])
 		_localHost = YES;
-		else if(inet_pton(AF_INET, [host UTF8String], &ipv4Address) == 1) { //FIXME: Also handle local IPv6 addresses
+		else
+#endif
+		if(inet_pton(AF_INET, [host UTF8String], &ipv4Address) == 1) { //FIXME: Also handle local IPv6 addresses
 			address = ntohl(ipv4Address.s_addr);
 			if((address >= MAKE_IPV4(10, 0, 0, 0)) && (address <= MAKE_IPV4(10, 255, 255, 255)))
 			_localHost = YES;
@@ -200,7 +213,9 @@ static CFTimeInterval					_downloadTime = 0.0,
 {
 	[self _cleanUp];
 	
+#if !TARGET_OS_IPHONE
 	[_encryptionPassword release];
+#endif
 	[_baseURL release];
 	
 	[super dealloc];
@@ -236,6 +251,8 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return _totalSize;
 }
 
+#if !TARGET_OS_IPHONE
+
 - (NSData*) lastTransferDigestData
 {
 	unsigned int*			ptr = (unsigned int*)_digestBuffer;
@@ -246,6 +263,8 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	return data;
 }
+
+#endif
 
 - (NSString*) absolutePathForRemotePath:(NSString*)path
 {
@@ -325,6 +344,8 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return result;
 }
 
+#if !TARGET_OS_IPHONE
+
 - (BOOL) _createDigestContext
 {
 	bzero(_digestBuffer, 16);
@@ -385,13 +406,17 @@ static CFTimeInterval					_downloadTime = 0.0,
 	}
 }
 
+#endif
+
 - (BOOL) openOutputStream:(NSOutputStream*)stream isFileTransfer:(BOOL)isFileTransfer
 {
 	_totalSize = 0;
 	_fileTransfer = isFileTransfer;
 	if(_fileTransfer) {
+#if !TARGET_OS_IPHONE
 		if(![self _createDigestContext] || ![self _createCypherContext:YES])
 		return NO;
+#endif
 		_maxSpeed = ([self isLocalHost] ? 0.0 : _maxDownloadSpeed);
 	}
 	else
@@ -399,8 +424,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	[stream open];
 	if([stream streamStatus] != NSStreamStatusOpen) {
+#if !TARGET_OS_IPHONE
 		[self _destroyCypherContext];
 		[self _destroyDigestContext];
+#endif
 		return NO;
 	}
 	
@@ -418,6 +445,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	void*						realBytes;
 	CFTimeInterval				dTime;
 	
+#if !TARGET_OS_IPHONE
 	if(_encryptionContext) {
 		if(length + EVP_MAX_BLOCK_LENGTH != _encryptionBufferSize) {
 			_encryptionBufferSize = length + EVP_MAX_BLOCK_LENGTH;
@@ -429,15 +457,19 @@ static CFTimeInterval					_downloadTime = 0.0,
 		if(EVP_DecryptUpdate(_encryptionContext, realBytes, &realLength, bytes, length) != 1)
 		success = NO;
 	}
-	else {
+	else
+#endif
+	{
 		realBytes = (void*)bytes;
 		realLength = length;
 	}
 	
+#if !TARGET_OS_IPHONE
 	if(success && _digestContext) {
 		if(EVP_DigestUpdate(_digestContext, realBytes, realLength) != 1)
 		success = NO;
 	}
+#endif
 	
 	if(success && (realLength > 0)) {
 		if(_maxSpeed)
@@ -498,8 +530,11 @@ static CFTimeInterval					_downloadTime = 0.0,
 	int							offset = 0,
 								outLength,
 								numBytes;
+#if !TARGET_OS_IPHONE
 	unsigned char				buffer[EVP_MAX_BLOCK_LENGTH];
+#endif
 	
+#if !TARGET_OS_IPHONE
 	if(_encryptionContext) {
 		if(EVP_DecryptFinal(_encryptionContext, buffer, &outLength) != 1)
 		success = NO;
@@ -537,14 +572,17 @@ static CFTimeInterval					_downloadTime = 0.0,
 		
 		[self _destroyDigestContext];
 	}
+#endif
 	
 	return success;
 }
 
 - (void) closeOutputStream:(NSOutputStream*)stream
 {
+#if !TARGET_OS_IPHONE
 	[self _destroyCypherContext];
 	[self _destroyDigestContext];
+#endif
 	
 	[stream close];
 }
@@ -554,8 +592,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	_totalSize = 0;
 	_fileTransfer = isFileTransfer;
 	if(_fileTransfer) {
+#if !TARGET_OS_IPHONE
 		if(![self _createDigestContext] || ![self _createCypherContext:NO])
 		return NO;
+#endif
 		_maxSpeed = ([self isLocalHost] ? 0.0 : _maxUploadSpeed);
 	}
 	else
@@ -563,8 +603,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	
 	[stream open];
 	if([stream streamStatus] != NSStreamStatusOpen) {
+#if !TARGET_OS_IPHONE
 		[self _destroyCypherContext];
 		[self _destroyDigestContext];
+#endif
 		return NO;
 	}
 	
@@ -580,6 +622,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	NSInteger					result;
 	CFTimeInterval				dTime;
 	
+#if !TARGET_OS_IPHONE
 	if(_encryptionContext) {
 		if(length <= EVP_MAX_BLOCK_LENGTH)
 		return -1;
@@ -651,7 +694,9 @@ static CFTimeInterval					_downloadTime = 0.0,
 			[self _destroyDigestContext];
 		}
 	}
-	else {
+	else
+#endif
+	{
 		if(_maxSpeed)
 		time = CFAbsoluteTimeGetCurrent();
 		else if(maxSpeed) {
@@ -682,6 +727,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 			}
 		}
 		
+#if !TARGET_OS_IPHONE
 		if(_digestContext) {
 			if(result > 0) {
 				if(EVP_DigestUpdate(_digestContext, bytes, result) != 1)
@@ -694,6 +740,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 				[self _destroyDigestContext];
 			}
 		}
+#endif
 	}
 	
 	if(result > 0)
@@ -704,8 +751,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (void) closeInputStream:(NSInputStream*)stream
 {
+#if !TARGET_OS_IPHONE
 	[self _destroyCypherContext];
 	[self _destroyDigestContext];
+#endif
 	
 	[stream close];
 }
@@ -718,8 +767,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 {
 	BOOL					success;
 	
+#if !TARGET_OS_IPHONE
 	if([self encryptionPassword])
 	length = (length / kEncryptionCipherBlockSize + 1) * kEncryptionCipherBlockSize;
+#endif
 	[self setMaxLength:length];
 	
 	success = [self uploadFileToPath:remotePath fromStream:stream];
@@ -771,8 +822,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	}
 	
 	maxLength = [[info objectForKey:NSFileSize] unsignedIntegerValue];
+#if !TARGET_OS_IPHONE
 	if([self encryptionPassword])
 	maxLength = (maxLength / kEncryptionCipherBlockSize + 1) * kEncryptionCipherBlockSize;
+#endif
 	[self setMaxLength:maxLength];
 	
 	success = [self uploadFileToPath:remotePath fromStream:[NSInputStream inputStreamWithFileAtPath:localPath]];
@@ -800,8 +853,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return NO;
 	
 	maxLength = [data length];
+#if !TARGET_OS_IPHONE
 	if([self encryptionPassword])
 	maxLength = (maxLength / kEncryptionCipherBlockSize + 1) * kEncryptionCipherBlockSize;
+#endif
 	[self setMaxLength:maxLength];
 	
 	success = [self uploadFileToPath:remotePath fromStream:[NSInputStream inputStreamWithData:data]];
@@ -872,8 +927,10 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return NO;
 	
 	maxLength = length;
+#if !TARGET_OS_IPHONE
 	if([self encryptionPassword])
 	maxLength = (maxLength / kEncryptionCipherBlockSize + 1) * kEncryptionCipherBlockSize;
+#endif
 	[self setMaxLength:maxLength];
 	
 	info.buffer = (void*)bytes;

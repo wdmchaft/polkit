@@ -284,6 +284,8 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 
 @end
 
+#if !TARGET_OS_IPHONE
+
 @implementation RemoteTransferController
 
 + (void) initialize
@@ -451,3 +453,5 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 @end
+
+#endif

@@ -17,7 +17,11 @@
 */
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE
+#import <CFNetwork/CFNetwork.h>
+#else
 #import <CoreServices/CoreServices.h>
+#endif
 #import <sys/socket.h>
 
 @interface MiniUDPSocket : NSObject

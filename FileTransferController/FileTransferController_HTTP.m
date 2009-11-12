@@ -23,6 +23,9 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 */
 
 #import <SystemConfiguration/SystemConfiguration.h>
+#if TARGET_OS_IPHONE
+#import <MobileCoreServices/MobileCoreServices.h>
+#endif
 
 #import "FileTransferController_Internal.h"
 #import "NSURL+Parameters.h"
@@ -134,10 +137,12 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 		CFRelease(sslSettings);
 	}
 	
+#if !TARGET_OS_IPHONE
 	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
 		CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPProxy, (proxySettings));
 		CFRelease(proxySettings);
 	}
+#endif
 	
 	return readStream;
 }
@@ -329,8 +334,20 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 {
+	static NSDateFormatter*	formatter1 = nil; //FIXME: Is this class really thread-safe?
+	static NSDateFormatter*	formatter2 = nil; //FIXME: Is this class really thread-safe?
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
 	NSString*				string;
+	
+	if(formatter1 == nil) {
+		formatter1 = [NSDateFormatter new];
+		[formatter1 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+		[formatter1 setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"]; //FIXME: We ignore Z and assume UTC
+	}
+	if(formatter2 == nil) {
+		formatter2 = [NSDateFormatter new];
+		[formatter2 setDateFormat:@"EEE, d MMM yyyy HH:mm:ss zzz"];
+	}
 	
 	if([node firstNodeAtSubpath:@"resourcetype:collection"])
 	[dictionary setObject:NSFileTypeDirectory forKey:NSFileType];
@@ -338,12 +355,12 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 	[dictionary setObject:NSFileTypeRegular forKey:NSFileType];
 	
 	if((string = [node firstValueAtSubpath:@"creationdate"]))
-	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	[dictionary setValue:[formatter1 dateFromString:string] forKey:NSFileCreationDate];
 	
 	if((string = [node firstValueAtSubpath:@"modificationdate"]))
-	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	[dictionary setValue:[formatter1 dateFromString:string] forKey:NSFileModificationDate];
 	else if((string = [node firstValueAtSubpath:@"getlastmodified"]))
-	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%a, %d %b %Y %H:%M:%S %Z"] forKey:NSFileModificationDate];
+	[dictionary setValue:[formatter2 dateFromString:string] forKey:NSFileModificationDate];	
 	
 	if((string = [node firstValueAtSubpath:@"getcontentlength"]))
 	[dictionary setValue:[NSNumber numberWithInteger:[string integerValue]] forKey:NSFileSize];
@@ -751,21 +768,25 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 /* See http://docs.amazonwebservices.com/AmazonS3/2006-03-01/index.html?RESTAuthentication.html */
 - (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(id)stream
 {
+	static NSDateFormatter*	formatter = nil; //FIXME: Is this class really thread-safe?
 	NSURL*					url = [NSMakeCollectable(CFHTTPMessageCopyRequestURL(request)) autorelease];
 	NSString*				query = [url query];
 	NSString*				host = [url host];
 	NSMutableString*		amzHeaders = [NSMutableString string];
 	NSMutableString*		buffer;
 	NSString*				authorization;
-	NSCalendarDate*			date;
 	NSString*				dateString;
 	NSDictionary*			headers;
 	NSString*				header;
 	NSRange					range;
 	
-	date = [NSCalendarDate calendarDate];
-	[date setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-	dateString = [date descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"];
+	if(formatter == nil) {
+		formatter = [NSDateFormatter new];
+		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+		[formatter setDateFormat:@"EEE, d MMM yyyy HH:mm:ss Z"];
+	}
+	
+	dateString = [formatter stringFromDate:[NSDate date]];
 	CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Date"), (CFStringRef)dateString);
 	
 	if(_productToken && _userToken)
@@ -805,23 +826,37 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 
 static NSDictionary* _DictionaryFromS3Buckets(MiniXMLNode* node)
 {
+	static NSDateFormatter*	formatter = nil; //FIXME: Is this class really thread-safe?
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
 	NSString*				string;
+	
+	if(formatter == nil) {
+		formatter = [NSDateFormatter new];
+		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+		[formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]; //FIXME: We ignore Z and assume UTC
+	}
 	
 	[dictionary setObject:NSFileTypeDirectory forKey:NSFileType];
 	
 	if((string = [node firstValueAtSubpath:@"CreationDate"]))
-	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	[dictionary setValue:[formatter dateFromString:string] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
 	
 	return dictionary;
 }	
 
 static NSDictionary* _DictionaryFromS3Objects(MiniXMLNode* node, NSString* basePath, NSString** path)
 {
+	static NSDateFormatter*	formatter = nil; //FIXME: Is this class really thread-safe?
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
 	BOOL					isDirectory = NO;
 	NSString*				string;
 	NSRange					range;
+	
+	if(formatter == nil) {
+		formatter = [NSDateFormatter new];
+		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+		[formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]; //FIXME: We ignore Z and assume UTC
+	}
 	
 	string = [node firstValueAtSubpath:@"Key"];
 	if(basePath) {
@@ -842,7 +877,7 @@ static NSDictionary* _DictionaryFromS3Objects(MiniXMLNode* node, NSString* baseP
 	*path = string;
 	
 	if((string = [node firstValueAtSubpath:@"LastModified"]))
-	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	[dictionary setValue:[formatter dateFromString:string] forKey:NSFileModificationDate];
 	
 	if(isDirectory == NO) {
 		if((string = [node firstValueAtSubpath:@"Size"]))

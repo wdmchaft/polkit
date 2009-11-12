@@ -17,6 +17,9 @@
 */
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE
+#import <CFNetwork/CFNetwork.h>
+#endif
 
 #define kFileTransferHost_Local					@"localhost"
 #define kFileTransferHost_iDisk					@"idisk.mac.com"
@@ -65,12 +68,14 @@
 										_maxLength;
 	BOOL								_digestComputation;
 	NSUInteger							_totalSize;
+#if !TARGET_OS_IPHONE
 	void*								_digestContext;
 	unsigned char						_digestBuffer[16];
 	NSString*							_encryptionPassword;
 	void*								_encryptionContext;
 	void*								_encryptionBufferBytes;
 	NSUInteger							_encryptionBufferSize;
+#endif
 	NSTimeInterval						_timeOut;
 	NSUInteger							_maxUploadSpeed,
 										_maxDownloadSpeed;
@@ -95,10 +100,14 @@
 @property(nonatomic, readonly) float transferProgress; //In [0,1] range or NAN if not defined
 
 @property(nonatomic, readonly) NSUInteger lastTransferSize;
+#if !TARGET_OS_IPHONE
 @property(nonatomic, readonly) NSData* lastTransferDigestData; //MD5 bytes
+#endif
 
+#if !TARGET_OS_IPHONE
 @property(nonatomic) BOOL digestComputation; //Enables on-the-fly MD5 digest computation for file uploads / downloads
 @property(nonatomic, copy) NSString* encryptionPassword; //Enables on-the-fly AES-256 encryption / decryption for file uploads / downloads if not nil (use 'openssl aes-256-cbc -d -k PASSWORD -nosalt -in IN_FILE -out OUT_FILE' to decrypt an uploaded file)
+#endif
 
 @property(nonatomic) NSTimeInterval timeOut; //In seconds - 0 means default
 @property(nonatomic) NSUInteger maximumDownloadSpeed; //In bytes per second - 0 means unlimited
@@ -143,6 +152,8 @@
 @interface LocalTransferController : StreamTransferController
 @end
 
+#if !TARGET_OS_IPHONE
+
 /* Abstract class: do not instantiate directly */
 @interface RemoteTransferController : LocalTransferController
 {
@@ -162,6 +173,8 @@
 /* Supports everything except -deleteDirectoryAtPath: */
 @interface SMBTransferController : RemoteTransferController
 @end
+
+#endif
 
 /* Only supports downloads and uploads */
 @interface HTTPTransferController : StreamTransferController
@@ -218,6 +231,8 @@
 @interface SecureAmazonS3TransferController : AmazonS3TransferController
 @end
 
+#if !TARGET_OS_IPHONE
+
 /* Supports everything except copy - Always use passive mode */
 /* Contrary to the FileTransferController conventions, deleting non-existent files or directories returns NO instead of YES, and creating already existing directory return YES instead of NO */
 @interface FTPTransferController : FileTransferController
@@ -245,3 +260,5 @@
 	void*								_sftp;
 }
 @end
+
+#endif

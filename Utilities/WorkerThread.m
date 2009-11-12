@@ -17,7 +17,10 @@
 */
 
 #import <pthread.h>
+#import <TargetConditionals.h>
+#if !TARGET_OS_IPHONE
 #import <objc/objc-runtime.h>
+#endif
 
 #import "WorkerThread.h"
 
