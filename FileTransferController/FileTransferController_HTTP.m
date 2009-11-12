@@ -29,6 +29,7 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 #import "NSData+Encryption.h"
 #import "DataStream.h"
 #import "Keychain.h"
+#import "MiniXMLParser.h"
 
 #define __LOG_HTTP_MESSAGES__ 0
 
@@ -326,38 +327,26 @@ HTTP Status Codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 @implementation WebDAVTransferController
 
-static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSString** path)
+static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 {
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
-	NSArray*				array;
+	NSString*				string;
 	
-	*path = [[[[[element elementsForName:@"D:href"] objectAtIndex:0] stringValue] lastPathComponent] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	if([node firstNodeAtSubpath:@"resourcetype:collection"])
+	[dictionary setObject:NSFileTypeDirectory forKey:NSFileType];
+	else
+	[dictionary setObject:NSFileTypeRegular forKey:NSFileType];
 	
-	element = [[element elementsForName:@"D:propstat"] objectAtIndex:0];
-	element = [[element elementsForName:@"D:prop"] objectAtIndex:0];
+	if((string = [node firstValueAtSubpath:@"creationdate"]))
+	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
 	
-	array = [element elementsForName:@"D:resourcetype"];
-	if([array count]) {
-		if([[[array objectAtIndex:0] elementsForName:@"D:collection"] count])
-		[dictionary setObject:NSFileTypeDirectory forKey:NSFileType];
-		else
-		[dictionary setObject:NSFileTypeRegular forKey:NSFileType];
-	}
+	if((string = [node firstValueAtSubpath:@"modificationdate"]))
+	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	else if((string = [node firstValueAtSubpath:@"getlastmodified"]))
+	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%a, %d %b %Y %H:%M:%S %Z"] forKey:NSFileModificationDate];
 	
-	array = [element elementsForName:@"D:creationdate"];
-	if([array count])
-	[dictionary setValue:[NSCalendarDate dateWithString:[[array objectAtIndex:0] stringValue] calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
-	array = [element elementsForName:@"D:modificationdate"];
-	if([array count])
-	[dictionary setValue:[NSCalendarDate dateWithString:[[array objectAtIndex:0] stringValue] calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
-	else {
-		array = [element elementsForName:@"D:getlastmodified"];
-		if([array count])
-		[dictionary setValue:[NSCalendarDate dateWithString:[[array objectAtIndex:0] stringValue] calendarFormat:@"%a, %d %b %Y %H:%M:%S %Z"] forKey:NSFileModificationDate];
-	}
-	array = [element elementsForName:@"D:getcontentlength"];
-	if([array count])
-	[dictionary setValue:[NSNumber numberWithInteger:[[[array objectAtIndex:0] stringValue] integerValue]] forKey:NSFileSize];
+	if((string = [node firstValueAtSubpath:@"getcontentlength"]))
+	[dictionary setValue:[NSNumber numberWithInteger:[string integerValue]] forKey:NSFileSize];
 	
 	return dictionary;
 }	
@@ -374,9 +363,7 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	NSString*				mime = nil;
 	NSString*				type;
 	NSRange					range;
-	NSArray*				elements;
-	NSXMLElement*			element;
-	NSDictionary*			properties;
+	MiniXMLNode*			node;
 	NSString*				path;
 	
 	if(error)
@@ -415,8 +402,11 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 		
 		if([mime isEqualToString:@"text/plain"])
 		body = [[NSString alloc] initWithData:data encoding:encoding];
-		else if([mime isEqualToString:@"text/xml"] || [mime isEqualToString:@"application/xml"])
-		body = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
+		else if([mime isEqualToString:@"text/xml"] || [mime isEqualToString:@"application/xml"]) {
+			body = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:@"DAV:"];
+			if((body == nil) && error)
+			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Invalid XML response");
+		}
 		else if([mime length]) {
 			if(error)
 			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Unsupported MIME type \"%@\"", mime);
@@ -424,14 +414,17 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	}
 	
 	if([method isEqualToString:@"PROPFIND"]) {
-		if((status == 207) && [body isKindOfClass:[NSXMLDocument class]]) {
-			elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"D:response"];
+		if((status == 207) && [body isKindOfClass:[MiniXMLParser class]]) {
 			result = [NSMutableDictionary dictionary];
-			for(element in elements) {
-				if(element == [elements objectAtIndex:0])
-				continue;
-				properties = _DictionaryFromDAVProperties(element, &path);
-				[result setObject:properties forKey:path];
+			path = (id)kCFNull;
+			for(node in [[(MiniXMLParser*)body firstNodeAtPath:@"multistatus"] children]) {
+				if(path == (id)kCFNull) {
+					path = nil;
+					continue;
+				}
+				path = [[[node firstValueAtSubpath:@"href"] lastPathComponent] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+				if(path)
+				[result setObject:_DictionaryFromDAVProperties([node firstNodeAtSubpath:@"propstat:prop"]) forKey:path];
 			}
 		}
 	}
@@ -611,11 +604,10 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	NSString*					string;
 	HTTPTransferController*		transferController;
 	NSData*						data;
-	NSXMLDocument*				document;
 	BOOL						success;
 	NSURL*						url;
-	NSArray*					elements;
-	NSXMLElement*				element;
+	MiniXMLParser*				parser;
+	MiniXMLNode*				node;
 	
 	if(error)
 	*error = nil;
@@ -631,22 +623,13 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	
 	data = [stream propertyForKey:NSStreamDataWrittenToMemoryStreamKey];
 	if([data length]) {
-		document = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
-		if(document) {
-			if(success && (elements = [[document rootElement] elementsForName:@"ActivateDesktopProductResult"])) {
-				if([elements count]) {
-					element = [elements objectAtIndex:0];
-					dictionary = [NSMutableDictionary dictionary];
-					elements = [element elementsForName:@"UserToken"];
-					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_UserToken];
-					elements = [element elementsForName:@"AWSAccessKeyId"];
-					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_AccessKeyID];
-					elements = [element elementsForName:@"SecretAccessKey"];
-					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-					[dictionary setValue:string forKey:kAmazonS3ActivationInfo_SecretAccessKey];
-				}
+		parser = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:nil];
+		if(parser) {
+			if(success && (node = [parser firstNodeAtPath:@"ActivateDesktopProductResult"])) {
+				dictionary = [NSMutableDictionary dictionary];
+				[dictionary setValue:[node firstValueAtSubpath:@"UserToken"] forKey:kAmazonS3ActivationInfo_UserToken];
+				[dictionary setValue:[node firstValueAtSubpath:@"AWSAccessKeyId"] forKey:kAmazonS3ActivationInfo_AccessKeyID];
+				[dictionary setValue:[node firstValueAtSubpath:@"SecretAccessKey"] forKey:kAmazonS3ActivationInfo_SecretAccessKey];
 				if([dictionary count] != 3) {
 					if(error)
 					*error = MAKE_ERROR(@"s3", -1, (string ? @"%@" : @"Incomplete response"), string);
@@ -654,20 +637,16 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 				}
 			}
 			else if(error) {
-				string = nil;
-				elements = [[document rootElement] elementsForName:@"Error"];
-				if([elements count]) {
-					element = [elements objectAtIndex:0];
-					elements = [element elementsForName:@"Message"];
-					string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-					if(string == nil) {
-						elements = [element elementsForName:@"Code"];
-						string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-					}
-				}
+				string = [parser firstValueAtPath:@"Error:Message"];
+				if(string == nil)
+				string = [parser firstValueAtPath:@"Error:Code"];
 				*error = MAKE_ERROR(@"s3", -1, (string ? @"%@" : @"Invalid response"), string);
 			}
-			[document release];
+			[parser release];
+		}
+		else {
+			if(error)
+			*error = MAKE_ERROR(@"s3", -1, @"Failed parsing response");
 		}
 	}
 	else if(error)
@@ -824,54 +803,50 @@ static NSDictionary* _DictionaryFromDAVProperties(NSXMLElement* element, NSStrin
 	return [super _newReadStreamWithHTTPRequest:request bodyStream:stream];
 }
 
-static NSDictionary* _DictionaryFromS3Buckets(NSXMLElement* element, NSString** path)
+static NSDictionary* _DictionaryFromS3Buckets(MiniXMLNode* node)
 {
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
-	NSArray*				array;
-	
-	*path = [[[element elementsForName:@"Name"] objectAtIndex:0] stringValue];
+	NSString*				string;
 	
 	[dictionary setObject:NSFileTypeDirectory forKey:NSFileType];
-	array = [element elementsForName:@"CreationDate"];
-	if([array count])
-	[dictionary setValue:[NSCalendarDate dateWithString:[[array objectAtIndex:0] stringValue] calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	
+	if((string = [node firstValueAtSubpath:@"CreationDate"]))
+	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileCreationDate]; //FIXME: We ignore Z and assume UTC (%z)
 	
 	return dictionary;
 }	
 
-static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* basePath, NSString** path)
+static NSDictionary* _DictionaryFromS3Objects(MiniXMLNode* node, NSString* basePath, NSString** path)
 {
 	NSMutableDictionary*	dictionary = [NSMutableDictionary dictionary];
 	BOOL					isDirectory = NO;
-	NSArray*				array;
-	NSString*				fullPath;
+	NSString*				string;
 	NSRange					range;
 	
-	fullPath = [[[element elementsForName:@"Key"] objectAtIndex:0] stringValue];
+	string = [node firstValueAtSubpath:@"Key"];
 	if(basePath) {
-		range = [fullPath rangeOfString:@"/" options:0 range:NSMakeRange([basePath length] + 1, [fullPath length] - [basePath length] - 1)];
-		if((range.location != NSNotFound) && (range.location != [fullPath length] - 1))
+		range = [string rangeOfString:@"/" options:0 range:NSMakeRange([basePath length] + 1, [string length] - [basePath length] - 1)];
+		if((range.location != NSNotFound) && (range.location != [string length] - 1))
 		return nil;
 		
-		if([fullPath characterAtIndex:([fullPath length] - 1)] == '/')
+		if([string characterAtIndex:([string length] - 1)] == '/')
 		isDirectory = YES;
 		
-		*path = [fullPath lastPathComponent];
+		*path = [string lastPathComponent];
 		if(isDirectory && [*path isEqualToString:basePath])
 		return nil;
 		
 		[dictionary setObject:(isDirectory ? NSFileTypeDirectory : NSFileTypeRegular) forKey:NSFileType];
 	}
 	else
-	*path = fullPath;
+	*path = string;
 	
-	array = [element elementsForName:@"LastModified"];
-	if([array count])
-	[dictionary setValue:[NSCalendarDate dateWithString:[[array objectAtIndex:0] stringValue] calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	if((string = [node firstValueAtSubpath:@"LastModified"]))
+	[dictionary setValue:[NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%S.%FZ"] forKey:NSFileModificationDate]; //FIXME: We ignore Z and assume UTC (%z)
+	
 	if(isDirectory == NO) {
-		array = [element elementsForName:@"Size"];
-		if([array count])
-		[dictionary setValue:[NSNumber numberWithInteger:[[[array objectAtIndex:0] stringValue] integerValue]] forKey:NSFileSize];
+		if((string = [node firstValueAtSubpath:@"Size"]))
+		[dictionary setValue:[NSNumber numberWithInteger:[string integerValue]] forKey:NSFileSize];
 	}
 	
 	return dictionary;
@@ -888,8 +863,7 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	NSString*				mime = nil;
 	NSString*				type;
 	NSRange					range;
-	NSArray*				elements;
-	NSXMLElement*			element;
+	MiniXMLNode*			node;
 	NSDictionary*			properties;
 	NSString*				path;
 	NSString*				string;
@@ -912,8 +886,11 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 			mime = type;
 		}
 		
-		if([mime isEqualToString:@"application/xml"])
-		body = [[NSXMLDocument alloc] initWithData:data options:NSXMLNodeOptionsNone error:error];
+		if([mime isEqualToString:@"application/xml"]) {
+			body = [[MiniXMLParser alloc] initWithXMLData:data nodeNamespace:nil];
+			if((body == nil) && error)
+			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Invalid XML response");
+		}
 		else if([mime length]) {
 			if(error)
 			*error = MAKE_FILETRANSFERCONTROLLER_ERROR(@"Unsupported MIME type \"%@\"", mime);
@@ -921,60 +898,60 @@ static NSDictionary* _DictionaryFromS3Objects(NSXMLElement* element, NSString* b
 	}
 	
 	if([method isEqualToString:@"GET/"]) {
-		if((status == 200) && [body isKindOfClass:[NSXMLDocument class]]) {
-			if([[[body rootElement] name] isEqualToString:@"ListBucketResult"]) {
-				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Contents"];
-				result = [NSMutableDictionary dictionary];
-				for(element in elements) {
-					properties = _DictionaryFromS3Objects(element, nil, &path);
-					if(properties)
-					[result setObject:properties forKey:path];
-				}
+		if((status == 200) && [body isKindOfClass:[MiniXMLParser class]]) {
+			string = [[(MiniXMLParser*)body rootNode] name];
+			if([string isEqualToString:@"ListBucketResult"]) {
 				dictionary = [NSMutableDictionary new];
-				for(element in [[body rootElement] children]) {
-					if(![element name] || [[element name] isEqualToString:@"Contents"])
-					continue;
-					[dictionary setValue:[element stringValue] forKey:[element name]];
+				result = [NSMutableDictionary dictionary];
+				for(node in [[(MiniXMLParser*)body rootNode] children]) {
+					string = [node name];
+					if([string isEqualToString:@"Contents"]) {
+						properties = _DictionaryFromS3Objects(node, nil, &path);
+						if(properties)
+						[result setObject:properties forKey:path];
+					}
+					else if(string)
+					[dictionary setValue:[node value] forKey:string];
 				}
 				[result setObject:dictionary forKey:[NSNull null]];
 				[dictionary release];
-				
 			}
-			else if([[[body rootElement] name] isEqualToString:@"ListAllMyBucketsResult"]) {
-				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Buckets"];
-				elements = [(NSXMLElement*)[elements objectAtIndex:0] elementsForName:@"Bucket"];
+			else if([string isEqualToString:@"ListAllMyBucketsResult"]) {
 				result = [NSMutableDictionary dictionary];
-				for(element in elements) {
-					properties = _DictionaryFromS3Buckets(element, &path);
-					if(properties)
-					[result setObject:properties forKey:path];
+				for(node in [[(MiniXMLParser*)body firstNodeAtPath:@"ListAllMyBucketsResult:Buckets"] children]) {
+					path = [node firstValueAtSubpath:@"Name"];
+					if(path)
+					[result setObject:_DictionaryFromS3Buckets(node) forKey:path];
 				}
 			}
 		}
 	}
 	else if([method isEqualToString:@"GET?"]) {
-		if((status == 200) && [body isKindOfClass:[NSXMLDocument class]] && [[[body rootElement] name] isEqualToString:@"LocationConstraint"])
-		result = [[body rootElement] stringValue];
+		if((status == 200) && [body isKindOfClass:[MiniXMLParser class]]) {
+			node = [(MiniXMLParser*)body rootNode];
+			if([[node name] isEqualToString:@"LocationConstraint"]) {
+				result = [node value];
+				if(result == nil)
+				result = @"";
+			}
+		}
 	}
 	else if([method isEqualToString:@"DELETE"]) {
 		if(status == 204)
 		result = [NSNumber numberWithBool:YES];
 	}
 	else if([method isEqualToString:@"COPY"]) {
-		if((status == 200) && [body isKindOfClass:[NSXMLDocument class]] && [[[body rootElement] name] isEqualToString:@"CopyObjectResult"])
+		if((status == 200) && [body isKindOfClass:[MiniXMLParser class]] && [[[(MiniXMLParser*)body rootNode] name] isEqualToString:@"CopyObjectResult"])
 		result = [NSNumber numberWithBool:YES];
 	}
 	else
 	result = [super processReadResultStream:stream userInfo:info error:error];
 	
 	if((result == nil) && error && ((*error == nil) || [[*error localizedDescription] isEqualToString:kDefaultHTTPError])) {
-		if([body isKindOfClass:[NSXMLDocument class]]) {
-			elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Message"];
-			string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-			if(string == nil) {
-				elements = [[(NSXMLDocument*)body rootElement] elementsForName:@"Code"];
-				string = ([elements count] ? [(NSXMLElement*)[elements objectAtIndex:0] stringValue] : nil);
-			}
+		if([body isKindOfClass:[MiniXMLParser class]]) {
+			string = [(MiniXMLParser*)body firstValueAtPath:@"Error:Message"];
+			if(string == nil)
+			string = [(MiniXMLParser*)body firstValueAtPath:@"Error:Code"];
 		}
 		else
 		string = nil;
