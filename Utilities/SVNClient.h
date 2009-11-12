@@ -17,8 +17,8 @@
 */
 
 /*
-- Required header search paths: "/usr/include/subversion-1" and "/usr/include/apr-1"
-- Required libraries: "/usr/lib/libsvn_client-1.dylib", "/usr/lib/libsvn_subr-1.dylib" and "/usr/lib/libapr-1.dylib"
+- Required header search paths: "${SDKROOT}/usr/include/subversion-1" and "${SDKROOT}/usr/include/apr-1"
+- Required libraries: "${SDKROOT}/usr/lib/libsvn_client-1.dylib", "${SDKROOT}/usr/lib/libsvn_subr-1.dylib" and "${SDKROOT}/usr/lib/libapr-1.dylib"
 */
 
 #import <Foundation/Foundation.h>
