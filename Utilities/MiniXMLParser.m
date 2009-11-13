@@ -161,7 +161,7 @@
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_MiniXMLParser
 {
 	if(_namespace)
 	free(_namespace);
@@ -171,14 +171,14 @@
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_MiniXMLParser];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_MiniXMLParser];
 	
 	[super dealloc];
 }

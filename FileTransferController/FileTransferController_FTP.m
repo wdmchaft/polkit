@@ -65,7 +65,7 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_FTPTransferController
 {
 	if(_handle)
 	curl_easy_cleanup(_handle);
@@ -73,14 +73,14 @@ static inline NSError* _MakeCURLError(CURLcode code, const char* message, id tra
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_FTPTransferController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_FTPTransferController];
 	
 	[_transcript release];
 	

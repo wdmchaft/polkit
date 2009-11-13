@@ -69,7 +69,7 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_NetworkConfiguration
 {
 	if(_runLoopSource) {
 		CFRunLoopRemoveSource(CFRunLoopGetMain(), _runLoopSource, kCFRunLoopCommonModes);
@@ -82,14 +82,14 @@ static void _DynamicStoreCallBack(SCDynamicStoreRef store, CFArrayRef changedKey
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_NetworkConfiguration];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_NetworkConfiguration];
 	
 	[super dealloc];
 }

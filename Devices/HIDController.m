@@ -237,7 +237,7 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_HIDController
 {
 	[self _disconnect];
 	
@@ -265,14 +265,14 @@ static void _TimerCallBack(CFRunLoopTimerRef timer, void* info)
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_HIDController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_HIDController];
 	
 	[super dealloc];
 }

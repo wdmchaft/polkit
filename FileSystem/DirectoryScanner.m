@@ -507,7 +507,7 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_DirectoryScanner
 {
 	if(_xattrBuffer)
 	free(_xattrBuffer);
@@ -519,14 +519,14 @@ static void _DictionaryApplierFunction_ConvertExtendedAttributes(const void* key
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_DirectoryScanner];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_DirectoryScanner];
 	
 	[_exclusionPredicate release];
 	[_info release];

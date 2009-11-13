@@ -79,7 +79,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 	return [self _initWithNetworkReachability:([name length] ? SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [name UTF8String]) : NULL)];
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_NetworkReachability
 {
 	if(_runLoop)
 	CFRelease(_runLoop);
@@ -89,7 +89,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_NetworkReachability];
 	
 	[super finalize];
 }
@@ -98,7 +98,7 @@ static void _ReachabilityCallBack(SCNetworkReachabilityRef target, SCNetworkConn
 {
 	[self setDelegate:nil];
 	
-	[self _cleanUp];
+	[self _cleanUp_NetworkReachability];
 	
 	[super dealloc];
 }

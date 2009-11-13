@@ -200,7 +200,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return [self initWithBaseURL:[NSURL URLWithScheme:[[self class] urlScheme] user:username password:password host:host port:port path:basePath]];
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_FileTransferController
 {
 	if(_reachability)
 	CFRelease(_reachability);
@@ -208,14 +208,14 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_FileTransferController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_FileTransferController];
 	
 #if !TARGET_OS_IPHONE
 	[_encryptionPassword release];
@@ -970,7 +970,7 @@ static CFTimeInterval					_downloadTime = 0.0,
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_StreamTransferController
 {
 	[self invalidate];
 	
@@ -980,14 +980,14 @@ static CFTimeInterval					_downloadTime = 0.0,
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_StreamTransferController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_StreamTransferController];
 	
 	[super dealloc];
 }

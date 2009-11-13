@@ -188,7 +188,7 @@
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_OSCController
 {
 	[_udpSocket invalidate];
 	
@@ -198,14 +198,14 @@
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_OSCController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_OSCController];
 	
 	[_udpSocket release];
 	[_address release];

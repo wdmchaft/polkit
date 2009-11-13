@@ -79,7 +79,7 @@ static CFMutableSetRef				_instanceList;
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_MidiController
 {
 	if(_midiEndPoint)
 	MIDIEndpointDispose(_midiEndPoint);
@@ -93,14 +93,14 @@ static CFMutableSetRef				_instanceList;
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_MidiController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_MidiController];
 	
 	[_name release];
 	

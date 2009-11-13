@@ -345,7 +345,7 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 	_basePath = nil;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_RemoteTransferController
 {
 	if(_basePath)
 	[self _unmount];
@@ -353,14 +353,14 @@ static pthread_mutex_t		_mountedMutex = PTHREAD_MUTEX_INITIALIZER;
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_RemoteTransferController];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_RemoteTransferController];
 	
 	[_subPath release];
 	[_sharePoint release];

@@ -40,7 +40,7 @@
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_DataReadStream
 {
 	if((_status == NSStreamStatusOpen) || (_status == NSStreamStatusAtEnd))
 	[_source closeDataStream:_info];
@@ -48,14 +48,14 @@
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_DataReadStream];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_DataReadStream];
 	
 	[_error release];
 	[_info release];
@@ -197,7 +197,7 @@
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_DataWriteStream
 {
 	if((_status == NSStreamStatusOpen) || (_status == NSStreamStatusAtEnd))
 	[_destination closeDataStream:_info];
@@ -205,14 +205,14 @@
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_DataWriteStream];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_DataWriteStream];
 	
 	[_error release];
 	[_info release];

@@ -75,7 +75,7 @@ static void _FSEventCallback(ConstFSEventStreamRef streamRef, void* clientCallBa
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_DirectoryWatcher
 {
 	[self stopWatching];
 	
@@ -88,14 +88,14 @@ static void _FSEventCallback(ConstFSEventStreamRef streamRef, void* clientCallBa
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_DirectoryWatcher];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_DirectoryWatcher];
 	
 	[_rootDirectory release];
 	

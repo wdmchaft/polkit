@@ -39,7 +39,7 @@
 	return self;
 }
 
-- (void) _cleanUp
+- (void) _cleanUp_WorkerThread
 {
 	pthread_mutex_destroy(&_threadMutex);
 	pthread_mutex_destroy(&_mutex);
@@ -48,14 +48,14 @@
 
 - (void) finalize
 {
-	[self _cleanUp];
+	[self _cleanUp_WorkerThread];
 	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	[self _cleanUp];
+	[self _cleanUp_WorkerThread];
 	
 	[super dealloc];
 }
