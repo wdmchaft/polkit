@@ -60,6 +60,24 @@ typedef struct {
 							modDate; //Seconds since 1970
 } DirectoryItemData;
 
+#pragma pack(push, 1)
+typedef struct {
+	uint16_t				mode;
+	uint16_t				flags;
+	uint32_t				uid;
+	uint32_t				gid;
+	uint32_t				nodeID;
+	uint32_t				revision;
+	uint32_t				resourceSize;
+	uint32_t				userInfoPtr;
+	uint32_t				aclStringPtr;
+	uint32_t				extendedAttributesPtr;
+	uint64_t				dataSize;
+	double					newDate,
+							modDate;
+} DirectoryItemData32;
+#pragma pack(pop)
+
 #define IS_DIRECTORY(__DATA__) S_ISDIR((__DATA__)->mode)
 
 #define ADD_PATH_TO_ARRAY(__ARRAY__, __PATH__) \
@@ -1711,28 +1729,45 @@ static void _DictionaryApplierFunction_ArchiveExtendedAttributes(const void* key
 static void _ArchiveDirectoryItemData(DirectoryItemData* data, NSCoder* coder)
 {
 	unsigned int				count;
-#if __BIG_ENDIAN__
-	DirectoryItemData			swapData;
-#endif
+	DirectoryItemData32			item;
 	
+#if __LP64__
 #if __BIG_ENDIAN__
-	swapData.mode = CFSwapInt16(data->mode);
-	swapData.flags = CFSwapInt16(data->flags);
-	swapData.uid = CFSwapInt32(data->uid);
-	swapData.gid = CFSwapInt32(data->gid);
-	swapData.nodeID = CFSwapInt32(data->nodeID);
-	swapData.revision = CFSwapInt32(data->revision);
-	swapData.resourceSize = CFSwapInt32(data->resourceSize);
-	swapData.userInfo = data->userInfo;
-	swapData.aclString = data->aclString;
-	swapData.extendedAttributes = data->extendedAttributes;
-	swapData.dataSize = CFSwapInt64(data->dataSize);
-	*((uint64_t*)&swapData.newDate) = CFSwapInt64(*((uint64_t*)&data->newDate));
-	*((uint64_t*)&swapData.modDate) = CFSwapInt64(*((uint64_t*)&data->modDate));
-	[coder encodeBytes:&swapData length:sizeof(DirectoryItemData)];
-#else
-	[coder encodeBytes:data length:sizeof(DirectoryItemData)];
+#error Unsupported architecture
 #endif
+	item.mode = data->mode;
+	item.flags = data->flags;
+	item.uid = data->uid;
+	item.gid = data->gid;
+	item.nodeID = CFSwapInt32(data->nodeID);
+	item.revision = CFSwapInt32(data->revision);
+	item.resourceSize = CFSwapInt32(data->resourceSize);
+	item.userInfoPtr = (data->userInfo ? 0xFFFFFFFF : 0);
+	item.aclStringPtr = (data->aclString ? 0xFFFFFFFF : 0);
+	item.extendedAttributesPtr = (data->extendedAttributes ? 0xFFFFFFFF : 0);
+	item.dataSize = data->dataSize;
+	item.newDate = data->newDate;
+	item.modDate = data->modDate;
+#else
+#if __BIG_ENDIAN__
+	item.mode = CFSwapInt16(data->mode);
+	item.flags = CFSwapInt16(data->flags);
+	item.uid = CFSwapInt32(data->uid);
+	item.gid = CFSwapInt32(data->gid);
+	item.nodeID = CFSwapInt32(data->nodeID);
+	item.revision = CFSwapInt32(data->revision);
+	item.resourceSize = CFSwapInt32(data->resourceSize);
+	item.userInfoPtr = data->userInfo;
+	item.aclStringPtr = data->aclString;
+	item.extendedAttributesPtr = data->extendedAttributes;
+	item.dataSize = CFSwapInt64(data->dataSize);
+	*((uint64_t*)&item.newDate) = CFSwapInt64(*((uint64_t*)&data->newDate));
+	*((uint64_t*)&item.modDate) = CFSwapInt64(*((uint64_t*)&data->modDate));
+#else
+	bcopy(data, &item, sizeof(DirectoryItemData));
+#endif
+#endif
+	[coder encodeBytes:&item length:sizeof(DirectoryItemData32)];
 	
 	if(data->userInfo)
 	[coder encodeObject:data->userInfo];
@@ -1814,7 +1849,7 @@ static void _DictionaryApplierFunction_ArchiveTrunk(const void* key, const void*
 static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger version)
 {
 	NSUInteger					length;
-	const DirectoryItemData*	item;
+	const DirectoryItemData32*	item;
 	DirectoryItemData*			data;
 	unsigned int				count,
 								i;
@@ -1822,8 +1857,28 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 	const void*					value;
 	void*						buffer;
 	
+	item = (const DirectoryItemData32*)[coder decodeBytesWithReturnedLength:&length];
+	if(length != sizeof(DirectoryItemData32))
+	[NSException raise:NSInternalInconsistencyException format:@"Invalid DirectoryItemData"];
 	data = malloc(sizeof(DirectoryItemData));
-	item = (const DirectoryItemData*)[coder decodeBytesWithReturnedLength:&length];
+#if __LP64__
+#if __BIG_ENDIAN__
+#error Unsupported architecture
+#endif
+	data->mode = item->mode;
+	data->flags = item->flags;
+	data->uid = item->uid;
+	data->gid = item->gid;
+	data->nodeID = item->nodeID;
+	data->revision = item->revision;
+	data->resourceSize = item->resourceSize;
+	data->userInfo = (NSData*)(long)item->userInfoPtr;
+	data->aclString = (const char*)(long)item->aclStringPtr;
+	data->extendedAttributes = (CFMutableDictionaryRef)(long)item->extendedAttributesPtr;
+	data->dataSize = item->dataSize;
+	data->newDate = item->newDate;
+	data->modDate = item->modDate;
+#else
 #if __BIG_ENDIAN__
 	data->mode = CFSwapInt16(item->mode);
 	data->flags = CFSwapInt16(item->flags);
@@ -1832,14 +1887,15 @@ static DirectoryItemData* _UnarchiveDirectoryItemData(NSCoder* coder, NSUInteger
 	data->nodeID = CFSwapInt32(item->nodeID);
 	data->revision = CFSwapInt32(item->revision);
 	data->resourceSize = CFSwapInt32(item->resourceSize);
-	data->userInfo = item->userInfo;
-	data->aclString = item->aclString;
-	data->extendedAttributes = item->extendedAttributes;
+	data->userInfo = item->userInfoPtr;
+	data->aclString = item->aclStringPtr;
+	data->extendedAttributes = item->extendedAttributesPtr;
 	data->dataSize = CFSwapInt64(item->dataSize);
 	*((uint64_t*)&data->newDate) = CFSwapInt64(*((uint64_t*)&item->newDate));
 	*((uint64_t*)&data->modDate) = CFSwapInt64(*((uint64_t*)&item->modDate));
 #else
 	bcopy(item, data, sizeof(DirectoryItemData));
+#endif
 #endif
 	
 	if(data->userInfo)
