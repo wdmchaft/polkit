@@ -93,6 +93,7 @@
 		E225A8210F44E98C00023F66 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E24D2AD00E92F3A800E298A9 /* Carbon.framework */; };
 		E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = E225AB930F61C8C800999E7D /* WorkerThread.m */; };
 		E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */ = {isa = PBXBuildFile; fileRef = E2A82D880F798BA400A4B20C /* StreamCoding.m */; };
+		E2A9EF5C10B077CB00777959 /* AppleRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = E2A9EF5B10B077CB00777959 /* AppleRemote.m */; };
 		E2D5896D0F3D82C4005575BD /* UnitTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = E2D5896C0F3D82C4005575BD /* UnitTesting.m */; };
 		E2DCBB2A10ABF4C900AEC193 /* MiniXMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = E2DCBB2910ABF4C900AEC193 /* MiniXMLParser.m */; };
 		E2DCBB4D10ABF5D400AEC193 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E2DCBB4C10ABF5D400AEC193 /* libxml2.dylib */; };
@@ -240,6 +241,8 @@
 		E29399A91099BD7100BA5DB6 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		E2A82D870F798BA400A4B20C /* StreamCoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamCoding.h; sourceTree = "<group>"; };
 		E2A82D880F798BA400A4B20C /* StreamCoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamCoding.m; sourceTree = "<group>"; };
+		E2A9EF5A10B077CB00777959 /* AppleRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleRemote.h; sourceTree = "<group>"; };
+		E2A9EF5B10B077CB00777959 /* AppleRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppleRemote.m; sourceTree = "<group>"; };
 		E2C085410F3847C80058019D /* Volume.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Volume.dmg; sourceTree = "<group>"; };
 		E2D5896B0F3D82C4005575BD /* UnitTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTesting.h; sourceTree = "<group>"; };
 		E2D5896C0F3D82C4005575BD /* UnitTesting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTesting.m; sourceTree = "<group>"; };
@@ -441,6 +444,8 @@
 		E24D2E270E95C81100E298A9 /* Devices */ = {
 			isa = PBXGroup;
 			children = (
+				E2A9EF5A10B077CB00777959 /* AppleRemote.h */,
+				E2A9EF5B10B077CB00777959 /* AppleRemote.m */,
 				E24D2E280E95C81100E298A9 /* HIDController.h */,
 				E24D2E290E95C81100E298A9 /* HIDController.m */,
 				E24D2E2A0E95C81100E298A9 /* MidiController.h */,
@@ -662,6 +667,7 @@
 				E225AB940F61C8C800999E7D /* WorkerThread.m in Sources */,
 				E2A82D890F798BA400A4B20C /* StreamCoding.m in Sources */,
 				E2DCBB2A10ABF4C900AEC193 /* MiniXMLParser.m in Sources */,
+				E2A9EF5C10B077CB00777959 /* AppleRemote.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
