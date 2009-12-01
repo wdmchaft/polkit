@@ -373,7 +373,7 @@
 			mainGroup = 0867D691FE84028FC02AAC07 /* iPhone */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
 			projectDirPath = "";
-			projectRoot = "";
+			projectRoot = ..;
 			targets = (
 				D2AAC07D0554694100DB518D /* iPhone */,
 			);

@@ -118,9 +118,7 @@ static char* NewBase64Encode(const void *buffer, size_t length, bool separateLin
 - (CFReadStreamRef) _newReadStreamWithHTTPRequest:(CFHTTPMessageRef)request bodyStream:(NSInputStream*)stream
 {
 	CFReadStreamRef			readStream = NULL;
-#if !TARGET_OS_IPHONE
 	CFDictionaryRef			proxySettings;
-#endif
 	CFMutableDictionaryRef	sslSettings;
 	
 #if __LOG_HTTP_MESSAGES__
@@ -143,12 +141,15 @@ static char* NewBase64Encode(const void *buffer, size_t length, bool separateLin
 		CFRelease(sslSettings);
 	}
 	
-#if !TARGET_OS_IPHONE
-	if((proxySettings = SCDynamicStoreCopyProxies(NULL))) {
-		CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPProxy, (proxySettings));
+#if TARGET_OS_IPHONE
+	if((proxySettings = CFNetworkCopySystemProxySettings()))
+#else
+	if((proxySettings = SCDynamicStoreCopyProxies(NULL)))
+#endif
+	{
+    	CFReadStreamSetProperty(readStream, kCFStreamPropertyHTTPProxy, (proxySettings));
 		CFRelease(proxySettings);
 	}
-#endif
 	
 	return readStream;
 }
