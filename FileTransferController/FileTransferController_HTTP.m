@@ -348,11 +348,13 @@ static NSDictionary* _DictionaryFromDAVProperties(MiniXMLNode* node)
 	
 	if(formatter1 == nil) {
 		formatter1 = [NSDateFormatter new];
+        [formatter1 setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
 		[formatter1 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		[formatter1 setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"]; //FIXME: We ignore Z and assume UTC
 	}
 	if(formatter2 == nil) {
 		formatter2 = [NSDateFormatter new];
+		[formatter2 setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
 		[formatter2 setDateFormat:@"EEE, d MMM yyyy HH:mm:ss zzz"];
 	}
 	
@@ -816,6 +818,7 @@ static NSString* _EncodeBase64(NSData* data)
 	
 	if(formatter == nil) {
 		formatter = [NSDateFormatter new];
+		[formatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
 		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		[formatter setDateFormat:@"EEE, d MMM yyyy HH:mm:ss Z"];
 	}
@@ -866,6 +869,7 @@ static NSDictionary* _DictionaryFromS3Buckets(MiniXMLNode* node)
 	
 	if(formatter == nil) {
 		formatter = [NSDateFormatter new];
+		[formatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
 		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		[formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]; //FIXME: We ignore Z and assume UTC
 	}
@@ -888,6 +892,7 @@ static NSDictionary* _DictionaryFromS3Objects(MiniXMLNode* node, NSString* baseP
 	
 	if(formatter == nil) {
 		formatter = [NSDateFormatter new];
+		[formatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease]];
 		[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		[formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]; //FIXME: We ignore Z and assume UTC
 	}
