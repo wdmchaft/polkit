@@ -472,19 +472,19 @@
 				E24D2E390E95C81100E298A9 /* FileTransferController_FTP.m */,
 				E24D2E360E95C81100E298A9 /* FileTransferController_SFTP.m */,
 				E24D2E3A0E95C81100E298A9 /* FileTransferController_HTTP.m */,
-				E24D2FAC0E95FABF00E298A9 /* libssh2-1.0 */,
+				E24D2FAC0E95FABF00E298A9 /* libssh2-1.2.4 */,
 			);
 			name = FileTransferController;
 			path = ../FileTransferController;
 			sourceTree = SOURCE_ROOT;
 		};
-		E24D2FAC0E95FABF00E298A9 /* libssh2-1.0 */ = {
+		E24D2FAC0E95FABF00E298A9 /* libssh2-1.2.4 */ = {
 			isa = PBXGroup;
 			children = (
 				E24D2FAF0E95FABF00E298A9 /* include */,
 				E24D2FB30E95FABF00E298A9 /* src */,
 			);
-			path = "libssh2-1.0";
+			path = "libssh2-1.2.4";
 			sourceTree = "<group>";
 		};
 		E24D2FAF0E95FABF00E298A9 /* include */ = {
